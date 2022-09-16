@@ -34,6 +34,8 @@ class AccountPaymentOrder(models.Model):
         for payment_line in self.payment_line_ids:
             assignment.add_payment_request(
                 kid=payment_line.move_line_id.move_id.line_ids.mapped('contract_id').group_id.ref,
+                bank_notification=
+                payment_line.move_line_id.move_id.line_ids.mapped('contract_id').group_id.notify_payee,
                 due_date=payment_line.date,
                 amount=payment_line.amount_currency,
                 reference=payment_line.name,

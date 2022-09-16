@@ -11,6 +11,7 @@
     "depends": ["account_banking_pain_base", "account_banking_mandate"],
     "data": [
         "data/account_payment_method.xml",
+        "views/view_group_contract_form.xml"
     ],
     "installable": True,
 }
