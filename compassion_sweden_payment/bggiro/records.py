@@ -10,7 +10,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    cast,
+    cast, Optional,
 )
 import datetime
 from attrs import define, field
@@ -19,18 +19,22 @@ from .converters import (
     to_date,
     to_date_or_genast,
     to_safe_str_or_none,
-    to_transaction_type, to_period_code, number_recurring_payments_to_int,
+    to_transaction_type,
+    to_period_code,
+    number_recurring_payments_to_int,
+    to_payment_status, to_int_or_none
 )
 from .validators import str_of_length
 
 if TYPE_CHECKING:
     import datetime
 
-from .enums import TransactionType, PeriodCode
+from .enums import TransactionType, PeriodCode, PaymentStatus
 
 __all__: List[str] = [
     'OpeningRecord',
     'PaymentRecord',
+    'EndRecord',
     'Record',
     'parse',
 ]
@@ -69,9 +73,9 @@ class OpeningRecord(Record):
     """
 
     customer_number: str = field(validator=str_of_length(6))
-    payer_bankgiro_number: str = field(validator=str_of_length(10))
+    payee_bankgiro_number: str = field(validator=str_of_length(10))
     date_written: 'datetime.date' = field(converter=to_date)
-
+    clearing_number: Optional[int] = field(default=None, converter=to_int_or_none)
     _PATTERNS: ClassVar[List[Pattern]] = [
         re.compile(
             r'''
@@ -81,7 +85,23 @@ class OpeningRecord(Record):
             AUTOGIRO# LayoutName
             [ ]{44}   # Padding
             (?P<customer_number>\d{6})
-            (?P<payer_bankgiro_number>\d{10})
+            (?P<payee_bankgiro_number>\d{10})
+            [ ]{2} 
+            $ 
+            ''',
+            re.VERBOSE,
+        ),
+        re.compile(
+            r'''
+            ^
+            01      # Transaction Code
+            (?P<date_written>\d{8})
+            AUTOGIRO# LayoutName
+            (?P<clearing_number>9900)
+            [ ]{40}   # Padding
+            (?P<customer_number>\d{6})
+            (?P<payee_bankgiro_number>\d{10})
+            [ ]{0,2} 
             $ 
             ''',
             re.VERBOSE,
@@ -94,8 +114,9 @@ class OpeningRecord(Record):
                 f'01'
                 f'{self.date_written:%Y%m%d}'
                 f'AUTOGIRO'
-                + (' ' * 44) +
-                f'{self.customer_number:6}{self.payer_bankgiro_number:10}'
+                + (self.clearing_number and f'{self.clearing_number:04d}' or (' ' * 4))
+                + (' ' * 40) +
+                f'{self.customer_number:6}{self.payee_bankgiro_number:10}'
                 + (' ' * 2)
         )
 
@@ -112,9 +133,10 @@ class PaymentRecord(Record):
     period_code: 'PeriodCode' = field(converter=to_period_code)
     number_recurring_payments: int = field(converter=number_recurring_payments_to_int)
     payer_number: int = field(converter=int)
-    payee_bankgiro_number: int = field(converter=int)
+    payer_bankgiro_number: int = field(converter=int)
     amount: int = field(converter=int)
     reference: str = field(converter=to_safe_str_or_none)
+    payment_status_code: Optional['PaymentStatus'] = field(default=None, converter=to_payment_status)
     # Only for assignment_type == AssignmentType.TRANSACTIONS
     _PATTERNS: ClassVar[List[Pattern]] = [
         re.compile(
@@ -126,7 +148,7 @@ class PaymentRecord(Record):
             ' '{4}
             (?P<payer_number>\d{16})     # Record type
             (?P<amount>\d{12})
-            (?P<payee_bankgiro_number>\d{10})
+            (?P<payer_bankgiro_number>\d{10})
             (?P<reference>.{16})
             ' '{11}   # Filler
             $
@@ -143,9 +165,10 @@ class PaymentRecord(Record):
             [ ]
             (?P<payer_number>\d{16})     # Record type
             (?P<amount>\d{12})
-            (?P<payee_bankgiro_number>\d{10})
-            (?P<reference>.{12,16})
-            [ ]{0,11}
+            (?P<payer_bankgiro_number>\d{10})
+            (?P<reference>.{16})
+            [ ]{10}
+            (?P<payment_status_code>.{1})
             $
             ''',
             re.VERBOSE,
@@ -162,9 +185,60 @@ class PaymentRecord(Record):
                 + ' '
                 + f'{self.payer_number:16d}'
                   f'{self.amount:012d}'
-                  f'{self.payee_bankgiro_number:010d}'
+                  f'{self.payer_bankgiro_number:010d}'
                   f'{self.reference:16}'
-                + ' '
+                + (' ' * 10)
+                + (self.payment_status_code and f'{self.payment_status_code:01d}' or (' ' * 1))
+        )
+
+
+@define
+class EndRecord(Record):
+    """TransmissionStart is the first record in every OCR file.
+
+    A file can only contain a single transmission.
+
+    Each transmission can contain any number of assignments.
+    """
+
+    date_written: 'datetime.date' = field(converter=to_date)
+    total_amount_outgoing: int = field(converter=int)
+    total_number_outgoing: int = field(converter=int)
+    total_amount_incoming: int = field(converter=int)
+    total_number_incoming: int = field(converter=int)
+    _PATTERNS: ClassVar[List[Pattern]] = [
+        re.compile(
+            r'''
+            ^
+            09      # Transaction Code
+            (?P<date_written>\d{8})
+            9900# Clearing number
+            [ ]{14}   # Padding
+            (?P<total_amount_outgoing>\d{12})
+            (?P<total_number_outgoing>\d{6})
+            (?P<total_number_incoming>\d{6})
+            0{4}
+            (?P<total_amount_incoming>\d{12})
+            0{12}
+            $ 
+            ''',
+            re.VERBOSE,
+        ),
+    ]
+
+    def to_ocr(self) -> str:
+        """Get record as OCR string."""
+        return (
+                f'09'
+                f'{self.date_written:%Y%m%d}'
+                f'9900'
+                + (' ' * 14) +
+                f'{self.total_amount_outgoing:012d}'
+                f'{self.total_number_outgoing:06d}'
+                f'{self.total_number_incoming:06d}'
+                + ('0' * 4) +
+                f'{self.total_amount_incoming:012d}'
+                + ('0' * 12)
         )
 
 
@@ -180,12 +254,14 @@ def parse(data: str) -> List[R]:
 
     record_classes = {TransactionType.INCOMING_PAYMENT: PaymentRecord,
                       TransactionType.OUTGOING_PAYMENT: PaymentRecord,
-                      TransactionType.OPENING_RECORD: OpeningRecord
+                      TransactionType.OPENING_RECORD: OpeningRecord,
+                      TransactionType.END_RECORD: EndRecord
                       }
 
     results: List[R] = []
 
     for line in data.strip().splitlines():
+        line = line + ' ' * (80 - len(line))
         # if len(line) != 80:
         #     raise ValueError('All lines must be exactly 80 chars long')
 

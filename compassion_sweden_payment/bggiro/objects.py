@@ -2,7 +2,7 @@
 
 import datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Iterable, List
+from typing import TYPE_CHECKING, Iterable, List, Optional
 from typing import TypeVar, Union
 
 from attrs import Factory, define, field
@@ -10,12 +10,13 @@ from attrs.validators import instance_of
 
 from .converters import (
     to_transaction_type, to_date_or_genast, to_period_code, to_safe_str_or_none,
-    number_recurring_payments_to_int
+    number_recurring_payments_to_int, to_payment_status, to_int_or_none
 )
-from .enums import TransactionType, PeriodCode
+from .enums import TransactionType, PeriodCode, PaymentStatus
 from .records import (
     OpeningRecord,
-    PaymentRecord
+    PaymentRecord,
+    EndRecord
 )
 from .records import parse as records_parse
 from .validators import str_of_length
@@ -51,6 +52,8 @@ class PaymentInitiation:
     #: Payee's bankgiro number. String of 10 digits.
     bankgiro_number: str = field(validator=str_of_length(10))
 
+    clearing_number: Optional[int] = field(default=None, converter=to_int_or_none)
+
     #: List of Payment.
     payments: List['Payment'] = field(default=Factory(list), repr=False)
 
@@ -60,14 +63,15 @@ class PaymentInitiation:
         if len(records) < 1:
             raise ValueError(f'At least 2 records required, got {len(records)}')
 
-        opening_record, body = records[0], records[1:]
+        opening_record = records[0]
 
         assert isinstance(opening_record, OpeningRecord)
-
+        body = records[1:] if opening_record.clearing_number is None else records[1:-1]
         return cls(
             date_written=opening_record.date_written,
             customer_number=opening_record.customer_number,
-            bankgiro_number=opening_record.payer_bankgiro_number,
+            bankgiro_number=opening_record.payee_bankgiro_number,
+            clearing_number=opening_record.clearing_number,
             payments=cls._get_incoming_payment(body),
         )
 
@@ -92,12 +96,24 @@ class PaymentInitiation:
         yield self._get_opening_record()
         for payment in self.payments:
             yield payment.to_record()
+        if self.clearing_number is not None:
+            yield self._get_end_record()
 
     def _get_opening_record(self) -> 'Record':
         return OpeningRecord(
             customer_number=self.customer_number,
-            payer_bankgiro_number=self.bankgiro_number,
-            date_written=self.date_written
+            payee_bankgiro_number=self.bankgiro_number,
+            date_written=self.date_written,
+            clearing_number=self.clearing_number
+        )
+
+    def _get_end_record(self) -> 'Record':
+        return EndRecord(
+            date_written=self.date_written,
+            total_amount_incoming=self._get_total_amount_incoming(),
+            total_amount_outgoing=self._get_total_amount_outgoing(),
+            total_number_incoming=self._get_total_number_incoming(),
+            total_number_outgoing=self._get_total_number_outgoing(),
         )
 
     def add_payment(
@@ -117,7 +133,7 @@ class PaymentInitiation:
             period_code=period_code,
             number_recurring_payments=number_recurring_payments,
             payer_number=payer_number,
-            payee_bankgiro_number=self.bankgiro_number,
+            payer_bankgiro_number=self.bankgiro_number,
             amount=amount,
             reference=reference
         )
@@ -125,20 +141,25 @@ class PaymentInitiation:
         self.payments.append(payment)
         return payment
 
-    def get_num_transactions(self) -> int:
+    def _get_total_amount_incoming(self) -> int:
         """Get number of transactions in the transmission."""
-        return sum(assignment.get_num_transactions() for assignment in self.assignments)
+        return 100 * sum([payment.amount for payment in self.payments
+                          if payment.transaction_type == TransactionType.INCOMING_PAYMENT])
 
-    def get_num_records(self) -> int:
-        """Get number of records in the transmission.
+    def _get_total_amount_outgoing(self) -> int:
+        """Get number of transactions in the transmission."""
+        return 100 * sum([payment.amount for payment in self.payments
+                          if payment.transaction_type == TransactionType.OUTGOING_PAYMENT])
 
-        Includes the transmission's start and end record.
-        """
-        return 2 + sum(assignment.get_num_records() for assignment in self.assignments)
+    def _get_total_number_incoming(self) -> int:
+        """Get number of transactions in the transmission."""
+        return len([payment for payment in self.payments
+                    if payment.transaction_type == TransactionType.INCOMING_PAYMENT])
 
-    def get_total_amount(self) -> Decimal:
-        """Get the total amount from all transactions in the transmission."""
-        return Decimal(sum(assignment.get_total_amount() for assignment in self.assignments))
+    def _get_total_number_outgoing(self) -> int:
+        """Get number of transactions in the transmission."""
+        return len([payment for payment in self.payments
+                    if payment.transaction_type == TransactionType.OUTGOING_PAYMENT])
 
 
 @define
@@ -155,11 +176,13 @@ class Payment:
 
     payer_number: int = field(converter=int)
 
-    payee_bankgiro_number: int = field(converter=int)
+    payer_bankgiro_number: int = field(converter=int)
 
     amount: int = field(converter=int)
 
     reference: str = field(converter=to_safe_str_or_none)
+
+    payment_status_code: Optional['PaymentStatus'] = field(default=None, converter=to_payment_status)
 
     @property
     def amount_in_cents(self) -> int:
@@ -178,8 +201,9 @@ class Payment:
             period_code=record.period_code,
             number_recurring_payments=record.number_recurring_payments,
             payer_number=record.payer_number,
-            payee_bankgiro_number=record.payee_bankgiro_number,
+            payer_bankgiro_number=record.payer_bankgiro_number,
             amount=Decimal(record.amount) / 100,
+            payment_status_code=record.payment_status_code,
             reference=record.reference
         )
 
@@ -190,7 +214,8 @@ class Payment:
                              period_code=self.period_code,
                              number_recurring_payments=self.number_recurring_payments,
                              payer_number=self.payer_number,
-                             payee_bankgiro_number=self.payee_bankgiro_number,
+                             payer_bankgiro_number=self.payer_bankgiro_number,
+                             payment_status_code=self.payment_status_code,
                              amount=self.amount_in_cents,
                              reference=self.reference)
 

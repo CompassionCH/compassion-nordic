@@ -6,6 +6,7 @@ from typing import List
 __all__: List[str] = [
     'TransactionType',
     'PeriodCode',
+    'PaymentStatus'
 ]
 
 
@@ -29,3 +30,13 @@ class TransactionType(IntEnum):
     OPENING_RECORD = 1
     INCOMING_PAYMENT = 82
     OUTGOING_PAYMENT = 32
+    END_RECORD = 9
+
+
+class PaymentStatus(IntEnum):
+    """Assignment types tell what type of transaction this is."""
+
+    APPROVED = 0
+    INSUFFICIENT_FUNDS = 1
+    NO_CONNECTION = 2
+    RENEWED_FUNDS = 9
