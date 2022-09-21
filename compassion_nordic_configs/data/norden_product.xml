@@ -3,13 +3,13 @@
 	<data noupdate="1">
         <!-- Sponsorship Templates -->
         <record id="product_template_sponsorship" model="product.template">
-            <field name="name">Sponsorship</field>
+            <field name="name">CDSP</field>
             <field name="categ_id" ref="sponsorship_compassion.product_category_sponsorship"/>
             <field name="type">service</field>
             <field name="description">Standard Sponsorship of type CDSP.</field>
            <field name="property_account_income_id" search="[('code','=','32110')]"/>
             <field name="property_account_expense_id" search="[('code','=','74710')]"/>
-            <field name="default_code">CDSP</field>
+            <field name="default_code">sponsorship</field>
         </record>
         <record id="product_template_sponsorship_ldp" model="product.template">
             <field name="name">LDP Sponsorship</field>
@@ -19,56 +19,56 @@
             <field name="default_code">sponsorship_ldp</field>
         </record>
         <record id="product_template_fund_gen" model="product.template">
-            <field name="name">General Fund</field>
+            <field name="name">SPONSORSHIP PLUS</field>
             <field name="type">service</field>
             <field name="categ_id" ref="sponsorship_compassion.product_category_fund" />
             <field name="description">Thanks to your donation to the General Fund, through your help we can offer
                 a concrete help and a new future to many children on the field and restore hope in their lives.</field>
             <field name="property_account_income_id" search="[('code','=','32120')]"/>
             <field name="property_account_expense_id" search="[('code','=','74720')]"/>
-            <field name="default_code">SPONSORSHIP PLUS</field>
+            <field name="default_code">fund_gen</field>
         </record>
 
         <!-- Sponsorship Gifts Templates -->
         <record id="product_template_gift_birthday" model="product.template">
-            <field name="name">Birthday Gift</field>
+            <field name="name">BIRTHDAY</field>
             <field name="type">service</field>
             <field name="categ_id" ref="sponsorship_compassion.product_category_gift" />
             <field name="property_account_income_id" search="[('code','=','32125')]" />
             <field name="property_account_expense_id" search="[('code','=','74725')]" />
-            <field name="default_code">BIRTHDAY</field>
+            <field name="default_code">gift_birthday</field>
         </record>
         <record id="product_template_gift_gen" model="product.template">
-            <field name="name">General Gift</field>
+            <field name="name">GENERAL</field>
             <field name="type">service</field>
             <field name="categ_id" ref="sponsorship_compassion.product_category_gift" />
             <field name="property_account_income_id" search="[('code','=','32125')]" />
             <field name="property_account_expense_id" search="[('code','=','74725')]" />
-            <field name="default_code">GENERAL</field>
+            <field name="default_code">gift_gen</field>
         </record>
         <record id="product_template_gift_family" model="product.template">
-            <field name="name">Family Gift</field>
+            <field name="name">FAMILY</field>
             <field name="type">service</field>
             <field name="categ_id" ref="sponsorship_compassion.product_category_gift" />
             <field name="property_account_income_id" search="[('code','=','32125')]" />
             <field name="property_account_expense_id" search="[('code','=','74725')]" />
-            <field name="default_code">FAMILY</field>
+            <field name="default_code">gift_family</field>
         </record>
         <record id="product_template_gift_project" model="product.template">
-            <field name="name">Project Gift</field>
+            <field name="name">PROJECT</field>
             <field name="type">service</field>
             <field name="categ_id" ref="sponsorship_compassion.product_category_gift" />
             <field name="property_account_income_id" search="[('code','=','32125')]" />
             <field name="property_account_expense_id" search="[('code','=','74725')]" />
-            <field name="default_code">PROJECT</field>
+            <field name="default_code">gift_project</field>
         </record>
         <record id="product_template_gift_graduation" model="product.template">
-            <field name="name">Graduation Gift</field>
+            <field name="name">GRADUATION</field>
             <field name="type">service</field>
             <field name="categ_id" ref="sponsorship_compassion.product_category_gift" />
             <field name="property_account_income_id" search="[('code','=','32125')]" />
             <field name="property_account_expense_id" search="[('code','=','74725')]" />
-            <field name="default_code">GRADUATION</field>
+            <field name="default_code">gift_graduation</field>
         </record>
 
         <!-- DES Fund Templates -->
@@ -81,12 +81,12 @@
             <field name="default_code">BIBLES</field>
         </record>
         <record id="product_template_christmas" model="product.template">
-            <field name="name">Christmas</field>
+            <field name="name">CHRISTMAS</field>
             <field name="type">service</field>
             <field name="categ_id" ref="sponsorship_compassion.product_category_fund" />
             <field name="property_account_income_id" search="[('code','=','32125')]" />
             <field name="property_account_expense_id" search="[('code','=','74725')]" />
-            <field name="default_code">CHRISTMAS</field>
+            <field name="default_code">Christmas</field>
         </record>
         <record id="product_template_civ" model="product.template">
             <field name="name">CIV</field>
@@ -97,12 +97,12 @@
             <field name="default_code">CIV</field>
         </record>
         <record id="product_template_drf" model="product.template">
-            <field name="name">Disaster Relief</field>
+            <field name="name">DISASTER RELIEF</field>
             <field name="type">service</field>
             <field name="categ_id" ref="sponsorship_compassion.product_category_fund" />
             <field name="property_account_income_id" search="[('code','=','32125')]" />
             <field name="property_account_expense_id" search="[('code','=','74725')]" />
-            <field name="default_code">DISASTER RELIEF</field>
+            <field name="default_code">drf</field>
         </record>
         <record id="product_template_uc" model="product.template">
             <field name="name">UC</field>
@@ -113,7 +113,7 @@
             <field name="default_code">UC</field>
         </record>
         <record id="product_template_survival" model="product.template">
-            <field name="name">Survival Interventions</field>
+            <field name="name">CSP</field>
             <field name="type">service</field>
             <field name="categ_id" ref="sponsorship_compassion.product_category_fund" />
             <field name="property_account_income_id" search="[('code','=','32125')]" />
@@ -129,28 +129,28 @@
             <field name="default_code">WMN</field>
         </record>
         <record id="product_template_wash" model="product.template">
-            <field name="name">Water for life</field>
+            <field name="name">WATER FOR LIFE</field>
             <field name="type">service</field>
             <field name="categ_id" ref="sponsorship_compassion.product_category_fund" />
             <field name="property_account_income_id" search="[('code','=','32125')]" />
             <field name="property_account_expense_id" search="[('code','=','74725')]" />
-            <field name="default_code">WATER FOR LIFE</field>
+            <field name="default_code">wash</field>
         </record>
         <!-- UNDES Fund Templates -->
         <record id="product_template_membership" model="product.template">
-            <field name="name">Membership</field>
+            <field name="name">MEMBERSHIP</field>
             <field name="type">service</field>
             <field name="categ_id" ref="sponsorship_compassion.product_category_fund" />
             <field name="property_account_income_id" search="[('code','=','39100')]" />
-            <field name="default_code">MEMBERSHIP</field>
+            <field name="default_code">Membership</field>
         </record>
         <record id="product_template_undes" model="product.template">
-            <field name="name">Un-designated donation</field>
+            <field name="name">UN-DESIGNATED</field>
             <field name="type">service</field>
             <field name="categ_id" ref="sponsorship_compassion.product_category_fund" />
             <field name="property_account_income_id" search="[('code','=','32130')]" />
             <field name="property_account_expense_id" search="[('code','=','74730')]" />
-            <field name="default_code">UN-DESIGNATED</field>
+            <field name="default_code">undes</field>
         </record>
     </data>
 </odoo>
