@@ -5,6 +5,9 @@ from typing import Optional, TypeVar, Union
 from .enums import (
     SignCode,
     RecordType,
+    DeliveryType,
+    SectionType,
+    TransactionCode,
 )
 
 T = TypeVar('T')
@@ -42,22 +45,38 @@ def to_sign_code(value: Union[SignCode, int, str]) -> SignCode:
     return SignCode(int(value))
 
 
+def to_delivery_type(value: Union[SignCode, int, str]) -> DeliveryType:
+    """Convert input to TransactionType."""
+    return DeliveryType(int(value))
+
+
+def to_section_type(value: Union[SignCode, int, str]) -> SectionType:
+    """Convert input to TransactionType."""
+    return SectionType(int(value))
+
+
+def to_transaction_code(value: Union[SignCode, int, str]) -> TransactionCode:
+    """Convert input to TransactionType."""
+    return TransactionCode(int(value))
+
+
 def to_date(value: Union[datetime.date, str]) -> datetime.date:
     """Convert input to date."""
     if isinstance(value, datetime.date):
         return value
-    return datetime.datetime.strptime(value, '%d%m%Y').date()
+    date_format = '%d%m%Y' if len(value) == 8 else '%d%m%y'
+    return datetime.datetime.strptime(value, date_format).date()
 
 
-def to_date_short_or_none(value: Union[datetime.date, str]) -> Optional[Union[datetime.date, None]]:
+def to_date_or_none(value):
     """Convert input to date or None."""
-    if isinstance(value, str) and '000000' in value:
-        return None if '000000' in value else datetime.datetime.strptime(value, '%d%m%y').date()
-    return value
-
-
-def to_date_long_or_none(value: Union[datetime.date, str]) -> Optional[Union[datetime.date, None]]:
-    """Convert input to date or None."""
-    if isinstance(value, str) and '00000000' in value:
-        return None if '00000000' in value else datetime.datetime.strptime(value, '%d%m%Y').date()
+    if isinstance(value, str):
+        if '000000' in value:
+            return None
+        elif len(value) == 6:
+            return datetime.datetime.strptime(value, '%d%m%y').date()
+        elif len(value) == 8:
+            return datetime.datetime.strptime(value, '%d%m%Y').date()
+        else:
+            raise ValueError(f'Error in date parsing  {value}')
     return value

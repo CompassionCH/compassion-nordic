@@ -21,8 +21,10 @@ class AccountPaymentOrder(models.Model):
         if self.payment_method_id.code != "denmark_direct_debit":
             return super().generate_payment_file()
 
-        data_delivery = beservice.DataDelivery(data_supplier_number=self.payment_mode_id.initiating_party_scheme,
-                                               subsystem='BS1', delivery_identification=1)
+        data_delivery = beservice.DataDeliveryCollection(
+            data_supplier_number=self.payment_mode_id.initiating_party_scheme,
+            subsystem='BS1',
+            delivery_type=beservice.DeliveryType.COLLECTION_DATA, delivery_identification=1)
 
         data_delivery.add_section(data_supplier_id=self.payment_mode_id.initiating_party_identifier,
                                   pbs_number=self.payment_mode_id.initiating_party_issuer,
@@ -36,7 +38,8 @@ class AccountPaymentOrder(models.Model):
             text_lines.sort(key=lambda a: a[0])
 
             data_delivery.sections[0].add_payment(customer_number=f'{bank_line.partner_id.ref:15}',
-                                                  mandate_number=bank_line.mandate_id.id,
+                                                  mandate_number=bank_line.payment_line_ids[0].move_line_id.move_id.
+                                                  line_ids.mapped('contract_id').group_id.ref,
                                                   amount=bank_line.amount_currency,
                                                   sign_code=beservice.SignCode.COLLECTION,
                                                   payment_date=bank_line.date,

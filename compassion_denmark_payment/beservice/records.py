@@ -10,31 +10,29 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    cast,
+    cast, Optional,
 )
 import netsgiro
 import datetime
 from attrs import define, field
 
 from .converters import (
-    to_date,
-    to_date_short_or_none,
-    to_date_long_or_none,
     to_int_or_none,
     to_safe_str_or_none,
-    to_sign_code, number_recurring_payments_to_int, to_record_type,
+    to_sign_code, number_recurring_payments_to_int, to_record_type, to_delivery_type, to_section_type, to_date_or_none,
+    to_transaction_code,
 )
 from .validators import str_of_length
 
 if TYPE_CHECKING:
     import datetime
 
-from .enums import SignCode, RecordType
+from .enums import SignCode, RecordType, DeliveryType, SectionType, TransactionCode
 
 __all__: List[str] = [
     'DataDeliveryStartRecord',
     'SectionStartRecord',
-    'PaymentInfoRecord',
+    'InfoRecord',
     'TextToDebtorRecord',
     'SectionEndRecord',
     'DataDeliveryEndRecord',
@@ -77,7 +75,8 @@ class DataDeliveryStartRecord(Record):
     data_supplier_number: int = field(converter=int)
     subsystem: str = field(validator=str_of_length(3))
     delivery_identification: int = field(converter=int)
-    date: Union[datetime.date, None] = field(converter=to_date_short_or_none)
+    delivery_type: 'DeliveryType' = field(converter=to_delivery_type)
+    delivery_date: Union['datetime.date', None] = field(converter=to_date_or_none)
 
     RECORD_TYPE = RecordType.DATA_DELIVERY_START
     _PATTERNS: ClassVar[List[Pattern]] = [
@@ -88,10 +87,10 @@ class DataDeliveryStartRecord(Record):
             002 # Data Record Type
             (?P<data_supplier_number>\d{8})
             (?P<subsystem>.{3})
-            0601# Delivery Type
+            (?P<delivery_type>\d{4})# Data Delivery Type
             (?P<delivery_identification>\d{10})
             [ ]{19}
-            (?P<date>\d{6})
+            (?P<delivery_date>\d{6})
             [ ]{0,73}
             $ 
             ''',
@@ -104,10 +103,10 @@ class DataDeliveryStartRecord(Record):
         return (
                 f'BS002'
                 + f'{self.data_supplier_number:08d}{self.subsystem:3}'
-                + f'0601'
+                + f'{self.delivery_type:04d}'
                 + f'{self.delivery_identification:010d}'
                 + (' ' * 19)
-                + (self.date and f'{self.date:%y%m%d}' or ('0' * 6))
+                + (self.delivery_date and f'{self.delivery_date:%d%m%y}' or ('0' * 6))
                 + (' ' * 72)
         )
 
@@ -117,8 +116,9 @@ class SectionStartRecord(Record):
     pbs_number: int = field(converter=int)
     debtor_group_number: int = field(converter=int)
     data_supplier_id: str = field(converter=to_safe_str_or_none)
-    date: Union[datetime.date, None] = field(converter=to_date_long_or_none)
-    main_text_line: str = field(converter=to_safe_str_or_none)
+    section_type: 'SectionType' = field(converter=to_section_type)
+    section_date: Union['datetime.date', None] = field(converter=to_date_or_none)
+    main_text_line: Optional[str] = field(default=None, converter=to_safe_str_or_none)
 
     RECORD_TYPE = RecordType.SECTION_START
     _PATTERNS: ClassVar[List[Pattern]] = [
@@ -128,49 +128,91 @@ class SectionStartRecord(Record):
             BS
             012 # Data Record Type
             (?P<pbs_number>\d{8})
-            0112 # Section Number
+            (?P<section_type>0112) # Section Number
             [ ]{5}
             (?P<debtor_group_number>\d{5})
             (?P<data_supplier_id>.{15})
             [ ]{4}
-            (?P<date>\d{8})
+            (?P<section_date>\d{8})
             [ ]{0,14}
             (?P<main_text_line>.{60})
             $ 
             ''',
             re.VERBOSE,
-        )
+        ), re.compile(
+            r'''
+            ^
+            BS
+            012 # Data Record Type
+            (?P<pbs_number>\d{8})
+            (?P<section_type>\d{4}) # Section Number
+            .{3}
+            (?P<debtor_group_number>\d{5})
+            (?P<data_supplier_id>.{15})
+            [ ]{9}
+            (?P<section_date>\d{6})
+            [ ]{73}
+            $ 
+            ''',
+            re.VERBOSE,
+        ),
     ]
 
     def to_ocr(self) -> str:
         """Get record as OCR string."""
-        return (
+        common_fields = (
                 f'BS012'
                 + f'{self.pbs_number:08d}'
-                + f'0112'
-                + ' ' * 4
-                + f'{self.debtor_group_number:05d}'
-                + (self.data_supplier_id and f'{self.data_supplier_id:15}' or (' ' * 15))
-                + (' ' * 4)
-                + (self.date and f'{self.date:%Y%m%d}' or ('0' * 8))
-                + (' ' * 14)
-                + (self.main_text_line and f'{self.main_text_line:60}' or (' ' * 60))
+                + f'{self.section_type:04d}'
         )
+        if self.section_type == SectionType.COLLECTION:
+            section_fields = (
+                    ' ' * 4
+                    + f'{self.debtor_group_number:05d}'
+                    + (self.data_supplier_id and f'{self.data_supplier_id:15}' or (' ' * 15))
+                    + (' ' * 4)
+                    + (self.section_date and f'{self.section_date:%d%m%Y}' or ('0' * 8))
+                    + (' ' * 14)
+                    + (self.main_text_line and f'{self.main_text_line:60}' or (' ' * 60))
+            )
+        else:
+            section_fields = (
+                    (' ' if self.section_type == SectionType.REGISTERED_AND_CANCELLED_MANDATE else '0') * 3
+                    + f'{self.debtor_group_number:05d}'
+                    + (self.data_supplier_id and f'{self.data_supplier_id:15}' or (' ' * 15))
+                    + (' ' * 9)
+                    + (self.section_date and f'{self.section_date:%d%m%y}' or ('0' * 6))
+                    + (' ' * 73)
+            )
+        return common_fields + section_fields
 
 
 @define
-class PaymentInfoRecord(Record):
+class InfoRecord(Record):
     pbs_number: int = field(converter=int)
     debtor_group_number: int = field(converter=int)
     customer_number: str = field(validator=str_of_length(15))
     mandate_number: int = field(converter=int)
-    payment_date: datetime.date = field(converter=to_date)
-    sign_code: 'SignCode' = field(converter=to_sign_code)
-    amount: int = field(converter=int)
-    reference: str = field(converter=to_safe_str_or_none)
-    payer_id: int = field(converter=to_int_or_none)
+    info_date: 'datetime.date' = field(converter=to_date_or_none)
+    transaction_code: TransactionCode = field(converter=to_transaction_code)
 
-    RECORD_TYPE = RecordType.PAYMENT_INFO
+    # 0603 Mandate Specific
+    end_date: Optional['datetime.date'] = field(default=None, converter=to_date_or_none)
+
+    # 0602 Payment Specific
+    payment_date: Optional['datetime.date'] = field(default=None, converter=to_date_or_none)
+    bookkeping_date: Optional['datetime.date'] = field(default=None, converter=to_date_or_none)
+    payment_amount: Optional[int] = field(default=None, converter=to_int_or_none)
+
+    # 0601 Collection Specific
+    payer_id: Optional[int] = field(default=None, converter=to_int_or_none)
+
+    # 0601 and 0602
+    sign_code: Optional['SignCode'] = field(default=None, converter=to_sign_code)
+    amount: Optional[int] = field(default=None, converter=to_int_or_none)
+    reference: Optional[str] = field(default=None, converter=to_safe_str_or_none)
+
+    RECORD_TYPE = RecordType.INFO
     _PATTERNS: ClassVar[List[Pattern]] = [
         re.compile(
             r'''
@@ -178,12 +220,12 @@ class PaymentInfoRecord(Record):
             BS
             042 # Data Record Type
             (?P<pbs_number>\d{8})
-            0280 # Section Number
+            (?P<transaction_code>0280)
             00000
             (?P<debtor_group_number>\d{5})
             (?P<customer_number>.{15})
             (?P<mandate_number>\d{9})
-            (?P<payment_date>\d{8})
+            (?P<info_date>\d{8})
             (?P<sign_code>\d{1})
             (?P<amount>\d{13})
             (?P<reference>.{30})
@@ -193,27 +235,94 @@ class PaymentInfoRecord(Record):
             $ 
             ''',
             re.VERBOSE,
+        ), re.compile(
+            r'''
+            ^
+            BS
+            042 # Data Record Type
+            (?P<pbs_number>\d{8})
+            (?P<transaction_code>\d{4})
+            000
+            (?P<debtor_group_number>\d{5})
+            (?P<customer_number>.{15})
+            (?P<mandate_number>\d{9})
+            (?P<info_date>\d{6})
+            (?P<end_date>\d{6})
+            [ ]{67}
+            $ 
+            ''',
+            re.VERBOSE,
+        ),
+        re.compile(
+            r'''
+            ^
+            BS
+            042 # Data Record Type
+            (?P<pbs_number>\d{8})
+            (?P<transaction_code>\d{4})
+            000
+            (?P<debtor_group_number>\d{5})
+            (?P<customer_number>.{15})
+            (?P<mandate_number>\d{9})
+            (?P<info_date>\d{6})
+            (?P<sign_code>\d{1})
+            (?P<amount>\d{13})
+            (?P<reference>.{30})
+            [ ]{4}
+            (?P<payment_date>\d{6})
+            (?P<bookkeping_date>\d{6})
+            (?P<payment_amount>\d{13})
+            $ 
+            ''',
+            re.VERBOSE,
         )
     ]
 
     def to_ocr(self) -> str:
         """Get record as OCR string."""
-        return (
-                f'BS042'
-                + f'{self.pbs_number:08d}'
-                + f'0280'
-                + f'00000'
-                + f'{self.debtor_group_number:05d}'
-                + f'{self.customer_number:15}'
-                + f'{self.mandate_number:09d}'
-                + f'{self.payment_date:%d%m%Y}'
-                + f'{self.sign_code:01d}'
-                + f'{self.amount:013d}'
-                + (self.reference and f'{self.reference:30}' or (' ' * 30))
-                + '00'
-                + (self.payer_id and f'{self.payer_id:15}' or (' ' * 15))
-                + ('0' * 8)
-        )
+        common_part = (f'BS042'
+                       + f'{self.pbs_number:08d}'
+                       + f'{self.transaction_code:04d}')
+        if self.transaction_code == TransactionCode.COLLECTION_INFORMATION:
+            transaction_spec = (
+                    f'00000'
+                    + f'{self.debtor_group_number:05d}'
+                    + f'{self.customer_number:15}'
+                    + f'{self.mandate_number:09d}'
+                    + f'{self.info_date:%d%m%Y}'
+                    + f'{self.sign_code:01d}'
+                    + f'{self.amount:013d}'
+                    + (self.reference and f'{self.reference:30}' or (' ' * 30))
+                    + '00'
+                    + (self.payer_id and f'{self.payer_id:15}' or (' ' * 15))
+                    + ('0' * 8))
+
+        elif self.transaction_code == TransactionCode.MANDATE_REGISTERED:
+            transaction_spec = (
+                    f'000'
+                    + f'{self.debtor_group_number:05d}'
+                    + f'{self.customer_number:15}'
+                    + f'{self.mandate_number:09d}'
+                    + f'{self.info_date:%d%m%y}'
+                    + (self.end_date and f'{self.end_date:%y%m%d}' or ('0' * 6))
+                    + (' ' * 67)
+            )
+        else:
+            transaction_spec = (
+                    f'000'
+                    + f'{self.debtor_group_number:05d}'
+                    + f'{self.customer_number:15}'
+                    + f'{self.mandate_number:09d}'
+                    + f'{self.info_date:%d%m%y}'
+                    + f'{self.sign_code:01d}'
+                    + f'{self.amount:013d}'
+                    + (self.reference and f'{self.reference:30}' or (' ' * 30))
+                    + (' ' * 4)
+                    + (self.payment_date and f'{self.payment_date:%d%m%y}' or ('0' * 6))
+                    + (self.bookkeping_date and f'{self.bookkeping_date:%d%m%y}' or ('0' * 6))
+                    + f'{self.payment_amount:013d}'
+            )
+        return common_part + transaction_spec
 
 
 @define
@@ -271,7 +380,7 @@ class SectionEndRecord(Record):
     net_amount: int = field(converter=int)
     num_of_record_52_62: int = field(converter=int)
     num_of_record_22: int = field(converter=int)
-
+    section_type: 'SectionType' = field(converter=to_section_type)
     RECORD_TYPE: ClassVar[RecordType] = RecordType.SECTION_END
     _PATTERNS: ClassVar[List[Pattern]] = [
         re.compile(
@@ -280,10 +389,29 @@ class SectionEndRecord(Record):
             BS
             092 # Data Record Type
             (?P<pbs_number>\d{8})
-            0112 # Transaction Code
+            (?P<section_type>0112) # Section Number
             00000
             (?P<debtor_group_number>\d{5})
             [ ]{4}
+            (?P<num_of_record_42>\d{11})
+            (?P<net_amount>\d{15})
+            (?P<num_of_record_52_62>\d{11})
+            [ ]{15}
+            (?P<num_of_record_22>\d{11})
+            [ ]{34}
+            $ 
+            ''',
+            re.VERBOSE,
+        ), re.compile(
+            r'''
+            ^
+            BS
+            092 # Data Record Type
+            (?P<pbs_number>\d{8})
+            (?P<section_type>\d{4}) # Section Number
+            000
+            (?P<debtor_group_number>\d{5})
+            [ ]{6}
             (?P<num_of_record_42>\d{11})
             (?P<net_amount>\d{15})
             (?P<num_of_record_52_62>\d{11})
@@ -298,26 +426,40 @@ class SectionEndRecord(Record):
 
     def to_ocr(self) -> str:
         """Get record as OCR string."""
-        return (
+        common_part = (
                 f'BS092'
                 + f'{self.pbs_number:08d}'
-                + f'0112'
-                + f'00000'
-                + f'{self.debtor_group_number:05d}'
-                + (' ' * 4)
-                + f'{self.num_of_record_42:011d}'
-                + f'{self.net_amount:015d}'
-                + f'{self.num_of_record_52_62:011d}'
-                + (' ' * 15)
-                + f'{self.num_of_record_22:011d}'
-                + (' ' * 34)
-        )
+                + f'{self.section_type:04d}')
+        if self.section_type == SectionType.COLLECTION:
+            section_spec = (f'00000'
+                            + f'{self.debtor_group_number:05d}'
+                            + (' ' * 4)
+                            + f'{self.num_of_record_42:011d}'
+                            + f'{self.net_amount:015d}'
+                            + f'{self.num_of_record_52_62:011d}'
+                            + (' ' * 15)
+                            + f'{self.num_of_record_22:011d}'
+                            + (' ' * 34)
+                            )
+        else:
+            section_spec = (f'000'
+                            + f'{self.debtor_group_number:05d}'
+                            + (' ' * 6)
+                            + f'{self.num_of_record_42:011d}'
+                            + f'{self.net_amount:015d}'
+                            + f'{self.num_of_record_52_62:011d}'
+                            + (' ' * 15)
+                            + f'{self.num_of_record_22:011d}'
+                            + (' ' * 34)
+                            )
+        return common_part + section_spec
 
 
 @define
 class DataDeliveryEndRecord(Record):
     data_supplier_number: int = field(converter=int)
     subsystem: str = field(validator=str_of_length(3))
+    delivery_type: 'DeliveryType' = field(converter=to_delivery_type)
     num_of_section: int = field(converter=int)
     num_of_record_42: int = field(converter=int)
     net_amount: int = field(converter=int)
@@ -333,7 +475,7 @@ class DataDeliveryEndRecord(Record):
             992 # Data Record Type
             (?P<data_supplier_number>\d{8})
             (?P<subsystem>.{3})
-            0601# Delivery Type
+            (?P<delivery_type>\d{4})# Data Delivery Type
             (?P<num_of_section>\d{11})
             (?P<num_of_record_42>\d{11})
             (?P<net_amount>\d{15})
@@ -353,7 +495,7 @@ class DataDeliveryEndRecord(Record):
                 f'BS992'
                 + f'{self.data_supplier_number:08d}'
                 + f'{self.subsystem:3}'
-                + f'0601'
+                + f'{self.delivery_type:04d}'
                 + f'{self.num_of_section:011d}'
                 + f'{self.num_of_record_42:011d}'
                 + f'{self.net_amount:015d}'
@@ -377,7 +519,6 @@ def parse(data: str) -> List[R]:
     record_classes = {
         cls.RECORD_TYPE: cls for cls in all_subclasses(Record) if hasattr(cls, 'RECORD_TYPE')
     }
-
     results: List[R] = []
 
     for line in data.strip().splitlines():
