@@ -3,14 +3,16 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 {
-    "name": "Compassion Denmark Payment",
-    "summary": "Create Denmark Direct Debit",
+    "name": "Compassion Mandate Upload",
+    "summary": "Add button to upload mandate files",
     "version": "14.0.1.3.3",
     "license": "AGPL-3",
     "category": "Banking addons",
-    "depends": ["account_banking_pain_base", "account_banking_mandate","compassion_mandate_upload"],
+    "depends": ["account_banking_pain_base", "account_banking_mandate"],
     "data": [
-        "data/account_payment_method.xml",
+        "views/mandate_upload_view.xml",
+        "views/load_mandate_wizard_view.xml",
+        'security/ir.model.access.csv'
     ],
     "installable": True,
 }

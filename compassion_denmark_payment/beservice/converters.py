@@ -40,8 +40,10 @@ def to_record_type(value: Union[RecordType, int, str]) -> RecordType:
     return RecordType(int(value))
 
 
-def to_sign_code(value: Union[SignCode, int, str]) -> SignCode:
+def to_sign_code(value: Union[SignCode, int, str]) -> Optional[SignCode]:
     """Convert input to TransactionType."""
+    if value is None:
+        return None
     return SignCode(int(value))
 
 

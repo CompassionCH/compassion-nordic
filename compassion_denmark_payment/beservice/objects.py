@@ -449,7 +449,8 @@ class MandateRegistration(InformationData):
             mandate_number=record.mandate_number,
             start_date=record.info_date,
             end_date=record.end_date,
-            transaction_code=record.transaction_code
+            transaction_code=record.transaction_code,
+            info_date=record.info_date
         )
 
     def to_records(self) -> Iterable['Record']:
