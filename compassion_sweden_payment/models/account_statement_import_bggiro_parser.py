@@ -4,12 +4,11 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 import itertools
 import logging
-from decimal import Decimal
 from io import StringIO
 from os import path
-from .. import bggiro
 
 from odoo import _, api, models
+from .. import bggiro
 
 _logger = logging.getLogger(__name__)
 
@@ -76,18 +75,3 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
         transactions.append(transaction)
 
         return transactions
-
-    @api.model
-    def _parse_decimal(self, value, mapping):
-        thousands, decimal = mapping._get_float_separators()
-        value = value.replace(thousands, "")
-        value = value.replace(decimal, ".")
-        return Decimal(value)
-
-    @api.model
-    def _normalize_tz(self, value):
-        if value in ["PDT", "PST"]:
-            return "America/Los_Angeles"
-        elif value in ["CET", "CEST"]:
-            return "Europe/Paris"
-        return value

@@ -1,12 +1,7 @@
 # Copyright 2020 Akretion (Alexis de Lattre <alexis.delattre@akretion.com>)
 # Copyright 2018 Tecnativa - Pedro M. Baeza
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
-
-from lxml import etree
-
-from odoo import _, exceptions, fields, models
-from odoo.exceptions import UserError
-from datetime import date
+from odoo import models
 from .. import bggiro
 
 
@@ -29,7 +24,7 @@ class AccountPaymentOrder(models.Model):
                 payment_date=payment_line.date,
                 period_code=bggiro.PeriodCode.ONCE,
                 number_recurring_payments=0,
-                payer_number=payment_line.move_line_id.move_id.line_ids.mapped('contract_id').group_id.ref,
-                amount=payment_line.amount_currency,
+                payer_number=int(payment_line.move_line_id.move_id.line_ids.mapped('contract_id').group_id.ref),
+                amount=int(payment_line.amount_currency),
                 reference=payment_line.communication)
         return payment_initiation.to_ocr().encode('iso-8859-1'), "{}.xml".format(self.name)

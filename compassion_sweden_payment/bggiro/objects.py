@@ -1,7 +1,6 @@
 """The higher-level objects API."""
 
 import datetime
-from decimal import Decimal
 from typing import TYPE_CHECKING, Iterable, List, Optional
 from typing import TypeVar, Union
 
@@ -123,7 +122,7 @@ class PaymentInitiation:
             period_code: PeriodCode,
             number_recurring_payments: int,
             payer_number: int,
-            amount: Decimal,
+            amount: int,
             reference: str,
     ) -> 'Payment':
 
@@ -133,7 +132,7 @@ class PaymentInitiation:
             period_code=period_code,
             number_recurring_payments=number_recurring_payments,
             payer_number=payer_number,
-            payer_bankgiro_number=self.bankgiro_number,
+            payer_bankgiro_number=int(self.bankgiro_number),
             amount=amount,
             reference=reference
         )
@@ -202,7 +201,7 @@ class Payment:
             number_recurring_payments=record.number_recurring_payments,
             payer_number=record.payer_number,
             payer_bankgiro_number=record.payer_bankgiro_number,
-            amount=Decimal(record.amount) / 100,
+            amount=int(record.amount / 100),
             payment_status_code=record.payment_status_code,
             reference=record.reference
         )

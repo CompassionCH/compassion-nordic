@@ -6,7 +6,7 @@
 
 import logging
 
-from odoo import fields, models
+from odoo import models
 
 _logger = logging.getLogger(__name__)
 
@@ -21,8 +21,6 @@ class AccountStatementImport(models.TransientModel):
             return Parser.parse(
                  data_file, self.statement_filename
             )
-        except Exception:
-            if self.env.context.get("account_statement_import_paypal_test"):
-                raise
-            _logger.warning("PayPal parser error", exc_info=True)
+        except ValueError as e:
+            _logger.warning(f"Sweden BGgiro parser error {e}", exc_info=True)
         return super()._parse_file(data_file)
