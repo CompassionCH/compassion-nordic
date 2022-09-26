@@ -2,15 +2,12 @@
 # Copyright 2019 Brainbean Apps (https://brainbeanapps.com)
 # Copyright 2020 CorporateHub (https://corporatehub.eu)
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
-import base64
 import itertools
 import logging
-from datetime import datetime
 from decimal import Decimal
 from io import StringIO
 from os import path
 from .. import bggiro
-from pytz import timezone, utc
 
 from odoo import _, api, models
 
@@ -42,14 +39,6 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
             return currency_code, account_number, [{"name": name, "transactions": []}]
         balance_end = file_data.get_total_amount_incoming()
         date = file_data.date_written
-        # lines = list(sorted(lines, key=lambda line: line["timestamp"]))
-        # first_line = lines[0]
-        # balance_start = first_line["balance_amount"]
-        # balance_start -= first_line["gross_amount"]
-        # balance_start -= first_line["fee_amount"]
-        # last_line = lines[-1]
-        # balance_end = last_line["balance_amount"]
-
         transactions = list(
             itertools.chain.from_iterable(
                 map(lambda line: self._convert_line_to_transactions(line), lines)
@@ -79,7 +68,6 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
         bank_account = res.partner_id.bank_ids
         transaction = {
             "partner_id": res.partner_id.id,
-            "name": details or "",
             "amount": str(gross_amount),
             "date": line.payment_date,
             "account_number": bank_account.acc_number,
