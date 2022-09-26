@@ -9,7 +9,7 @@
     "license": "AGPL-3",
     "category": "Banking addons",
     "depends": ["account_banking_pain_base", "account_banking_mandate","compassion_mandate_upload",
-                "account_statement_import"],
+                "account_statement_import","recurring_contract"],
     "data": [
         "data/account_payment_method.xml",
     ],
