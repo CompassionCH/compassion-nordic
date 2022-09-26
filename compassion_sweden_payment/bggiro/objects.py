@@ -110,8 +110,8 @@ class PaymentInitiation:
     def _get_end_record(self) -> 'Record':
         return EndRecord(
             date_written=self.date_written,
-            total_amount_incoming=self._get_total_amount_incoming(),
-            total_amount_outgoing=self._get_total_amount_outgoing(),
+            total_amount_incoming=self.get_total_amount_incoming(),
+            total_amount_outgoing=self.get_total_amount_outgoing(),
             total_number_incoming=self._get_total_number_incoming(),
             total_number_outgoing=self._get_total_number_outgoing(),
         )
@@ -141,12 +141,12 @@ class PaymentInitiation:
         self.payments.append(payment)
         return payment
 
-    def _get_total_amount_incoming(self) -> int:
+    def get_total_amount_incoming(self) -> int:
         """Get number of transactions in the transmission."""
         return 100 * sum([payment.amount for payment in self.payments
                           if payment.transaction_type == TransactionType.INCOMING_PAYMENT])
 
-    def _get_total_amount_outgoing(self) -> int:
+    def get_total_amount_outgoing(self) -> int:
         """Get number of transactions in the transmission."""
         return 100 * sum([payment.amount for payment in self.payments
                           if payment.transaction_type == TransactionType.OUTGOING_PAYMENT])
