@@ -27,6 +27,7 @@ __all__: List[str] = [
     'DataDeliveryCollection',
     'Collection',
     'parse',
+    'PaymentInformation'
 ]
 
 # Record or Record subclasses
