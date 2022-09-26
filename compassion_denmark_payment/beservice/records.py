@@ -12,14 +12,13 @@ from typing import (
     Union,
     cast, Optional,
 )
-import netsgiro
 import datetime
 from attrs import define, field
 
 from .converters import (
     to_int_or_none,
     to_safe_str_or_none,
-    to_sign_code, number_recurring_payments_to_int, to_record_type, to_delivery_type, to_section_type, to_date_or_none,
+    to_sign_code, to_record_type, to_delivery_type, to_section_type, to_date_or_none,
     to_transaction_code,
 )
 from .validators import str_of_length
@@ -30,6 +29,7 @@ if TYPE_CHECKING:
 from .enums import SignCode, RecordType, DeliveryType, SectionType, TransactionCode
 
 __all__: List[str] = [
+    'Record',
     'DataDeliveryStartRecord',
     'SectionStartRecord',
     'InfoRecord',

@@ -9,6 +9,7 @@ from attrs import Factory, define, field
 from .converters import *
 from .enums import SignCode, SectionType, TransactionCode, DeliveryType
 from .records import (
+    Record,
     DataDeliveryStartRecord,
     DataDeliveryEndRecord,
     SectionStartRecord,
@@ -371,7 +372,7 @@ class Collection(InformationData):
         assert isinstance(info, InfoRecord)
         return cls(
             sign_code=info.sign_code,
-            amount=info.amount,
+            amount=int(info.amount / 100),
             reference=info.reference,
             payer_id=info.payer_id,
             text_lines=cls._get_text_lines(text_lines_rec),
@@ -383,7 +384,8 @@ class Collection(InformationData):
             info_date=info.info_date
         )
 
-    def get_net_amount(self):
+    @staticmethod
+    def get_net_amount():
         return 0
 
     @staticmethod
@@ -408,7 +410,7 @@ class Collection(InformationData):
             mandate_number=self.mandate_number,
             info_date=self.info_date,
             sign_code=self.sign_code,
-            amount=self.amount,
+            amount=self.amount * 100,
             reference=self.reference,
             payer_id=self.payer_id,
             transaction_code=self.transaction_code)
@@ -492,9 +494,9 @@ class PaymentInformation(InformationData):
             transaction_code=record.transaction_code,
             payment_date=record.payment_date,
             bookkeping_date=record.bookkeping_date,
-            payment_amount=record.payment_amount,
+            payment_amount=int(record.payment_amount / 100) if record.payment_amount is not None else None,
             info_date=record.info_date,
-            amount=record.amount,
+            amount=int(record.amount / 100) if record.amount is not None else None,
             sign_code=record.sign_code,
             reference=record.reference
         )
@@ -510,8 +512,8 @@ class PaymentInformation(InformationData):
             info_date=self.info_date,
             payment_date=self.payment_date,
             bookkeping_date=self.bookkeping_date,
-            payment_amount=self.payment_amount,
-            amount=self.amount,
+            payment_amount=self.payment_amount * 100 if self.payment_amount is not None else None,
+            amount=self.amount * 100 if self.amount is not None else None,
             sign_code=self.sign_code,
             reference=self.reference
         )
