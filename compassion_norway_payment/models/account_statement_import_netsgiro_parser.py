@@ -87,7 +87,6 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
         bank_account = res.partner_id.bank_ids
         transaction = {
             "partner_id": res.partner_id.id,
-            "name": details or "",
             "amount": str(gross_amount),
             "date": line.date,
             "account_number": bank_account.acc_number,

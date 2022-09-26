@@ -15,7 +15,6 @@ class AccountStatementImport(models.TransientModel):
     _inherit = "account.statement.import"
 
     def _parse_file(self, data_file):
-        print("saluts")
         self.ensure_one()
         try:
             Parser = self.env["account.statement.import.netsgiro.parser"]
