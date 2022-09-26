@@ -34,7 +34,7 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
             path.basename(filename),
         )
         file_data = bggiro.parse(StringIO(data_file.decode("iso-8859-1")).read())
-        lines = file_data.payments
+        lines = [p for p in file_data.payments if p.payment_status_code == bggiro.PaymentStatus.APPROVED]
         if not lines:
             return currency_code, account_number, [{"name": name, "transactions": []}]
         balance_end = file_data.get_total_amount_incoming()
