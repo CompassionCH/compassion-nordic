@@ -2,15 +2,13 @@
 # Copyright 2019 Brainbean Apps (https://brainbeanapps.com)
 # Copyright 2020 CorporateHub (https://corporatehub.eu)
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
-import base64
 import itertools
 import logging
-from datetime import datetime
 from decimal import Decimal
 from io import StringIO
 from os import path
+
 import netsgiro
-from pytz import timezone, utc
 
 from odoo import _, api, models
 
@@ -42,15 +40,6 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
             return currency_code, account_number, [{"name": name, "transactions": []}]
         balance_end = file_data.assignments[0].get_total_amount()
         date = file_data.assignments[0].date
-
-        # lines = list(sorted(lines, key=lambda line: line["timestamp"]))
-        # first_line = lines[0]
-        # balance_start = first_line["balance_amount"]
-        # balance_start -= first_line["gross_amount"]
-        # balance_start -= first_line["fee_amount"]
-        # last_line = lines[-1]
-        # balance_end = last_line["balance_amount"]
-
         transactions = list(
             itertools.chain.from_iterable(
                 map(lambda line: self._convert_line_to_transactions(line), lines)
@@ -71,13 +60,6 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
             ],
         )
 
-    @staticmethod
-    def _calculate_lines(data):
-        lines = []
-        for li in data.information_list:
-            lines.append(li)
-        return lines
-
     @api.model
     def _convert_line_to_transactions(self, line: netsgiro.Transaction):
         transactions = []
@@ -95,18 +77,3 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
         transactions.append(transaction)
 
         return transactions
-
-    @api.model
-    def _parse_decimal(self, value, mapping):
-        thousands, decimal = mapping._get_float_separators()
-        value = value.replace(thousands, "")
-        value = value.replace(decimal, ".")
-        return Decimal(value)
-
-    @api.model
-    def _normalize_tz(self, value):
-        if value in ["PDT", "PST"]:
-            return "America/Los_Angeles"
-        elif value in ["CET", "CEST"]:
-            return "Europe/Paris"
-        return value

@@ -8,13 +8,9 @@
 #
 ##############################################################################
 import base64
-import csv
 from datetime import date
-
 import netsgiro
-from odoo import _, api, models, fields
-import io
-
+from odoo import models
 from odoo.exceptions import ValidationError
 
 
@@ -28,11 +24,7 @@ class LoadMandateWizard(models.Model):
             try:
                 parsed_file = netsgiro.parse(mandate_file)
             except ValueError as e:
-                raise ValidationError(
-                    _(
-                        "Incorrect File Format"
-                    )
-                )
+                raise ValidationError(f"Incorrect File Format{e}")
             for assignment in parsed_file.assignments:
                 for transaction in assignment.transactions:
                     res = self.env['recurring.contract.group'].search([('ref', '=', transaction.kid)])
