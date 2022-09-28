@@ -4,10 +4,8 @@
 
 from lxml import etree
 
-from odoo import _, exceptions, fields, models
-from odoo.exceptions import UserError
+from odoo import models
 import netsgiro
-from datetime import date
 
 
 class AccountPaymentOrder(models.Model):
