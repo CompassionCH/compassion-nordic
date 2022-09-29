@@ -10,7 +10,6 @@
     "category": "Banking addons",
     "depends": ["account_banking_pain_base", "account_banking_mandate"],
     "data": [
-        "views/mandate_upload_view.xml",
         "views/load_mandate_wizard_view.xml",
         'security/ir.model.access.csv'
     ],

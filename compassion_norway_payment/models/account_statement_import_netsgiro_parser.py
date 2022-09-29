@@ -71,9 +71,9 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
             "partner_id": res.partner_id.id,
             "amount": str(gross_amount),
             "date": line.date,
-            "ref":details or "",
+            "ref": line.kid,
             "account_number": bank_account.acc_number,
-            "payment_ref": f"INV/{line.date:%Y/%m/00%d}: {line.kid}"
+            "payment_ref":  details or ""
         }
         transactions.append(transaction)
 
