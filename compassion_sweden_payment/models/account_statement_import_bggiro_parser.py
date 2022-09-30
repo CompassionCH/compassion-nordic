@@ -70,6 +70,7 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
             "amount": str(gross_amount),
             "date": line.payment_date,
             "account_number": bank_account.acc_number,
+            "ref": line.payer_number,
             "payment_ref": details or ""
         }
         transactions.append(transaction)
