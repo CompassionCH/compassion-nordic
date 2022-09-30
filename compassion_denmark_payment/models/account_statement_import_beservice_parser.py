@@ -83,6 +83,7 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
             "partner_id": res.partner_id.id,
             "amount": str(gross_amount),
             "date": line.info_date,
+            "ref": line.mandate_number,
             "payment_ref": details,
             "account_number": bank_account.acc_number,
         }

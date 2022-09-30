@@ -40,20 +40,25 @@ class LoadMandateWizard(models.Model):
                 )
             for sections in parsed_file.sections:
                 for info in sections.information_list:
-                    res = self.env['recurring.contract.group'].search([('ref', '=', info.mandate_number)])
-                    partner = res.partner_id
-                    if not res:
-                        raise ValidationError(
-                            _(
-                                "Contract Group '%s' does not exists"
-                            )
-                            % info.mandate_number
-                        )
+                    partner = self.env['res.partner'].search([('ref', '=', int(info.customer_number))])
                     if info.transaction_code in [beservice.TransactionCode.MANDATE_CANCELLED_BY_BANK,
                                                  beservice.TransactionCode.MANDATE_CANCELLED_BY_BETALINGSSERVICE,
                                                  beservice.TransactionCode.MANDATE_CANCELLED_BY_CREDITOR]:
+                        res = self.env['recurring.contract.group'].search([('ref', '=', info.mandate_number)])
+                        if not res:
+                            raise ValidationError(
+                                _(
+                                    "Contract Group '%s' does not exists"
+                                )
+                                % info.mandate_number)
+                        partner = res.partner_id
                         partner.valid_mandate_id.cancel()
                     elif info.transaction_code == beservice.TransactionCode.MANDATE_REGISTERED:
+                        res = self.env['recurring.contract.group'].search([('ref', '=', info.mandate_number)])
+                        if not res:
+                            empty_ref = partner.contracts_fully_managed.filtered(lambda a: a.group_id.ref == "/")
+                            for em in empty_ref:
+                                em.group_id.update({'ref': info.mandate_number})
                         company_id = self.env.user.company_id.id
                         bank_account = partner.bank_ids.filtered(lambda b: b.acc_number == info.customer_number)
                         if not bank_account:
