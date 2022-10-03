@@ -1,0 +1,14 @@
+<odoo>
+    <record model="ir.ui.view" id="nordic_project_view_form">
+        <field name="name">nordic.project.form</field>
+        <field name="model">compassion.project</field>
+        <field name="inherit_id" ref="child_compassion.view_compassion_project_form"/>
+        <field name="arch" type="xml">
+            <field name="description_en" position="after">
+                <field name="desc_se"/>
+                <field name="desc_no"/>
+                <field name="desc_da"/>
+            </field>
+        </field>
+    </record>
+</odoo>

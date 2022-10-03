@@ -1,0 +1,16 @@
+babel
+iso639-lang
+jwt
+langdetect
+pdfminer
+phonenumbers
+pycups
+PyMuPDF
+pyquery
+pytesseract
+python-magic
+pytz
+pyzbar
+regex
+timezonefinder
+wand

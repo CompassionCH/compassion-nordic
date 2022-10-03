@@ -1,0 +1,33 @@
+
+[account-financial-tools]
+checkout = git clone 'https://github.com/oca/account-financial-tools' 'account-financial-tools' -b 14.0
+
+[bank-payment]
+checkout = git clone 'https://github.com/oca/bank-payment' 'bank-payment' -b 14.0
+
+[compassion-accounting]
+checkout = git clone 'https://github.com/compassionch/compassion-accounting' 'compassion-accounting' -b 14.0
+
+[compassion-modules]
+checkout = git clone 'https://github.com/compassionch/compassion-modules' 'compassion-modules' -b 14.0
+
+[compassion-nordic]
+checkout = git clone 'https://github.com/compassionch/compassion-nordic' 'compassion-nordic' -b 14.0
+
+[connector-telephony]
+checkout = git clone 'https://github.com/oca/connector-telephony' 'connector-telephony' -b 14.0
+
+[partner-contact]
+checkout = git clone 'https://github.com/oca/partner-contact' 'partner-contact' -b 14.0
+
+[queue]
+checkout = git clone 'https://github.com/oca/queue' 'queue' -b 14.0
+
+[report-print-send]
+checkout = git clone 'https://github.com/oca/report-print-send' 'report-print-send' -b 14.0
+
+[server-ux]
+checkout = git clone 'https://github.com/oca/server-ux' 'server-ux' -b 14.0
+
+[web]
+checkout = git clone 'https://github.com/oca/web' 'web' -b 14.0
