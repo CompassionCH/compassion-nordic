@@ -8,7 +8,7 @@
     "version": "14.0.1.3.3",
     "license": "AGPL-3",
     "category": "Banking addons",
-    "depends": ["account_banking_pain_base", "account_banking_mandate"],
+    "depends": ["account_banking_pain_base", "account_banking_mandate","recurring_contract","account_invoice_pricelist"],
     "data": [
         "views/load_mandate_wizard_view.xml",
         'security/ir.model.access.csv'
