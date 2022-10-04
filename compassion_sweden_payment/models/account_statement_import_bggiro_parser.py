@@ -1,7 +1,13 @@
-# Copyright 2019 Tecnativa - Vicent Cubells
-# Copyright 2019 Brainbean Apps (https://brainbeanapps.com)
-# Copyright 2020 CorporateHub (https://corporatehub.eu)
-# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+##############################################################################
+#
+#    Copyright (C) 2015-2022 Compassion CH (http://www.compassion.ch)
+#    Releasing children from poverty
+#    @author: Robin Berguerand <robin.berguerand@gmail.com>
+#
+#
+#    The licence is in the file __manifest__.py
+#
+##############################################################################
 import itertools
 import logging
 from io import StringIO
