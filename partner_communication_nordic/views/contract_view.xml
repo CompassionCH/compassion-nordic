@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+     <record id="view_recurring_contract_form" model="ir.ui.view">
+        <field name="name">recurring.contract.form</field>
+        <field name="model">recurring.contract</field>
+        <field name="inherit_id" ref="recurring_contract.view_recurring_contract_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='activation_date']" position="before">
+                <field name="onboarding_start_date" />
+            </xpath>
+        </field>
+     </record>
+</odoo>
