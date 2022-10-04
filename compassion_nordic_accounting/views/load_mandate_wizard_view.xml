@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="load_csv_wizard_views" model="ir.ui.view">
-        <field name="name">Load CSV wizard form view</field>
+        <field name="name">Load Mandate wizard form view</field>
         <field name="model">load.mandate.wizard</field>
             <field name="arch" type="xml">
                 <form string="File uploading">
@@ -14,7 +14,7 @@
                     <footer>
                         <button type="object"
                                 name="generate_new_mandate"
-                                string="Apply the change"
+                                string="Generate New mandate"
                                 class="btn-primary"
                                />
                     </footer>
