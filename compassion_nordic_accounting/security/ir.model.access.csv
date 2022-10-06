@@ -1,2 +1,3 @@
 "id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
 access_load_mandate_wizard,access_load_mandate_wizard,model_load_mandate_wizard,base.group_user,1,1,1,0
+access_generate_tax_wizard,access_generate_tax_wizard,model_generate_tax_wizard,base.group_user,1,1,1,0

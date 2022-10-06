@@ -9,10 +9,11 @@
     "license": "AGPL-3",
     "category": "Banking addons",
     "depends": ["account_banking_pain_base", "account_banking_mandate", "recurring_contract",
-                "account_invoice_pricelist"],
+                "account_invoice_pricelist","sponsorship_compassion"],
     "data": [
         "views/load_mandate_wizard_view.xml",
-        "views/mandate_update_view.xml",
+        "views/menu_finance_receivables.xml",
+        "views/generate_tax_wizard_view.xml",
         'security/ir.model.access.csv'
     ],
     "installable": True,

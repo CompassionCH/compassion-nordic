@@ -12,4 +12,17 @@
               name="Upload Mandate File"
               sequence="9"
               />
+
+    <act_window id="action_generate_wizard"
+                name="Generate Tax Files"
+                res_model="generate.tax.wizard"
+                view_mode="form"
+                target="new"
+                />
+    <menuitem action="action_generate_wizard"
+              id="menu_generate_tax"
+              parent="account.menu_finance_receivables"
+              name="Generate Tax File"
+              sequence="10"
+              />
 </odoo>
