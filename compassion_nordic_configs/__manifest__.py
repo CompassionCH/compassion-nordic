@@ -7,6 +7,7 @@
     'author': 'CompassionCH',
     'website': 'http://www.compassion.ch',
     'category': 'Localization',
+    "depends": ["product","sponsorship_compassion"],
     'data': [
         'data/norden_product.xml',
         'data/res.users.csv',
