@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <act_window id="action_load_wizard"
+                name="Upload Mandate File"
+                res_model="load.mandate.wizard"
+                view_mode="form"
+                target="new"
+                />
+    <menuitem action="action_load_wizard"
+              id="menu_load_csv"
+              parent="account.menu_finance_receivables"
+              name="Upload Mandate File"
+              sequence="9"
+              />
+
+    <act_window id="action_generate_wizard"
+                name="Generate Tax Files"
+                res_model="generate.tax.wizard"
+                view_mode="form"
+                target="new"
+                />
+    <menuitem action="action_generate_wizard"
+              id="menu_generate_tax"
+              parent="account.menu_finance_receivables"
+              name="Generate Tax File"
+              sequence="10"
+              />
+</odoo>
