@@ -8,14 +8,4 @@
 #
 ##############################################################################
 
-from . import controllers
-from . import wizards
-
-from odoo.addons.message_center_compassion.tools.load_mappings import \
-    load_mapping_files
-
-
-def load_mappings(cr, registry):
-    path = "wordpress_api/static/mappings/"
-    files = ["child.json"]
-    load_mapping_files(cr, path, files)
+from . import childpool_search

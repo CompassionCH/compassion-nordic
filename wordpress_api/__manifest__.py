@@ -41,6 +41,8 @@
     ],
     "external_dependencies": {"python": []},
     "data": [
+        "data/res_users.xml",
+        "data/ir_cron.xml",
     ],
     "post_init_hook": "load_mappings",
     "demo": [],
