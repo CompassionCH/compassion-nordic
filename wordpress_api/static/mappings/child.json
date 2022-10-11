@@ -1,0 +1,47 @@
+{
+  "name": "Wordpress Consignment Child",
+  "model": "compassion.child",
+  "mapping": {
+    "key": "local_id",
+    "name": "name",
+    "personalName": "firstname",
+    "age": "age",
+    "dateOfBirth": "birthdate",
+    "householdMember": {
+      "field": "household_id.name",
+      "to_json_conversion": "'todo'"
+    },
+    "sponsor_id": "sponsor_id.ref",
+    "shoolLevel": "education_level",
+    "favoriteSchoolSubject": "subject_ids.value",
+    "favoriteHobbyActivities": "hobby_ids.value",
+    "churchActivities": "christian_activity_ids.value",
+    "helpWith": "duty_ids.value",
+    "projectActivities": "project_activity_ids.value",
+    "localSociatySituated": {
+      "field": "project_id.name",
+      "to_json_conversion": "'todo'"
+    },
+    "noOfInhabitants": "project_id.community_population",
+    "sourroundings": "project_id.community_terrain",
+    "commonLanguage": "project_id.primary_language_id.name",
+    "nickName": "preferred_name",
+    "denomination": "project_id.church_denomination",
+    "projectName": "project_id.name",
+    "FatherWorkAs": "household_id.male_guardian_job",
+    "MotherWorkAs": "household_id.female_guardian_job",
+    "localFood": "project_id.primary_diet_ids.value",
+    "riskArea": "project_id.field_office_id.high_risk_ids.value",
+    "famalyActivities": "project_id.activities_for_parents",
+    "Hiv": {
+      "to_json_conversion": "False"
+    },
+    "orphan": "is_orphan",
+    "handicapped": {
+      "field": "physical_disability_ids",
+      "to_json_conversion": "bool(odoo_value)"
+    },
+    "gender": "gender",
+    "country": "project_id.field_office_id.country_id.name"
+  }
+}
