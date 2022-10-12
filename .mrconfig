@@ -5,6 +5,9 @@ checkout = git clone 'https://github.com/oca/account-financial-tools' 'account-f
 [bank-payment]
 checkout = git clone 'https://github.com/oca/bank-payment' 'bank-payment' -b 14.0
 
+[bank-statement-import]
+checkout = git clone 'https://github.com/oca/bank-statement-import' 'bank-statement-import' -b 14.0
+
 [compassion-accounting]
 checkout = git clone 'https://github.com/compassionch/compassion-accounting' 'compassion-accounting' -b 14.0
 

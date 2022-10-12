@@ -15,6 +15,7 @@
 
 account-financial-tools
 bank-payment
+bank-statement-import
 compassion-accounting https://github.com/CompassionCH/compassion-accounting
 connector-telephony
 partner-contact

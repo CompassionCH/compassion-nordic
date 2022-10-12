@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="denmark_direct_debit" model="account.payment.method">
+        <field name="name">Denmark Direct Debit for customers</field>
+        <field name="code">denmark_direct_debit</field>
+        <field name="payment_type">inbound</field>
+        <field name="mandate_required" eval="True" />
+    </record>
+</odoo>
+
