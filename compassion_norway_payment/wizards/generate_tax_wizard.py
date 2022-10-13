@@ -71,7 +71,7 @@ class GenerateTaxWizard(models.Model):
             partner = self.env['res.partner'].browse(partner_id)
             oppgave = ET.SubElement(leveranse, 'oppgave')
             oppgaveeier = ET.SubElement(oppgave, 'oppgaveeier')
-            text_map(oppgaveeier, {'foedselsnummer': str(partner.vat), 'navn': partner.name})
+            text_map(oppgaveeier, {'foedselsnummer': str(partner.social_sec_nr), 'navn': partner.name})
             text_map(oppgave, {'beloep': str(int(amount))})
             total_amount += amount
         oppgaveoppsummering = ET.SubElement(leveranse, 'oppgaveoppsummering')

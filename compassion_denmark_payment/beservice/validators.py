@@ -1,4 +1,13 @@
-"""Custom validators for :mod:`attrs`."""
+##############################################################################
+#
+#    Copyright (C) 2022 Compassion CH (http://www.compassion.ch)
+#    Releasing children from poverty
+#    @author: Robin Berguerand <robin.berguerand@gmail.com>
+#
+#    The licence is in the file __manifest__.py
+#    Inspired by Netsgiro structure
+##############################################################################
+
 from typing import Any, Callable
 
 from attr import Attribute
