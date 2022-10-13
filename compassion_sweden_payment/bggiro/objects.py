@@ -1,5 +1,12 @@
-"""The higher-level objects API."""
-
+##############################################################################
+#
+#    Copyright (C) 2022 Compassion CH (http://www.compassion.ch)
+#    Releasing children from poverty
+#    @author: Robin Berguerand <robin.berguerand@gmail.com>
+#
+#    The licence is in the file __manifest__.py
+#    Inspired by Netsgiro structure
+##############################################################################
 import datetime
 from typing import TYPE_CHECKING, Iterable, List, Optional
 from typing import TypeVar, Union

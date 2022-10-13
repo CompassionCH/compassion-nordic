@@ -29,4 +29,4 @@ class RecurringContract(models.Model):
                                        map(lambda b: (2 if (b[0] & 1 == 0) else 1) * int(b[1]), enumerate(ref)),
                                        0)) % 10
             group.update({'ref': f"{ref}{check_digit}"})
-            return super().create(vals)
+        return super().create(vals)

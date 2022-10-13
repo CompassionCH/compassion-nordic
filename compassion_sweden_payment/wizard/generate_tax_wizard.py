@@ -108,7 +108,7 @@ class GenerateTaxWizard(models.Model):
                                     'Specifikationsnummer': (str(partner.id), '570')
                                     })
             InkomsttagareKU65 = ET.SubElement(KU65, 'ku:InkomsttagareKU65')
-            text_map_faltkod(InkomsttagareKU65, {"Inkomsttagare": (partner.vat, "215"), })
+            text_map_faltkod(InkomsttagareKU65, {"Inkomsttagare": (partner.social_sec_nr, "215"), })
 
         xmlstr = minidom.parseString(ET.tostring(Skatteverket)).toprettyxml(indent="   ")
 

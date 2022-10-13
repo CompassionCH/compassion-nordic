@@ -1,6 +1,12 @@
-# Copyright 2020 Akretion (Alexis de Lattre <alexis.delattre@akretion.com>)
-# Copyright 2018 Tecnativa - Pedro M. Baeza
-# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+##############################################################################
+#
+#    Copyright (C) 2022 Compassion CH (http://www.compassion.ch)
+#    Releasing children from poverty
+#    @author: Robin Berguerand <robin.berguerand@gmail.com>
+#
+#    The licence is in the file __manifest__.py
+#
+##############################################################################
 
 from lxml import etree
 
