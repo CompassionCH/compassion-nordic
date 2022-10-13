@@ -34,7 +34,9 @@
     "license": "AGPL-3",
     "category": "Banking addons",
     "depends": ["account_banking_pain_base", "account_banking_mandate", "recurring_contract",
-                "account_invoice_pricelist","sponsorship_compassion","partner_ssn","account_statement_import_camt"],
+                "partner_contact_birthdate",
+                "partner_contact_gender", "account_invoice_pricelist", "sponsorship_compassion", "partner_ssn",
+                "account_statement_import_camt"],
     "data": [
         "views/load_mandate_wizard_view.xml",
         "views/menu_finance_receivables.xml",

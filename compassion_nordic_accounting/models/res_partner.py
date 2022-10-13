@@ -79,14 +79,11 @@ class ResPartner(models.Model):
                     if month < 1 or month > 12:
                         self._raise_error("Month should be between 1 and 12")
                     year = self.compute_year(int(group_matches['year']), int(group_matches['century_code']))
+                    gender_code = int(group_matches['gender'])
+                    self.gender = 'female' if gender_code % 2 == 0 else 'male'
                     if not self.checksum(sec_num[:10], self._checksum1_coefficient):
                         self._raise_error("Invalid checksum 1")
                     if not self.checksum(sec_num, self._checksum2_coefficient):
                         self._raise_error("Invalid checksum 2")
-                    date_of_birth = date(year, month, day)
-                    today = date.today()
-                    years = today.year - date_of_birth.year
-                    if today.month < date_of_birth.month or \
-                            (today.month == date_of_birth.month and today.day < date_of_birth.day):
-                        years -= 1
-                    rec.age = years
+                    self.birthdate_date = date(year, month, day)
+                    self._compute_age()
