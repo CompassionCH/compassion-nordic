@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="load_csv_wizard_views" model="ir.ui.view">
+    <record id="generate_tax_wizard" model="ir.ui.view">
         <field name="name">Generate Tax File</field>
         <field name="model">generate.tax.wizard</field>
             <field name="arch" type="xml">

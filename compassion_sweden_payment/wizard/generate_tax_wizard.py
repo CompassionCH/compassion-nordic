@@ -22,8 +22,11 @@ class GenerateTaxWizard(models.Model):
     _inherit = "generate.tax.wizard"
 
     def generate_tax(self):
+
+        company = self.env.company
         ret = self.env['account.move'].read_group([
             ('payment_state', '=', 'paid'),
+            ('company_id', '=', company.id),
             ('last_payment', '>=', datetime(int(self.year), 1, 1)),
             ('last_payment', '<=', datetime(int(self.year), 12, 31)),
         ], ['amount_total', 'last_payment'],
@@ -34,8 +37,6 @@ class GenerateTaxWizard(models.Model):
                 if a['partner_id'][0] not in total_amount_year:
                     total_amount_year[a['partner_id'][0]] = 0
                 total_amount_year[a['partner_id'][0]] += a['amount_total']
-
-        company = self.env.company
 
         def sub_with_txt(parent, tag, text, **extra):
             elem = ET.SubElement(parent, tag, extra)
@@ -91,24 +92,25 @@ class GenerateTaxWizard(models.Model):
 
         for partner_id, amount in total_amount_year.items():
             partner = self.env["res.partner"].browse(partner_id)
-            Blankett = ET.SubElement(Skatteverket, "ku:Blankett", nummer="2314")
-            Arendeinformation = ET.SubElement(Blankett, "ku:Arendeinformation")
-            text_map(Arendeinformation, {'Arendeagare': company.vat,
-                                         'Period': str(self.year)})
-            Blankettinnehall = ET.SubElement(Blankett, "ku:Blankettinnehall")
-            KU65 = ET.SubElement(Blankettinnehall, "ku:KU65")
+            if partner.social_sec_nr:
+                Blankett = ET.SubElement(Skatteverket, "ku:Blankett", nummer="2314")
+                Arendeinformation = ET.SubElement(Blankett, "ku:Arendeinformation")
+                text_map(Arendeinformation, {'Arendeagare': company.vat,
+                                             'Period': str(self.year)})
+                Blankettinnehall = ET.SubElement(Blankett, "ku:Blankettinnehall")
+                KU65 = ET.SubElement(Blankettinnehall, "ku:KU65")
 
-            UppgiftslamnareKU65 = ET.SubElement(KU65, 'ku:UppgiftslamnareKU65')
+                UppgiftslamnareKU65 = ET.SubElement(KU65, 'ku:UppgiftslamnareKU65')
 
-            text_map_faltkod(UppgiftslamnareKU65, {"UppgiftslamnarId": (company.vat, "201"),
-                                                   "NamnUppgiftslamnare": (partner.name, '202')})
+                text_map_faltkod(UppgiftslamnareKU65, {"UppgiftslamnarId": (company.vat, "201"),
+                                                       "NamnUppgiftslamnare": (partner.name, '202')})
 
-            text_map_faltkod(KU65, {'Inkomstar': (str(self.year), '203'),
-                                    'MottagetGavobelopp': (str(int(amount)), '621'),
-                                    'Specifikationsnummer': (str(partner.id), '570')
-                                    })
-            InkomsttagareKU65 = ET.SubElement(KU65, 'ku:InkomsttagareKU65')
-            text_map_faltkod(InkomsttagareKU65, {"Inkomsttagare": (partner.social_sec_nr, "215"), })
+                text_map_faltkod(KU65, {'Inkomstar': (str(self.year), '203'),
+                                        'MottagetGavobelopp': (str(int(amount)), '621'),
+                                        'Specifikationsnummer': (str(partner.ref), '570')
+                                        })
+                InkomsttagareKU65 = ET.SubElement(KU65, 'ku:InkomsttagareKU65')
+                text_map_faltkod(InkomsttagareKU65, {"Inkomsttagare": (partner.social_sec_nr, "215"), })
 
         xmlstr = minidom.parseString(ET.tostring(Skatteverket)).toprettyxml(indent="   ")
 
@@ -117,7 +119,7 @@ class GenerateTaxWizard(models.Model):
         # create attachment
         data = base64.b64encode(str.encode(xmlstr, 'utf-8'))
         attachment_id = attachment_obj.create(
-            [{'name': "name.xml", 'datas': data}])
+            [{'name': f"Tax_{self.year}_{company.name}.xml", 'datas': data}])
         # prepare download url
         download_url = '/web/content/' + str(attachment_id.id) + '?download=true'
         # download

@@ -7,7 +7,8 @@
     'author': 'CompassionCH',
     'website': 'http://www.compassion.ch',
     'category': 'Localization',
-    'depends': ['product'],
+    'depends': ['product', 'compassion_nordic_accounting', 'compassion_denmark_payment', 'compassion_norway_payment',
+                'compassion_sweden_payment'],
     'data': [
         'data/norden_product.xml',
         'data/res.users.csv',
