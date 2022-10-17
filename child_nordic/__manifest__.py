@@ -38,6 +38,7 @@
     "depends": ["child_compassion"],
     "data": [
         "data/ir.advanced.translation.csv",
+        "data/res.lang.compassion.csv",
         "views/compassion_child.xml",
         "views/compassion_project.xml"
     ],
