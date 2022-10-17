@@ -23,6 +23,7 @@ class GenerateTaxWizard(models.Model):
     _description = "Generate Tax files"
 
     year = fields.Char("Fiscal Year", default=str(datetime.now().year - 1))
+    xml_version = fields.Float("XML version", default=8)
 
     def generate_tax(self):
         pass

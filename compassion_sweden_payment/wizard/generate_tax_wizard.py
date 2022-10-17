@@ -17,6 +17,8 @@ from datetime import datetime
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
+from odoo.exceptions import ValidationError
+
 
 class GenerateTaxWizard(models.Model):
     _inherit = "generate.tax.wizard"
@@ -24,6 +26,10 @@ class GenerateTaxWizard(models.Model):
     def generate_tax(self):
 
         company = self.env.company
+        if company.country_id.name != "Sweden":
+            return super().generate_tax()
+        if not company.company_registry:
+            raise ValidationError(f"The Company should have a Tax ID")
         ret = self.env['account.move'].read_group([
             ('payment_state', '=', 'paid'),
             ('company_id', '=', company.id),
@@ -44,34 +50,33 @@ class GenerateTaxWizard(models.Model):
             return elem
 
         def text_map_faltkod(parent, data_map: dict):
-            for key, (value, falkod) in data_map.items():
-                sub_with_txt(parent, f"ku:{key}", value, falkod=falkod)
+            for key, (value, faltkod) in data_map.items():
+                sub_with_txt(parent, f"ku:{key}", value, faltkod=faltkod)
 
         def text_map(parent, data_map: dict):
             for key, value in data_map.items():
                 sub_with_txt(parent, f"ku:{key}", value)
-
+        version = f"{self.xml_version:.1f}"
         Skatteverket = ET.Element('Skatteverket')
-        Skatteverket.attrib = {'xmlns': "http://xmls.skatteverket.se/se/skatteverket/ai/instans/infoForBeskattning/7.0",
-                               'xmlns:m': "http://xmls.skatteverket.se/se/skatteverket/ai/gemensamt"
-                                          "/infoForBeskattning/7.0",
-                               'xmlns:ku': "http://xmls.skatteverket.se/se/skatteverket/ai/komponent"
-                                           "/infoForBeskattning/7.0",
+        Skatteverket.attrib = {"xmlns": f"http://xmls.skatteverket.se/se/skatteverket/ai/instans/infoForBeskattning/{version}",
+                               "xmlns:m": f"http://xmls.skatteverket.se/se/skatteverket/ai/gemensamt/infoForBeskattning/{version}",
+                               "xmlns:ku": f"http://xmls.skatteverket.se/se/skatteverket/ai/komponent/infoForBeskattning/{version}",
                                "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
                                "omrade": "Kontrolluppgifter",
                                "xsi:schemaLocation": "http://xmls.skatteverket.se/se/skatteverket/ai/instans"
-                                                     "/infoForBeskattning/7.0 "
+                                                     f"/infoForBeskattning/{version}"
                                                      "http://xmls.skatteverket.se/se/skatteverket/ai"
-                                                     "/kontrolluppgift/instans/Kontrolluppgifter_7.0.xsd"}
+                                                     f"/kontrolluppgift/instans/Kontrolluppgifter_{version}.xsd"}
 
         Avsandare = ET.SubElement(Skatteverket, 'ku:Avsandare')
+        Orgnr = f"16{company.company_registry.replace('-', '')}"
         text_map(Avsandare, {'Programnamn': 'KUfilsprogrammet',
-                             'Organisationsnummer': company.vat}
+                             'Organisationsnummer': Orgnr}
                  )
 
         TekniskKontaktperson = ET.SubElement(Avsandare, 'ku:TekniskKontaktperson')
         text_map(TekniskKontaktperson, {'Namn': company.partner_id.name,
-                                        'Telfon': company.partner_id.phone,
+                                        'Telefon': company.partner_id.phone,
                                         'Epostadress': company.partner_id.email,
                                         'Utdelningsadress1': company.partner_id.street,
                                         'Postnummer': company.partner_id.zip,
@@ -81,7 +86,7 @@ class GenerateTaxWizard(models.Model):
         Blankettgemensamt = ET.SubElement(Skatteverket, 'ku:Blankettgemensamt')
         Uppgiftslamnare = ET.SubElement(Blankettgemensamt, 'ku:Uppgiftslamnare')
 
-        text_map(Uppgiftslamnare, {'UppgiftslamnarePersOrgnr': company.vat})
+        text_map(Uppgiftslamnare, {'UppgiftslamnarePersOrgnr': Orgnr})
 
         Kontaktperson = ET.SubElement(Uppgiftslamnare, 'ku:Kontaktperson')
         text_map(Kontaktperson,
@@ -95,14 +100,14 @@ class GenerateTaxWizard(models.Model):
             if partner.social_sec_nr:
                 Blankett = ET.SubElement(Skatteverket, "ku:Blankett", nummer="2314")
                 Arendeinformation = ET.SubElement(Blankett, "ku:Arendeinformation")
-                text_map(Arendeinformation, {'Arendeagare': company.vat,
+                text_map(Arendeinformation, {'Arendeagare': Orgnr,
                                              'Period': str(self.year)})
                 Blankettinnehall = ET.SubElement(Blankett, "ku:Blankettinnehall")
                 KU65 = ET.SubElement(Blankettinnehall, "ku:KU65")
 
                 UppgiftslamnareKU65 = ET.SubElement(KU65, 'ku:UppgiftslamnareKU65')
 
-                text_map_faltkod(UppgiftslamnareKU65, {"UppgiftslamnarId": (company.vat, "201"),
+                text_map_faltkod(UppgiftslamnareKU65, {"UppgiftslamnarId": (Orgnr, "201"),
                                                        "NamnUppgiftslamnare": (partner.name, '202')})
 
                 text_map_faltkod(KU65, {'Inkomstar': (str(self.year), '203'),
@@ -110,14 +115,15 @@ class GenerateTaxWizard(models.Model):
                                         'Specifikationsnummer': (str(partner.ref), '570')
                                         })
                 InkomsttagareKU65 = ET.SubElement(KU65, 'ku:InkomsttagareKU65')
-                text_map_faltkod(InkomsttagareKU65, {"Inkomsttagare": (partner.social_sec_nr, "215"), })
+                text_map_faltkod(InkomsttagareKU65,
+                                 {"Inkomsttagare": (partner.social_sec_nr.replace("-", ""), "215"), })
 
-        xmlstr = minidom.parseString(ET.tostring(Skatteverket)).toprettyxml(indent="   ")
+        xml_str = minidom.parseString(ET.tostring(Skatteverket)).toprettyxml(indent="   ", encoding='UTF-8')
 
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
         attachment_obj = self.env['ir.attachment']
         # create attachment
-        data = base64.b64encode(str.encode(xmlstr, 'utf-8'))
+        data = base64.b64encode(xml_str)
         attachment_id = attachment_obj.create(
             [{'name': f"Tax_{self.year}_{company.name}.xml", 'datas': data}])
         # prepare download url
