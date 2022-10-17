@@ -9,7 +9,7 @@
 ##############################################################################
 from functools import reduce
 
-from odoo import models, api, _
+from odoo import models, api, _, fields
 from datetime import date
 import logging
 from odoo.exceptions import ValidationError
@@ -27,6 +27,15 @@ class ResPartner(models.Model):
     )
     _checksum1_coefficient = [3, 7, 6, 1, 8, 9, 4, 5, 2, 1]
     _checksum2_coefficient = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2, 1]
+
+    age = fields.Char(string="Age", )  # compute="calculate_age" removed computed
+    social_sec_nr = fields.Char(string="Social security number")
+
+    _sql_constraints = [
+        ('social_sec_nr_unique',
+         'UNIQUE(social_sec_nr)',
+         'social security number field needs to be unique'
+         )]
 
     @staticmethod
     def checksum(value, coefficient):
@@ -62,7 +71,90 @@ class ResPartner(models.Model):
     def calculate_age(self):
         for rec in self:
             if rec.country_id == self.env.ref("base.se"):
-                super().calculate_age()
+                today = date.today()
+                social_sec = rec.social_sec_nr
+                social_sec_stripped = ""
+                if social_sec:
+                    if re.fullmatch("([0-9]){8}-([0-9]){4}", social_sec):
+                        social_sec_stripped = social_sec.split("-")[0]
+                    elif re.fullmatch("([0-9]){12}", social_sec):
+                        social_sec_stripped = social_sec[:8]
+                        rec.social_sec_nr = "%s-%s" % (
+                            social_sec_stripped,
+                            social_sec[8:12],
+                        )
+                    elif re.fullmatch("([0-9]){6}-([0-9]){4}", social_sec):
+                        social_sec_stripped = social_sec.split("-")[0]
+                        error_message = _(
+                            "Social security number %s is formated as YYMMDD-NNNN, this format is not accepted"
+                        ) % social_sec
+                        self._raise_error(error_message)
+                    elif re.fullmatch("([0-9]){10}", social_sec):
+                        social_sec_stripped = social_sec[:8]
+                        rec.social_sec_nr = "%s-%s" % (
+                            social_sec_stripped,
+                            social_sec[8:12],
+                        )
+                        error_message = _(
+                            "Social security number %s is frmated as YYMMDDNNNN, this format is not accepted"
+                        ) % social_sec
+                        self._raise_error(error_message)
+                    else:
+                        error_message = _(
+                            "Social security number %s is not correctly formated."
+                        ) % social_sec
+                        self._raise_error(error_message)
+                    rec.birthdate_date = date(1980, 1, 1)
+                    rec.gender = 'F' if int(social_sec_stripped[-1]) % 2 == 0 else 'M'
+                    if len(social_sec_stripped) == 6:
+                        yr = social_sec_stripped[:2]
+                        year = int("20" + yr)
+                        month = int(social_sec_stripped[2:4])
+                        day = int(social_sec_stripped[4:6])
+                        if day > 60:
+                            day = day - 60
+                        try:
+                            rec.birthdate_date = date(year, month, day)
+                            rec._compute_age()
+                        except:
+                            error_message = _(
+                                "Could not convert social security number %s to date"
+                            ) % social_sec
+                            self._raise_error(error_message)
+                        # if social security numbers with 10 numbers are reallowed,
+                        # change this to something more reasonable in case children
+                        # are allowed to register
+                        if today.year - rec.birthdate_date.year < 18:
+                            year = int("19" + yr)
+                            try:
+                                rec.birthdate_date = date(year, month, day)
+                                rec._compute_age()
+                            except:
+                                error_message = _(
+                                    "Could not convert social security number %s to date"
+                                ) % social_sec_stripped
+                                self._raise_error(error_message)
+                    elif len(social_sec_stripped) == 8:
+                        year = int(social_sec_stripped[:4])
+                        month = int(social_sec_stripped[4:6])
+                        day = int(social_sec_stripped[6:8])
+
+                        if day > 60:
+                            day = day - 60
+                        try:
+                            rec.birthdate_date = date(year, month, day)
+                            rec._compute_age()
+                        except:
+                            error_message = _(
+                                "Could not convert social security number %s to date"
+                            ) % social_sec_stripped
+                            self._raise_error(error_message)
+
+                    else:
+                        error_message = _(
+                            "Incorrectly formated social security number %s"
+                        ) % social_sec
+                        self._raise_error(error_message)
             elif rec.country_id == self.env.ref("base.no"):
                 sec_num = rec.social_sec_nr
                 if sec_num:
