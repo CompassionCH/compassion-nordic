@@ -44,14 +44,13 @@
         "partner_contact_birthdate",
         # OCA/account-invoicing
         "account_invoice_pricelist",
-        # vertelab/odoo-base
-        "partner_ssn",
         "account_statement_import_camt"
     ],
     "data": [
         "views/load_mandate_wizard_view.xml",
         "views/menu_finance_receivables.xml",
         "views/generate_tax_wizard_view.xml",
+        "views/res_partner_view.xml",
         'security/ir.model.access.csv'
     ],
     "installable": True,
