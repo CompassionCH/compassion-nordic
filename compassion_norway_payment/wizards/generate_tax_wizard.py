@@ -79,7 +79,7 @@ class GenerateTaxWizard(models.Model):
         oppgaveoppsummering = ET.SubElement(leveranse, 'oppgaveoppsummering')
         text_map(oppgaveoppsummering, {'antallOppgaver': str(len(grouped_amounts)),
                                        'sumBeloep': str(int(total_amount))})
-        xmlstr = minidom.parseString(ET.tostring(melding)).toprettyxml(indent="   ")
+        xmlstr = minidom.parseString(ET.tostring(melding)).toprettyxml(indent="   ", encoding='UTF-8')
 
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
         attachment_obj = self.env['ir.attachment']

@@ -8,6 +8,7 @@
                     <sheet>
                         <group>
                             <field name = "year"/>
+                            <field name = "xml_version" />
                         </group>
                     </sheet>
                     <footer>
