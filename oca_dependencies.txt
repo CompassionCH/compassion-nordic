@@ -13,11 +13,13 @@
 #
 # To provide both the URL and a branch, use:
 
+account-invoicing
 account-financial-tools
 bank-payment
 bank-statement-import
 compassion-accounting https://github.com/CompassionCH/compassion-accounting
 connector-telephony
+odoo-base https://github.com/vertelab/odoo-base
 partner-contact
 queue
 report-print-send

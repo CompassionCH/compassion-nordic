@@ -9,7 +9,7 @@
 ##############################################################################
 from functools import reduce
 
-from odoo import models, fields, api, _
+from odoo import models, api, _
 from datetime import date
 import logging
 from odoo.exceptions import ValidationError
@@ -21,9 +21,6 @@ _logger = logging.getLogger(__name__)
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
-    age = fields.Char(string="Age", )  # compute="calculate_age" removed computed
-    social_sec_nr = fields.Char(string="Social security number")
-    social_sec_nr_age = fields.Char(string="Social security number", compute="combine_social_sec_nr_age")
     _patterns = re.compile(
         r'(?P<day>\d{2})(?P<month>\d{2})(?P<year>\d{2})(?P<century_code>\d{1})'
         r'(?P<i2>\d{1})(?P<gender>\d{1})(?P<checksum1>\d{1})(?P<checksum2>\d{1})'
@@ -64,9 +61,9 @@ class ResPartner(models.Model):
     @api.constrains("social_sec_nr")
     def calculate_age(self):
         for rec in self:
-            if rec.country_id.name == "Sweden":
+            if rec.country_id == self.env.ref("base.se"):
                 super().calculate_age()
-            elif rec.country_id.name == "Norway":
+            elif rec.country_id == self.env.ref("base.no"):
                 sec_num = rec.social_sec_nr
                 if sec_num:
                     if len(sec_num) != 11:
@@ -80,10 +77,10 @@ class ResPartner(models.Model):
                         self._raise_error("Month should be between 1 and 12")
                     year = self.compute_year(int(group_matches['year']), int(group_matches['century_code']))
                     gender_code = int(group_matches['gender'])
-                    self.gender = 'female' if gender_code % 2 == 0 else 'male'
+                    rec.gender = 'F' if gender_code % 2 == 0 else 'M'
                     if not self.checksum(sec_num[:10], self._checksum1_coefficient):
                         self._raise_error("Invalid checksum 1")
                     if not self.checksum(sec_num, self._checksum2_coefficient):
                         self._raise_error("Invalid checksum 2")
-                    self.birthdate_date = date(year, month, day)
-                    self._compute_age()
+                    rec.birthdate_date = date(year, month, day)
+                    rec._compute_age()

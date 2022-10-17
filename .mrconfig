@@ -2,6 +2,9 @@
 [account-financial-tools]
 checkout = git clone 'https://github.com/oca/account-financial-tools' 'account-financial-tools' -b 14.0
 
+[account-invoicing]
+checkout = git clone 'https://github.com/oca/account-invoicing' 'account-invoicing' -b 14.0
+
 [bank-payment]
 checkout = git clone 'https://github.com/oca/bank-payment' 'bank-payment' -b 14.0
 
@@ -19,6 +22,9 @@ checkout = git clone 'https://github.com/compassionch/compassion-nordic' 'compas
 
 [connector-telephony]
 checkout = git clone 'https://github.com/oca/connector-telephony' 'connector-telephony' -b 14.0
+
+[odoo-base]
+checkout = git clone 'https://github.com/vertelab/odoo-base' 'odoo-base' -b 14.0
 
 [partner-contact]
 checkout = git clone 'https://github.com/oca/partner-contact' 'partner-contact' -b 14.0

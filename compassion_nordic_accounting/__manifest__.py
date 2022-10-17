@@ -33,10 +33,21 @@
     "website": "http://www.compassion.ch",
     "license": "AGPL-3",
     "category": "Banking addons",
-    "depends": ["account_banking_pain_base", "account_banking_mandate", "recurring_contract",
-                "partner_contact_birthdate",
-                "partner_contact_gender", "account_invoice_pricelist", "sponsorship_compassion", "partner_ssn",
-                "account_statement_import_camt"],
+    "depends": [
+        # compassion-modules
+        "sponsorship_compassion",
+        "partner_salutation",
+        # OCA/bank-payment
+        "account_banking_pain_base",
+        "account_banking_mandate",
+        # OCA/partner-contact
+        "partner_contact_birthdate",
+        # OCA/account-invoicing
+        "account_invoice_pricelist",
+        # vertelab/odoo-base
+        "partner_ssn",
+        "account_statement_import_camt"
+    ],
     "data": [
         "views/load_mandate_wizard_view.xml",
         "views/menu_finance_receivables.xml",
