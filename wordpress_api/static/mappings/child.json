@@ -2,25 +2,48 @@
   "name": "Wordpress Consignment Child",
   "model": "compassion.child",
   "mapping": {
-    "key": "local_id",
+    "key": "global_id",
     "name": "name",
     "personalName": "firstname",
     "age": "age",
-    "dateOfBirth": "birthdate",
-    "householdMember": {
-      "field": "household_id.name",
-      "to_json_conversion": "'todo'"
+    "dateOfBirth": {
+      "field": "birthdate",
+      "to_json_conversion": "fields.Datetime.to_datetime(odoo_value).timestamp()"
     },
-    "sponsor_id": "sponsor_id.ref",
+    "householdMember": {
+      "field": "household_id.member_ids.id"
+    },
+    "sponsor_id": {
+      "field": "sponsor_id.ref",
+      "to_json_conversion": "odoo_value or None"
+    },
+    "sponsored": {
+      "field": "sponsor_id.id",
+      "to_json_conversion": "bool(odoo_value)"
+    },
     "shoolLevel": "education_level",
-    "favoriteSchoolSubject": "subject_ids.value",
-    "favoriteHobbyActivities": "hobby_ids.value",
-    "churchActivities": "christian_activity_ids.value",
-    "helpWith": "duty_ids.value",
-    "projectActivities": "project_activity_ids.value",
+    "favoriteSchoolSubject": {
+      "field": "subject_ids.value",
+      "to_json_conversion": "', '.join(odoo_value) if isinstance(odoo_value, list) else odoo_value"
+    },
+    "favoriteHobbyActivities": {
+      "field": "hobby_ids.value",
+      "to_json_conversion": "', '.join(odoo_value) if isinstance(odoo_value, list) else odoo_value"
+    },
+    "churchActivities": {
+      "field": "christian_activity_ids.value",
+      "to_json_conversion": "', '.join(odoo_value) if isinstance(odoo_value, list) else odoo_value"
+    },
+    "helpWith": {
+      "field": "duty_ids.value",
+      "to_json_conversion": "', '.join(odoo_value) if isinstance(odoo_value, list) else odoo_value"
+    },
+    "projectActivities": {
+      "field": "project_activity_ids.value",
+      "to_json_conversion": "', '.join(odoo_value) if isinstance(odoo_value, list) else odoo_value"
+    },
     "localSociatySituated": {
-      "field": "project_id.name",
-      "to_json_conversion": "'todo'"
+      "field": "project_id.community_name"
     },
     "noOfInhabitants": "project_id.community_population",
     "sourroundings": "project_id.community_terrain",
@@ -30,7 +53,10 @@
     "projectName": "project_id.name",
     "FatherWorkAs": "household_id.male_guardian_job",
     "MotherWorkAs": "household_id.female_guardian_job",
-    "localFood": "project_id.primary_diet_ids.value",
+    "localFood": {
+      "field": "project_id.primary_diet_ids.value",
+      "to_json_conversion": "', '.join(odoo_value) if isinstance(odoo_value, list) else odoo_value"
+    },
     "riskArea": "project_id.field_office_id.high_risk_ids.value",
     "famalyActivities": "project_id.activities_for_parents",
     "Hiv": {
@@ -41,7 +67,12 @@
       "field": "physical_disability_ids",
       "to_json_conversion": "bool(odoo_value)"
     },
-    "gender": "gender",
-    "country": "project_id.field_office_id.country_id.name"
+    "gender": {
+      "field": "gender",
+      "to_json_conversion": "1 if odoo_value == 'M' else 2"
+    },
+    "country": "project_id.field_office_id.country_id.code",
+    "country_name": "project_id.field_office_id.country_id.name",
+    "Fullshot": "image_url"
   }
 }
