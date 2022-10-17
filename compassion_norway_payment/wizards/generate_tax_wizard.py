@@ -22,6 +22,7 @@ class GenerateTaxWizard(models.Model):
         if company.country_id.name != "Norway":
             return super().generate_tax()
         ret = self.env['account.move'].read_group([
+            ('company_id', '=', company.id),
             ('payment_state', '=', 'paid'),
             ('last_payment', '>=', datetime(int(self.year), 1, 1)),
             ('last_payment', '<=', datetime(int(self.year), 12, 31)),
@@ -69,11 +70,12 @@ class GenerateTaxWizard(models.Model):
         total_amount = 0
         for partner_id, amount in grouped_amounts.items():
             partner = self.env['res.partner'].browse(partner_id)
-            oppgave = ET.SubElement(leveranse, 'oppgave')
-            oppgaveeier = ET.SubElement(oppgave, 'oppgaveeier')
-            text_map(oppgaveeier, {'foedselsnummer': str(partner.social_sec_nr), 'navn': partner.name})
-            text_map(oppgave, {'beloep': str(int(amount))})
-            total_amount += amount
+            if partner.social_sec_nr:
+                oppgave = ET.SubElement(leveranse, 'oppgave')
+                oppgaveeier = ET.SubElement(oppgave, 'oppgaveeier')
+                text_map(oppgaveeier, {'foedselsnummer': str(partner.social_sec_nr), 'navn': partner.name})
+                text_map(oppgave, {'beloep': str(int(amount))})
+                total_amount += amount
         oppgaveoppsummering = ET.SubElement(leveranse, 'oppgaveoppsummering')
         text_map(oppgaveoppsummering, {'antallOppgaver': str(len(grouped_amounts)),
                                        'sumBeloep': str(int(total_amount))})

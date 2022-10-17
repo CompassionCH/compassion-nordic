@@ -91,7 +91,6 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
             "date": line.info_date,
             "ref": line.mandate_number,
             "payment_ref": details,
-            "account_number": bank_account.acc_number,
         }
         transactions.append(transaction)
 
