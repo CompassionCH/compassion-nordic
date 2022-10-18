@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_print_childpack_wizard,access_print_childpack_wizard,model_print_childpack,child_compassion.group_sponsorship,1,1,1,1
