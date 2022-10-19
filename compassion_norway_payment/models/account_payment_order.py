@@ -45,4 +45,4 @@ class AccountPaymentOrder(models.Model):
                 amount=payment_line.amount_currency,
                 reference=payment_line.name,
                 payer_name=payment_line.partner_id.ref)
-        return transmission.to_ocr().encode('iso-8859-1'), "{}.xml".format(self.name)
+        return transmission.to_ocr().encode('iso-8859-1'), "{}.txt".format(self.name)
