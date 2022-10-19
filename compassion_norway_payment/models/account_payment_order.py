@@ -34,7 +34,7 @@ class AccountPaymentOrder(models.Model):
             service_code=netsgiro.ServiceCode.AVTALEGIRO,
             assignment_type=netsgiro.AssignmentType.TRANSACTIONS,
             number="{:07d}".format(self.id),
-            account=self.company_partner_bank_id.acc_number)
+            account=self.company_partner_bank_id.acc_number.strip(' .-/'))
 
         for payment_line in self.payment_line_ids:
             assignment.add_payment_request(
