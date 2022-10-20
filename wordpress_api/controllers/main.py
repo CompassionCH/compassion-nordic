@@ -91,3 +91,26 @@ class ApiController(Controller):
             "direction": "Supporter To Beneficiary"
         }])
         return f"New letter created with id {new_letter.id}"
+
+    @route("/wapi/supporter/<string:global_id>", auth="public", methods=["GET"], type="json")
+    def get_sponsor_info(self, global_id, **params):
+        sponsor = request.env["res.partner"].sudo().search([("global_id", "=", global_id)])
+        children = sponsor.sponsored_child_ids
+        if not sponsor or not children:
+            raise NotFound("Not a valid sponsor.")
+        return {
+            "Supporter": {
+                "GlobalSupporterId": sponsor.global_id,
+                "CompassConstituentId": sponsor.ref
+            },
+            "Beneficiaries": [
+                {
+                    "GlobalBeneficiaryId": child.global_id,
+                    "LocalBeneficiaryId": child.local_id,
+                    "FirstName": child.firstname,
+                    "PreferredName": child.preferred_name,
+                    "RelationshipType": "Sponsor"
+                }
+                for child in children
+            ]
+        }
