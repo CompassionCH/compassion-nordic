@@ -5,6 +5,9 @@ checkout = git clone 'https://github.com/oca/account-financial-tools' 'account-f
 [account-invoicing]
 checkout = git clone 'https://github.com/oca/account-invoicing' 'account-invoicing' -b 14.0
 
+[account-reconcile]
+checkout = git clone 'https://github.com/oca/account-reconcile' 'account-reconcile' -b 14.0
+
 [bank-payment]
 checkout = git clone 'https://github.com/oca/bank-payment' 'bank-payment' -b 14.0
 
