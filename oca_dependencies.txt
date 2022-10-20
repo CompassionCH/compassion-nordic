@@ -15,6 +15,7 @@
 
 account-invoicing
 account-financial-tools
+account-reconcile
 bank-payment
 bank-statement-import
 compassion-accounting https://github.com/CompassionCH/compassion-accounting
