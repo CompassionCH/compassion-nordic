@@ -101,14 +101,14 @@ class ApiController(Controller):
                 "GlobalSupporterId": sponsor.global_id,
                 "CompassConstituentId": sponsor.ref,
                 "FirstName": sponsor.firstname,
-                "PreferredName": sponsor.preferred_name
+                "PreferredName": sponsor.preferred_name or sponsor.firstname
             },
             "Beneficiaries": [
                 {
                     "GlobalBeneficiaryId": child.global_id,
                     "LocalBeneficiaryId": child.local_id,
-                    "FirstName": child.firstname,
-                    "PreferredName": child.preferred_name,
+                    "FirstName": child.firstname or "",
+                    "PreferredName": child.preferred_name or "",
                     "RelationshipType": "Sponsor"
                 }
                 for child in children
