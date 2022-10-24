@@ -1,5 +1,3 @@
-import json
-
 from werkzeug.exceptions import NotFound, BadRequest
 
 from odoo.http import request, route, Controller
@@ -59,9 +57,9 @@ class ApiController(Controller):
         return f"Child {global_id} is sponsored"
 
     @route("/wapi/letters/write", auth="public", methods=["POST"], type="json")
-    def write_letter(self, InputTxt, **params):
+    def write_letter(self, **params):
         try:
-            letter_data = json.loads(InputTxt)
+            letter_data = request.jsonrequest
             child_global_id = letter_data["Beneficiary"]["GlobalBeneficiaryId"]
             sponsor_global_id = letter_data["Supporter"].get("GlobalSupporterId", "not_set")
             sponsor_ref = letter_data["Supporter"]["CompassConstituentId"]
@@ -101,7 +99,9 @@ class ApiController(Controller):
         return {
             "Supporter": {
                 "GlobalSupporterId": sponsor.global_id,
-                "CompassConstituentId": sponsor.ref
+                "CompassConstituentId": sponsor.ref,
+                "FirstName": sponsor.firstname,
+                "PreferredName": sponsor.preferred_name
             },
             "Beneficiaries": [
                 {

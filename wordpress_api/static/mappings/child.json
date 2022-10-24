@@ -73,6 +73,9 @@
     },
     "country": "project_id.field_office_id.country_id.code",
     "country_name": "project_id.field_office_id.country_id.name",
-    "Fullshot": "image_url"
+    "Fullshot": {
+      "field": "image_url",
+      "to_json_conversion": "odoo_value.replace('/w_150', '')"
+    }
   }
 }
