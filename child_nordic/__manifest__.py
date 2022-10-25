@@ -35,7 +35,10 @@
     "license": "AGPL-3",
     "website": "http://www.compassion.ch",
     "development_status": "Stable",
-    "depends": ["child_compassion"],
+    "depends": [
+        "child_compassion",
+        "report_wkhtmltopdf_param"  # OCA/reporting-engine
+    ],
     "data": [
         "data/ir.advanced.translation.csv",
         "data/res.lang.compassion.csv",

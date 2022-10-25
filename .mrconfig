@@ -35,6 +35,9 @@ checkout = git clone 'https://github.com/oca/queue' 'queue' -b 14.0
 [report-print-send]
 checkout = git clone 'https://github.com/oca/report-print-send' 'report-print-send' -b 14.0
 
+[reporting-engine]
+checkout = git clone 'https://github.com/oca/reporting-engine' 'reporting-engine' -b 14.0
+
 [server-ux]
 checkout = git clone 'https://github.com/oca/server-ux' 'server-ux' -b 14.0
 

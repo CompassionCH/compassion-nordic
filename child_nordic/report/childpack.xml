@@ -13,6 +13,7 @@
         <field name="header_line" eval="False"/>
         <field name="header_spacing">3</field>
         <field name="dpi">96</field>
+        <field name="custom_params" eval="[(0, 0, {'name': '--disable-smart-shrinking'})]"/>
     </record>
 
     <record id="paperformat_a4_childpack" model="report.paperformat">
@@ -27,6 +28,7 @@
         <field name="header_line" eval="False"/>
         <field name="header_spacing">3</field>
         <field name="dpi">96</field>
+        <field name="custom_params" eval="[(0, 0, {'name': '--disable-smart-shrinking'})]"/>
     </record>
 
     <report id="report_childpack_full"
