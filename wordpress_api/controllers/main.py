@@ -63,7 +63,7 @@ class ApiController(Controller):
             child_global_id = letter_data["Beneficiary"]["GlobalBeneficiaryId"]
             sponsor_global_id = letter_data["Supporter"].get("GlobalSupporterId", "not_set")
             sponsor_ref = letter_data["Supporter"]["CompassConstituentId"]
-            original_text = PAGE_SEPARATOR.join(map(lambda p: p.get("OriginalText", ""), letter_data["Pages"]))
+            original_text = PAGE_SEPARATOR.join(letter_data["Pages"])
             original_language = LANG_MAPPING.get(letter_data["OriginalLanguage"], "sv_SE")
             letter_image = letter_data["PDFBase64"]
         except (TypeError, ValueError, KeyError):
