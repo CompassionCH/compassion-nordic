@@ -19,12 +19,22 @@ class ResPartner(models.Model):
 
     def _get_salutation_sv_SE(self):
         self.ensure_one()
-        return ""
+        res = "Hej"
+        if self.firstname:
+            res += f" {self.firstname},"
+        else:
+            res += ","
+        return res
 
     def _get_salutation_nb_NO(self):
         self.ensure_one()
-        return ""
+        res = "Hei"
+        if self.firstname:
+            res += f" {self.firstname},"
+        else:
+            res += ","
+        return res
 
     def _get_salutation_da_DK(self):
         self.ensure_one()
-        return ""
+        return self._get_salutation_sv_SE()
