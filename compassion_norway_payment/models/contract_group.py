@@ -34,7 +34,8 @@ class RecurringContract(models.Model):
             if vals.get('reference', '/') == '/':
                 vals['reference'] = self.env['ir.sequence'].next_by_code(
                     'recurring.contract.ref')
-            ref = f'7{vals["partner_id.ref"]:05d}{int(vals["reference"][3:]):07d}'
+            partner_ref = self.env['res.partner'].browse(vals.get('partner_id')).ref
+            ref = f'7{partner_id:05d}{int(vals["reference"][3:]):07d}'
             check_digit = (10 - reduce(lambda a, b: (a + int(b / 10) + b),
                                        map(lambda b: (2 if (b[0] & 1 == 0) else 1) * int(b[1]), enumerate(ref)),
                                        0)) % 10
