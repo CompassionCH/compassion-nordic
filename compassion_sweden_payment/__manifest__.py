@@ -29,13 +29,12 @@
 {
     "name": "Compassion Sweden Payment",
     "summary": "Create Sweden Direct Debit",
-    "version": "14.0.1.3.3",
+    "version": "14.0.1.4.0",
     "author": "Compassion CH",
     "website": "http://www.compassion.ch",
     "license": "AGPL-3",
     "category": "Banking addons",
-    "depends": ["account_banking_pain_base", "account_banking_mandate", "account", "account_statement_import",
-                "recurring_contract", "compassion_nordic_accounting"],
+    "depends": ["compassion_nordic_accounting"],
     "data": [
         "data/account_payment_method.xml",
     ],

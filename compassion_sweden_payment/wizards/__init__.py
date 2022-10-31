@@ -9,3 +9,4 @@
 #
 ##############################################################################
 from . import generate_tax_wizard
+from . import account_statement_import
