@@ -1,9 +1,10 @@
-from odoo import models
+from odoo import api, models
 
 
 class BankStatement(models.Model):
     _inherit = "account.bank.statement"
 
+    @api.model_create_multi
     def create(self, values):
         if self.env.context.get("from_large_import"):
             self.with_context(from_large_import=False).with_delay().create_and_post(
