@@ -1,4 +1,4 @@
-from werkzeug.exceptions import NotFound, BadRequest
+from werkzeug.exceptions import NotFound, BadRequest, Unauthorized
 
 from odoo.http import request, route, Controller
 
@@ -17,6 +17,9 @@ class ApiController(Controller):
 
     @route("/wapi/consignment", auth="public", methods=["GET"], type="json")
     def get_consigned_children(self, **params):
+        api_key = params.get("api_key")
+        if api_key != request.env["res.config.settings"].get_param("wordpress_api_key"):
+            raise Unauthorized()
         lang = LANG_MAPPING.get(params.get("LanguageCode", "ENG"))
         limit = int(params.get("limit", 0))
         offset = int(params.get("offset", 0))
@@ -46,6 +49,9 @@ class ApiController(Controller):
 
     @route("/wapi/consignment/<string:global_id>/sponsor", auth="public", methods=["GET"], type="json")
     def sponsor_child(self, global_id, **params):
+        api_key = params.get("api_key")
+        if api_key != request.env["res.config.settings"].get_param("wordpress_api_key"):
+            raise Unauthorized()
         wordpress_user = request.env.ref("wordpress_api.user_wordpress")
         child = request.env["compassion.child"].with_user(wordpress_user).search([("global_id", "=", global_id)])
         if not child:
@@ -58,6 +64,9 @@ class ApiController(Controller):
 
     @route("/wapi/letters/write", auth="public", methods=["POST"], type="json")
     def write_letter(self, **params):
+        api_key = params.get("api_key")
+        if api_key != request.env["res.config.settings"].get_param("wordpress_api_key"):
+            raise Unauthorized()
         try:
             letter_data = request.jsonrequest
             child_global_id = letter_data["Beneficiary"]["GlobalBeneficiaryId"]
@@ -93,6 +102,9 @@ class ApiController(Controller):
 
     @route("/wapi/supporter/<string:global_id>", auth="public", methods=["GET"], type="json")
     def get_sponsor_info(self, global_id, **params):
+        api_key = params.get("api_key")
+        if api_key != request.env["res.config.settings"].get_param("wordpress_api_key"):
+            raise Unauthorized()
         sponsor = request.env["res.partner"].sudo().search([("global_id", "=", global_id)])
         children = sponsor.sponsored_child_ids
         if not sponsor or not children:

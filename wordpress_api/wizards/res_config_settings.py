@@ -8,5 +8,10 @@
 #
 ##############################################################################
 
-from . import childpool_search
-from . import res_config_settings
+from odoo import models, fields
+
+
+class StaffNotificationSettings(models.TransientModel):
+    _inherit = "res.config.settings"
+
+    wordpress_api_key = fields.Char(config_parameter="wordpress_api.api_key")
