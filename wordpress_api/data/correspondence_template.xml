@@ -1,0 +1,30 @@
+<odoo>
+    <record id="webletter_template" model="correspondence.template">
+        <field name="name">Webletter</field>
+        <field name="layout">SC-A-6S11-1</field>
+        <field name="page_width">2480</field>
+        <field name="page_height">3508</field>
+    </record>
+
+    <record id="webletter_page1" model="correspondence.template.page">
+        <field name="name">Webletter page 1</field>
+        <field name="template_id" ref="webletter_template"/>
+        <field name="page_index">1</field>
+        <field name="header_box_id" ref="sbc_compassion.s2b_header_box"/>
+        <field name="text_box_ids" eval="[(6, 0, [ref('sbc_compassion.s2b_l6_textbox_original')])]"/>
+    </record>
+
+    <record id="webletter_page2" model="correspondence.template.page">
+        <field name="name">Webletter page 2</field>
+        <field name="template_id" ref="webletter_template"/>
+        <field name="page_index">2</field>
+        <field name="text_box_ids" eval="[(6, 0, [ref('sbc_compassion.s2b_l6_textbox_translation')])]"/>
+    </record>
+
+    <record id="webletter_page3" model="correspondence.template.page">
+        <field name="name">Webletter additional page</field>
+        <field name="template_id" ref="webletter_template"/>
+        <field name="page_index">3</field>
+        <field name="text_box_ids" eval="[(6, 0, [ref('sbc_compassion.s2b_l6_textbox_original')])]"/>
+    </record>
+</odoo>

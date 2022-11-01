@@ -29,7 +29,7 @@
 # pylint: disable=C8101
 {
     "name": "Compassion Nordic Wordpress API",
-    "version": "14.0.1.0.0",
+    "version": "14.0.1.1.0",
     "category": "Other",
     "author": "Compassion CH",
     "license": "AGPL-3",
@@ -43,6 +43,7 @@
     "data": [
         "data/res_users.xml",
         "data/ir_cron.xml",
+        "data/correspondence_template.xml",
     ],
     "post_init_hook": "load_mappings",
     "demo": [],

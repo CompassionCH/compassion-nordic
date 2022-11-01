@@ -86,7 +86,8 @@ class ApiController(Controller):
             "original_language_id": language.id,
             "letter_image": letter_image,
             "sponsorship_id": sponsorship.id,
-            "direction": "Supporter To Beneficiary"
+            "direction": "Supporter To Beneficiary",
+            "template_id": sponsorship.env.ref("wordpress_api.webletter_template").id
         }])
         return f"New letter created with id {new_letter.id}"
 
