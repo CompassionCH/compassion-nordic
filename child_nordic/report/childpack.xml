@@ -65,7 +65,9 @@
         <t t-set="small" t-value="not full"/>
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
-                <t t-call="child_nordic.childpack_document" t-lang="lang"/>
+                <div class="article">
+                    <t t-call="child_nordic.childpack_document" t-lang="lang"/>
+                </div>
             </t>
         </t>
     </template>
