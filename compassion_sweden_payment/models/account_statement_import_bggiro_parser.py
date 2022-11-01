@@ -41,7 +41,6 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
         lines = [p for p in file_data.payments if p.payment_status_code == bggiro.PaymentStatus.APPROVED]
         if not lines:
             return currency_code, account_number, [{"name": name, "transactions": []}]
-        balance_end = file_data.get_total_amount_incoming()
         date = file_data.date_written
         transactions = list(map(lambda line: self._convert_line_to_transactions(line), lines))
         return (
@@ -51,8 +50,8 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
                 {
                     "name": name,
                     "date": date,
-                    "balance_start": float(0),
-                    "balance_end_real": float(balance_end),
+                    "balance_start": float(-file_data.get_total_amount_incoming()),
+                    "balance_end_real": float(0),
                     "transactions": transactions,
                 }
             ],
