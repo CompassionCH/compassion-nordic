@@ -35,9 +35,7 @@
     "version": "14.0.1.3.3",
     "license": "AGPL-3",
     "category": "Banking addons",
-    "depends": ["account_banking_pain_base", "account_banking_mandate",
-                "account_statement_import", "recurring_contract", "sponsorship_compassion",
-                "compassion_nordic_accounting"],
+    "depends": ["compassion_nordic_accounting"],
     "data": [
         "data/account_payment_method.xml",
     ],

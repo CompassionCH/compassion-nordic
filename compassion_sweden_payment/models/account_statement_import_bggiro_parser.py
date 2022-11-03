@@ -8,7 +8,6 @@
 #    The licence is in the file __manifest__.py
 #
 ##############################################################################
-import itertools
 import logging
 from io import StringIO
 from os import path
@@ -42,14 +41,8 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
         lines = [p for p in file_data.payments if p.payment_status_code == bggiro.PaymentStatus.APPROVED]
         if not lines:
             return currency_code, account_number, [{"name": name, "transactions": []}]
-        balance_end = file_data.get_total_amount_incoming()
         date = file_data.date_written
-        transactions = list(
-            itertools.chain.from_iterable(
-                map(lambda line: self._convert_line_to_transactions(line), lines)
-            )
-        )
-
+        transactions = list(map(lambda line: self._convert_line_to_transactions(line), lines))
         return (
             currency_code,
             account_number,
@@ -57,8 +50,8 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
                 {
                     "name": name,
                     "date": date,
-                    "balance_start": float(0),
-                    "balance_end_real": float(balance_end),
+                    "balance_start": float(-file_data.get_total_amount_incoming()),
+                    "balance_end_real": float(0),
                     "transactions": transactions,
                 }
             ],
@@ -66,12 +59,11 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
 
     @api.model
     def _convert_line_to_transactions(self, line: bggiro.Payment):
-        transactions = []
         details = line.reference
         gross_amount = line.amount
         res = self.env['recurring.contract.group'].search([('ref', '=', line.payer_number)], limit=1)
         bank_account = res.partner_id.bank_ids
-        transaction = {
+        return {
             "partner_id": res.partner_id.id,
             "amount": str(gross_amount),
             "date": line.payment_date,
@@ -79,6 +71,3 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
             "ref": line.payer_number,
             "payment_ref": details or ""
         }
-        transactions.append(transaction)
-
-        return transactions

@@ -44,7 +44,6 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
         lines = file_data.assignments[0].transactions
         if not lines:
             return currency_code, account_number, [{"name": name, "transactions": []}]
-        balance_end = file_data.assignments[0].get_total_amount()
         date = file_data.assignments[0].date
         transactions = list(
             itertools.chain.from_iterable(
@@ -59,8 +58,8 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
                 {
                     "name": name,
                     "date": date,
-                    "balance_start": float(0),
-                    "balance_end_real": float(balance_end),
+                    "balance_start": float(-file_data.assignments[0].get_total_amount()),
+                    "balance_end_real": float(0),
                     "transactions": transactions,
                 }
             ],

@@ -1,6 +1,4 @@
-import json
-
-from werkzeug.exceptions import NotFound, BadRequest
+from werkzeug.exceptions import NotFound, BadRequest, Unauthorized
 
 from odoo.http import request, route, Controller
 
@@ -19,6 +17,9 @@ class ApiController(Controller):
 
     @route("/wapi/consignment", auth="public", methods=["GET"], type="json")
     def get_consigned_children(self, **params):
+        api_key = params.get("api_key")
+        if api_key != request.env["res.config.settings"].get_param("wordpress_api_key"):
+            raise Unauthorized()
         lang = LANG_MAPPING.get(params.get("LanguageCode", "ENG"))
         limit = int(params.get("limit", 0))
         offset = int(params.get("offset", 0))
@@ -48,6 +49,9 @@ class ApiController(Controller):
 
     @route("/wapi/consignment/<string:global_id>/sponsor", auth="public", methods=["GET"], type="json")
     def sponsor_child(self, global_id, **params):
+        api_key = params.get("api_key")
+        if api_key != request.env["res.config.settings"].get_param("wordpress_api_key"):
+            raise Unauthorized()
         wordpress_user = request.env.ref("wordpress_api.user_wordpress")
         child = request.env["compassion.child"].with_user(wordpress_user).search([("global_id", "=", global_id)])
         if not child:
@@ -59,13 +63,16 @@ class ApiController(Controller):
         return f"Child {global_id} is sponsored"
 
     @route("/wapi/letters/write", auth="public", methods=["POST"], type="json")
-    def write_letter(self, InputTxt, **params):
+    def write_letter(self, **params):
+        api_key = params.get("api_key")
+        if api_key != request.env["res.config.settings"].get_param("wordpress_api_key"):
+            raise Unauthorized()
         try:
-            letter_data = json.loads(InputTxt)
+            letter_data = request.jsonrequest
             child_global_id = letter_data["Beneficiary"]["GlobalBeneficiaryId"]
             sponsor_global_id = letter_data["Supporter"].get("GlobalSupporterId", "not_set")
             sponsor_ref = letter_data["Supporter"]["CompassConstituentId"]
-            original_text = PAGE_SEPARATOR.join(map(lambda p: p.get("OriginalText", ""), letter_data["Pages"]))
+            original_text = PAGE_SEPARATOR.join(letter_data["Pages"])
             original_language = LANG_MAPPING.get(letter_data["OriginalLanguage"], "sv_SE")
             letter_image = letter_data["PDFBase64"]
         except (TypeError, ValueError, KeyError):
@@ -88,12 +95,16 @@ class ApiController(Controller):
             "original_language_id": language.id,
             "letter_image": letter_image,
             "sponsorship_id": sponsorship.id,
-            "direction": "Supporter To Beneficiary"
+            "direction": "Supporter To Beneficiary",
+            "template_id": sponsorship.env.ref("wordpress_api.webletter_template").id
         }])
         return f"New letter created with id {new_letter.id}"
 
     @route("/wapi/supporter/<string:global_id>", auth="public", methods=["GET"], type="json")
     def get_sponsor_info(self, global_id, **params):
+        api_key = params.get("api_key")
+        if api_key != request.env["res.config.settings"].get_param("wordpress_api_key"):
+            raise Unauthorized()
         sponsor = request.env["res.partner"].sudo().search([("global_id", "=", global_id)])
         children = sponsor.sponsored_child_ids
         if not sponsor or not children:
@@ -101,14 +112,16 @@ class ApiController(Controller):
         return {
             "Supporter": {
                 "GlobalSupporterId": sponsor.global_id,
-                "CompassConstituentId": sponsor.ref
+                "CompassConstituentId": sponsor.ref,
+                "FirstName": sponsor.firstname,
+                "PreferredName": sponsor.preferred_name or sponsor.firstname
             },
             "Beneficiaries": [
                 {
                     "GlobalBeneficiaryId": child.global_id,
                     "LocalBeneficiaryId": child.local_id,
-                    "FirstName": child.firstname,
-                    "PreferredName": child.preferred_name,
+                    "FirstName": child.firstname or "",
+                    "PreferredName": child.preferred_name or "",
                     "RelationshipType": "Sponsor"
                 }
                 for child in children

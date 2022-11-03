@@ -35,8 +35,7 @@
     "category": "Banking addons",
     "depends": [
         # compassion-modules
-        "sponsorship_compassion",
-        "partner_salutation",
+        "account_reconcile_compassion",
         # OCA/bank-payment
         "account_banking_pain_base",
         "account_banking_mandate",
@@ -44,13 +43,18 @@
         "partner_contact_birthdate",
         # OCA/account-invoicing
         "account_invoice_pricelist",
-        "account_statement_import_camt"
+        # OCA/bank-statement-import
+        "account_statement_import_camt",
+        "account_statement_import_file_reconciliation_widget",
+        # OCA/web
+        "web_notify"
     ],
     "data": [
         "views/load_mandate_wizard_view.xml",
         "views/menu_finance_receivables.xml",
         "views/generate_tax_wizard_view.xml",
         "views/res_partner_view.xml",
+        "views/account_statement_import_view.xml",
         'security/ir.model.access.csv'
     ],
     "installable": True,

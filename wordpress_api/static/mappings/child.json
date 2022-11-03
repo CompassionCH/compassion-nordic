@@ -2,16 +2,29 @@
   "name": "Wordpress Consignment Child",
   "model": "compassion.child",
   "mapping": {
-    "key": "global_id",
-    "name": "name",
-    "personalName": "firstname",
-    "age": "age",
+    "key": {
+      "field": "global_id",
+      "to_json_conversion": "odoo_value or None"
+    },
+    "name": {
+      "field": "name",
+      "to_json_conversion":  "odoo_value or None"
+    },
+    "personalName": {
+      "field": "firstname",
+      "to_json_conversion":  "odoo_value or None"
+    },
+    "age": {
+      "field": "age",
+      "to_json_conversion":  "odoo_value or None"
+    },
     "dateOfBirth": {
       "field": "birthdate",
       "to_json_conversion": "fields.Datetime.to_datetime(odoo_value).timestamp()"
     },
     "householdMember": {
-      "field": "household_id.member_ids.id"
+      "field": "household_id.member_ids.id",
+      "to_json_conversion": "odoo_value or None"
     },
     "sponsor_id": {
       "field": "sponsor_id.ref",
@@ -21,7 +34,10 @@
       "field": "sponsor_id.id",
       "to_json_conversion": "bool(odoo_value)"
     },
-    "shoolLevel": "education_level",
+    "shoolLevel": {
+      "field": "education_level",
+      "to_json_conversion": "odoo_value or None"
+    },
     "favoriteSchoolSubject": {
       "field": "subject_ids.value",
       "to_json_conversion": "', '.join(odoo_value) if isinstance(odoo_value, list) else odoo_value"
@@ -43,22 +59,53 @@
       "to_json_conversion": "', '.join(odoo_value) if isinstance(odoo_value, list) else odoo_value"
     },
     "localSociatySituated": {
-      "field": "project_id.community_name"
+      "field": "project_id.community_name",
+      "to_json_conversion": "odoo_value or None"
     },
-    "noOfInhabitants": "project_id.community_population",
-    "sourroundings": "project_id.community_terrain",
-    "commonLanguage": "project_id.primary_language_id.name",
-    "nickName": "preferred_name",
-    "denomination": "project_id.church_denomination",
-    "projectName": "project_id.name",
-    "FatherWorkAs": "household_id.male_guardian_job",
-    "MotherWorkAs": "household_id.female_guardian_job",
+    "noOfInhabitants": {
+      "field": "project_id.community_population",
+      "to_json_conversion": "odoo_value or None"
+    },
+    "sourroundings": {
+      "field": "project_id.community_terrain",
+      "to_json_conversion": "odoo_value or None"
+    },
+    "commonLanguage": {
+      "field": "project_id.primary_language_id.name",
+      "to_json_conversion": "odoo_value or None"
+    },
+    "nickName": {
+      "field": "preferred_name",
+      "to_json_conversion": "odoo_value or None"
+    },
+    "denomination": {
+      "field": "project_id.church_denomination",
+      "to_json_conversion": "odoo_value or None"
+    },
+    "projectName": {
+      "field": "project_id.name",
+      "to_json_conversion": "odoo_value or None"
+    },
+    "FatherWorkAs": {
+      "field": "household_id.male_guardian_job",
+      "to_json_conversion": "odoo_value or None"
+    },
+    "MotherWorkAs": {
+      "field": "household_id.female_guardian_job",
+      "to_json_conversion": "odoo_value or None"
+    },
     "localFood": {
       "field": "project_id.primary_diet_ids.value",
       "to_json_conversion": "', '.join(odoo_value) if isinstance(odoo_value, list) else odoo_value"
     },
-    "riskArea": "project_id.field_office_id.high_risk_ids.value",
-    "famalyActivities": "project_id.activities_for_parents",
+    "riskArea": {
+      "field": "project_id.field_office_id.high_risk_ids.value",
+      "to_json_conversion": "odoo_value or None"
+    },
+    "famalyActivities": {
+      "field": "project_id.activities_for_parents",
+      "to_json_conversion": "odoo_value or None"
+    },
     "Hiv": {
       "to_json_conversion": "False"
     },
@@ -71,8 +118,17 @@
       "field": "gender",
       "to_json_conversion": "1 if odoo_value == 'M' else 2"
     },
-    "country": "project_id.field_office_id.country_id.code",
-    "country_name": "project_id.field_office_id.country_id.name",
-    "Fullshot": "image_url"
+    "country": {
+      "field": "project_id.field_office_id.country_id.code",
+      "to_json_conversion": "odoo_value or None"
+    },
+    "country_name": {
+      "field": "project_id.field_office_id.country_id.name",
+      "to_json_conversion": "odoo_value or None"
+    },
+    "Fullshot": {
+      "field": "image_url",
+      "to_json_conversion": "odoo_value.replace('/w_150', '')"
+    }
   }
 }

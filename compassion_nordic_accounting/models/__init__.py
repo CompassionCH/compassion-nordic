@@ -8,5 +8,7 @@
 #
 ##############################################################################
 from . import contract_group
-from . import  recurring_contract_line
-from . import  res_partner
+from . import recurring_contract_line
+from . import res_partner
+from . import bank_statement
+from . import bank_statement_line

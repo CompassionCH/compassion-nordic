@@ -1,0 +1,25 @@
+<odoo>
+    <record model="ir.ui.view" id="statement_import_view">
+        <field name="name">account.statement.large.import.view</field>
+        <field name="model">account.statement.import</field>
+        <field name="inherit_id" ref="account_statement_import_file_reconciliation_widget.account_statement_import_form"/>
+        <field name="arch" type="xml">
+            <field name="statement_file" position="after">
+                <group>
+                    <field name="large_file_import"/>
+                    <field name="maximum_lines" attrs="{'invisible': [('large_file_import', '=', False)]}"/>
+                    <field name="auto_post" attrs="{'invisible': [('large_file_import', '=', False)]}"/>
+                </group>
+            </field>
+            <button name="import_file_and_reconcile_button" position="attributes">
+                <attribute name="attrs">{'invisible': [('large_file_import', '=', True)]}</attribute>
+            </button>
+            <button name="import_file_button" position="attributes">
+                <attribute name="attrs">{'invisible': [('large_file_import', '=', True)]}</attribute>
+            </button>
+            <button name="import_file_button" position="after">
+                <button name="import_file_button" string="Import in background" type="object" class="btn-primary" attrs="{'invisible': [('large_file_import', '=', False)]}"/>
+            </button>
+        </field>
+    </record>
+</odoo>

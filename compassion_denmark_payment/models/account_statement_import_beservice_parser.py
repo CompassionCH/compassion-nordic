@@ -47,7 +47,6 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
                  a.transaction_code == beservice.TransactionCode.AUTOMATED_PAYMENT_COMPLETED]
         if not lines:
             return currency_code, account_number, [{"name": name, "transactions": []}]
-        balance_end = file_data.sections[0].get_net_amount()
         date = file_data.sections[0].section_date
 
         transactions = list(
@@ -63,8 +62,8 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
                 {
                     "name": name,
                     "date": date,
-                    "balance_start": float(0),
-                    "balance_end_real": float(balance_end),
+                    "balance_start": float(-file_data.sections[0].get_net_amount()),
+                    "balance_end_real": float(0),
                     "transactions": transactions,
                 }
             ],
