@@ -2,4 +2,5 @@ cups
 libcups2-dev
 libzbar0
 php
+postgresql-contrib
 tesseract-ocr

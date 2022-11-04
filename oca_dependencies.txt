@@ -26,5 +26,6 @@ queue
 report-print-send
 reporting-engine
 server-ux
+server-tools
 social
 web
