@@ -1,0 +1,7 @@
+<odoo>
+    <record id="res_partner_name_trigram_index" model="trgm.index">
+        <field name="field_id" ref="base.field_res_partner__name"/>
+        <field name="index_name">partner_name_trigram</field>
+        <field name="index_type">gin</field>
+    </record>
+</odoo>

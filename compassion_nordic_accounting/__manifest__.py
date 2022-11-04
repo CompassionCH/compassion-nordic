@@ -46,6 +46,7 @@
         # OCA/bank-statement-import
         "account_statement_import_camt",
         "account_statement_import_file_reconciliation_widget",
+        "account_statement_import_txt_xlsx",
         # OCA/web
         "web_notify"
     ],

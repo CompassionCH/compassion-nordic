@@ -41,5 +41,8 @@ checkout = git clone 'https://github.com/oca/reporting-engine' 'reporting-engine
 [server-ux]
 checkout = git clone 'https://github.com/oca/server-ux' 'server-ux' -b 14.0
 
+[server-tools]
+checkout = git clone 'https://github.com/oca/server-tools' 'server-tools' -b 14.0
+
 [web]
 checkout = git clone 'https://github.com/oca/web' 'web' -b 14.0

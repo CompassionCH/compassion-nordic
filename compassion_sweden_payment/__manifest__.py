@@ -37,6 +37,7 @@
     "depends": ["compassion_nordic_accounting"],
     "data": [
         "data/account_payment_method.xml",
+        "data/statement_import_sheet_mapping.xml",
     ],
     "installable": True,
 }
