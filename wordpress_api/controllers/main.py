@@ -1,5 +1,6 @@
 from werkzeug.exceptions import NotFound, BadRequest, Unauthorized
 
+from odoo import fields
 from odoo.http import request, route, Controller
 
 from odoo.addons.child_compassion.models.compassion_hold import HoldType
@@ -24,10 +25,12 @@ class ApiController(Controller):
         limit = int(params.get("limit", 0))
         offset = int(params.get("offset", 0))
         count = request.env["compassion.child"].sudo().search_count([
-            ("state", "=", "N"), ("hold_channel", "=", "web"), ("hold_type", "=", HoldType.E_COMMERCE_HOLD.value)
+            ("state", "=", "N"), ("hold_channel", "=", "web"), ("hold_type", "=", HoldType.E_COMMERCE_HOLD.value),
+            ("hold_expiration", ">=", fields.Datetime.now())
         ])
         children = request.env["compassion.child"].sudo().with_context(lang=lang).search([
-            ("state", "=", "N"), ("hold_channel", "=", "web"), ("hold_type", "=", HoldType.E_COMMERCE_HOLD.value)
+            ("state", "=", "N"), ("hold_channel", "=", "web"), ("hold_type", "=", HoldType.E_COMMERCE_HOLD.value),
+            ("hold_expiration", ">=", fields.Datetime.now())
         ], limit=limit, offset=offset)
         data = children.data_to_json("Wordpress Consignment Child")
         for child_vals in data:
