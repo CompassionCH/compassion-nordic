@@ -8,8 +8,11 @@ from odoo.addons.sbc_compassion.models.correspondence_page import PAGE_SEPARATOR
 
 LANG_MAPPING = {
     "ENG": "en_US",
+    "English": "en_US",
     "SVE": "sv_SE",
+    "Swedish": "sv_SE",
     "NOR": "nb_NO",
+    "Norwegian": "nb_NO",
     "DAK": "da_DK"
 }
 
