@@ -9,11 +9,12 @@
 ##############################################################################
 import csv
 
-from odoo import api, models, fields
+from odoo import api, models, fields, _
+from odoo.exceptions import UserError
 import io
 
 
-class LoadMandateWizard(models.Model):
+class LoadMandateWizard(models.TransientModel):
     _name = "load.mandate.wizard"
     _description = "Link gifts with letters"
 
@@ -21,4 +22,7 @@ class LoadMandateWizard(models.Model):
     name_file = fields.Char("File Name")
 
     def generate_new_mandate(self):
-        pass
+        try:
+            raise NotImplementedError()
+        except NotImplementedError:
+            raise UserError(_("The company that you are on doesn't support this feature."))

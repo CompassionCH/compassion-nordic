@@ -7,7 +7,7 @@
                 target="new"
                 />
     <menuitem action="action_load_wizard"
-              id="menu_load_csv"
+              id="menu_load_mandate"
               parent="account.menu_finance_receivables"
               name="Upload Mandate File"
               sequence="9"

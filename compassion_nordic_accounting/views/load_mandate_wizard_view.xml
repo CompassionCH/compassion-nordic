@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="load_csv_wizard_views" model="ir.ui.view">
+    <record id="load_mandate_wizard_views" model="ir.ui.view">
         <field name="name">Load Mandate wizard form view</field>
         <field name="model">load.mandate.wizard</field>
             <field name="arch" type="xml">
