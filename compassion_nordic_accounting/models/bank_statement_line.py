@@ -9,7 +9,7 @@ class BankStatement(models.Model):
         Adapt the invoice to the bank statement amount for correcting exchange rate diffs
         """
         super()._check_invoice_state(invoice)
-        difference = invoice.amount_total - self.amount
+        difference = invoice.amount_total_signed  - self.amount
         if invoice.amount_total != self.amount:
             invoice_debit_line = invoice.line_ids.filtered("debit")
             self.button_undo_reconciliation()
