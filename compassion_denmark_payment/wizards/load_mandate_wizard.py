@@ -59,7 +59,7 @@ class LoadMandateWizard(models.TransientModel):
                             # we need to update all contract that the sponsor pays with the new mandate number received.
                             active_dd_contract = partner.sponsorship_ids.filtered(
                                 lambda a: a.state not in ('terminated', 'cancelled') and a.partner_id == partner.id)
-                            payment_mode_id = env['account.payment.mode'].search([
+                            payment_mode_id = self.env['account.payment.mode'].search([
                                 ('payment_method_id.code','=','denmark_direct_debit')])[0].id
                             for em in active_dd_contract:
                                 em.group_id.update({
