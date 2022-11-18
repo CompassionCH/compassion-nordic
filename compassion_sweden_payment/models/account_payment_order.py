@@ -33,5 +33,5 @@ class AccountPaymentOrder(models.Model):
                 number_recurring_payments=0,
                 payer_number=int(payment_line.move_line_id.move_id.line_ids.mapped('contract_id').group_id.ref),
                 amount=int(payment_line.amount_currency),
-                reference=payment_line.communication)
+                reference=payment_line.communication[:16])
         return payment_initiation.to_ocr().encode('iso-8859-1'), "{}.txt".format(self.name)
