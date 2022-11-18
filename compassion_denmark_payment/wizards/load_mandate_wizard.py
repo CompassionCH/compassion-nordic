@@ -56,11 +56,12 @@ class LoadMandateWizard(models.TransientModel):
                             partner = res.partner_id
                             partner.valid_mandate_id.cancel()
                         elif info.transaction_code == beservice.TransactionCode.MANDATE_REGISTERED:
-                            res = self.env['recurring.contract.group'].search([('ref', '=', info.mandate_number)])
-                            if not res:
-                                empty_ref = partner.contracts_fully_managed.filtered(lambda a: a.group_id.ref == "/")
-                                for em in empty_ref:
-                                    em.group_id.update({'ref': info.mandate_number})
+                            # we need to update all contract that the sponsor pays with the new mandate number received.
+                            active_dd_contract = partner.sponsorship_ids.filtered(
+                                lambda a: a.group_id.payment_mode_id.payment_method_id.code == "denmark_direct_debit"
+                                          and a.state not in ('terminated', 'cancelled') and a.partner_id == partner.id)
+                            for em in active_dd_contract:
+                                em.group_id.update({'ref': info.mandate_number})
                             company_id = self.env.company.id
                             bank_account = partner.bank_ids.filtered(lambda b: b.acc_number == info.customer_number)
                             if not bank_account:
