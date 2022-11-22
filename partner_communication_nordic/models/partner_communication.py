@@ -59,3 +59,20 @@ class PartnerCommunication(models.Model):
                 {"onboarding_start_date": datetime.today()}
             )
         return True
+
+    def _notify_email_header_dict(self):
+        # This removes the "unsubscribe" message from Sendgrid at the end of the message. We don't want it in
+        # the partner communications which are supposed to be transactional.
+        res = super()._notify_email_header_dict()
+        res.update({
+            "X-SMTPAPI": {
+                "filters": {
+                    "bypass_list_management": {
+                        "settings": {
+                            "enable": 1
+                        }
+                    }
+                }
+            }
+        })
+        return res
