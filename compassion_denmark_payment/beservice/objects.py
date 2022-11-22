@@ -124,7 +124,7 @@ class DataDelivery(ABC):
         return sum([section.get_num_of_record_22() for section in self.sections])
 
     def get_net_amount(self):
-        return sum([section.get_net_amount() for section in self.sections])
+        return sum([section.get_net_amount() for section in self.sections])*100
 
     def _get_end_record(self) -> 'Record':
         return DataDeliveryEndRecord(
