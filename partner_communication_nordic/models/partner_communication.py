@@ -67,9 +67,9 @@ class PartnerCommunication(models.Model):
         res.update({
             "X-SMTPAPI": {
                 "filters": {
-                    "bypass_list_management": {
+                    "subscriptiontrack": {
                         "settings": {
-                            "enable": 1
+                            "enable": 0
                         }
                     }
                 }
