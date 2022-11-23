@@ -132,7 +132,7 @@ class DataDelivery(ABC):
             subsystem=self.subsystem,
             num_of_section=len(self.sections),
             num_of_record_42=self.get_num_of_record_42(),
-            net_amount=self.get_net_amount(),
+            net_amount=self.get_net_amount() * 100,
             num_of_record_52_62=self.get_num_of_record_52_62(),
             num_of_record_22=self.get_num_of_record_22(),
             delivery_type=self.delivery_type
@@ -237,7 +237,7 @@ class Section(ABC):
                                 section_type=self.section_type,
                                 debtor_group_number=self.debtor_group_number,
                                 num_of_record_42=self.get_num_of_record_42(),
-                                net_amount=self.get_net_amount(),
+                                net_amount=self.get_net_amount() * 100,
                                 num_of_record_52_62=self.get_num_of_record_52_62(),
                                 num_of_record_22=self.get_num_of_record_22()
                                 )

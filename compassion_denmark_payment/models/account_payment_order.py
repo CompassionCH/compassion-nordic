@@ -51,4 +51,4 @@ class AccountPaymentOrder(models.Model):
                                                   payment_date=bank_line.date,
                                                   text_lines=text_lines
                                                   )
-        return data_delivery.to_ocr().encode('iso-8859-1'), "{}.xml".format(self.name)
+        return data_delivery.to_ocr().encode('iso-8859-1'), "{}.txt".format(self.name)

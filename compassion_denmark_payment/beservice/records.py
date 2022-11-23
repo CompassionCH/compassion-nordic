@@ -175,7 +175,7 @@ class SectionStartRecord(Record):
         )
         if self.section_type == SectionType.COLLECTION:
             section_fields = (
-                    ' ' * 4
+                    ' ' * 5
                     + f'{self.debtor_group_number:05d}'
                     + (self.data_supplier_id and f'{self.data_supplier_id:15}' or (' ' * 15))
                     + (' ' * 4)
