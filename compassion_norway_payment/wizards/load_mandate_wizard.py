@@ -34,7 +34,8 @@ class LoadMandateWizard(models.TransientModel):
                         res.update({"notify_payee": transaction.notify})
                         if transaction.registration_type == netsgiro.AvtaleGiroRegistrationType.DELETED_AGREEMENT:
                             partner.valid_mandate_id.cancel()
-                        elif transaction.registration_type == netsgiro.AvtaleGiroRegistrationType.ACTIVE_AGREEMENT:
+                        elif transaction.registration_type in (netsgiro.AvtaleGiroRegistrationType.ACTIVE_AGREEMENT, 
+                                                               netsgiro.AvtaleGiroRegistrationType.NEW_OR_UPDATED_AGREEMENT):
                             company_id = self.env.company.id
                             bank_account = partner.bank_ids.filtered(lambda b: b.acc_number == transaction.kid)
                             if not bank_account:
