@@ -26,7 +26,8 @@ class AccountPaymentOrder(models.Model):
         if self.payment_method_id.code != "norway_direct_debit":
             return super().generate_payment_file()
         transmission = netsgiro.Transmission(
-            number=self.format_transmission_number(),
+            #number=self.format_transmission_number(),
+            number=self.payment_mode_id.initiating_party_issuer,
             data_transmitter=self.payment_mode_id.initiating_party_identifier,
             data_recipient=netsgiro.NETS_ID)
 
