@@ -33,7 +33,7 @@ class AccountPaymentOrder(models.Model):
         assignment = transmission.add_assignment(
             service_code=netsgiro.ServiceCode.AVTALEGIRO,
             assignment_type=netsgiro.AssignmentType.TRANSACTIONS,
-            number="{:07d}".format(self.payment_mode_id.initiating_party_issuer),
+            number="{:07d}".format(self.id),
             account=self.company_partner_bank_id.acc_number.replace('.',''))
 
         for payment_line in self.payment_line_ids:
@@ -43,6 +43,6 @@ class AccountPaymentOrder(models.Model):
                 payment_line.move_line_id.move_id.line_ids.mapped('contract_id').group_id.notify_payee,
                 due_date=payment_line.date,
                 amount=payment_line.amount_currency,
-                reference=payment_line.name,
-                payer_name=payment_line.partner_id.ref)
+                reference="{:>25}".format(payment_line.name),
+                payer_name="{:>10}".format(payment_line.partner_id.ref))
         return transmission.to_ocr().encode('iso-8859-1'), "{}.txt".format(self.name)
