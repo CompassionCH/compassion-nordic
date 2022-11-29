@@ -19,7 +19,7 @@ class AccountPaymentOrder(models.Model):
     _inherit = "account.payment.order"
 
     def format_transmission_number(self):
-        return "{}1".format(self.create_date.strftime("%d%m%y"))
+        return "{}1".format(self.date_generated.strftime("%d%m%y"))
 
     def generate_payment_file(self):
         self.ensure_one()
@@ -33,7 +33,7 @@ class AccountPaymentOrder(models.Model):
         assignment = transmission.add_assignment(
             service_code=netsgiro.ServiceCode.AVTALEGIRO,
             assignment_type=netsgiro.AssignmentType.TRANSACTIONS,
-            number="{:07d}".format(self.id),
+            number="{:07d}".format(self.payment_mode_id.initiating_party_issuer),
             account=self.company_partner_bank_id.acc_number.replace('.',''))
 
         for payment_line in self.payment_line_ids:
