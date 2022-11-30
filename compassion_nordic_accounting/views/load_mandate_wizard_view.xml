@@ -3,22 +3,43 @@
     <record id="load_mandate_wizard_views" model="ir.ui.view">
         <field name="name">Load Mandate wizard form view</field>
         <field name="model">load.mandate.wizard</field>
-            <field name="arch" type="xml">
-                <form string="File uploading">
-                    <sheet>
-                        <group>
-                            <field widget="binary" height="64" name="data_mandate" filename="name_file"/>
-                            <field name = "name_file" invisible="1"/>
-                        </group>
-                    </sheet>
-                    <footer>
-                        <button type="object"
-                                name="generate_new_mandate"
-                                string="Generate New mandate"
-                                class="btn-primary"
-                               />
-                    </footer>
-                </form>
-            </field>
+        <field name="arch" type="xml">
+            <form string="File uploading">
+                <sheet>
+                    <group>
+                        <field widget="binary" height="64" name="data_mandate" filename="name_file"/>
+                        <field name="name_file" invisible="1"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button type="object"
+                            name="generate_new_mandate"
+                            string="Generate New mandate"
+                            class="btn-primary"
+                    />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- LIST VIEW for the result -->
+    <record id="view_load_mandate_result" model="ir.ui.view">
+        <field name="name">Loaded mandates results</field>
+        <field name="model">load.mandate.wizard</field>
+        <field name="arch" type="xml">
+            <tree decoration-danger="current_mandate_state == 'cancel'"
+                  decoration-success="current_mandate_state == 'valid'"
+                  create="false"
+                  edit="false"
+                  limit="40">
+                <field name="name_file"/>
+                <field name="company_id"/>
+                <field name="partner_id" widget="many2one"/>
+                <field name="mandate_id" widget="many2one"/>
+                <field name="old_mandate_state"/>
+                <field name="current_mandate_state"/>
+                <field name="create_date"/>
+            </tree>
+        </field>
     </record>
 </odoo>

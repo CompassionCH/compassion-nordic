@@ -24,7 +24,9 @@ class LoadMandateWizard(models.TransientModel):
     def generate_new_mandate(self):
         # When we aren't on the denmark company we call the parent to try other childrens modules
         if self.env.company.country_id == self.env.ref('base.dk'):
+            data = list()
             for wizard in self:
+                data_dict = {"name_file": wizard.name_file}
                 mandate_file = base64.decodebytes(wizard.data_mandate).decode('iso-8859-1')
                 try:
                     parsed_file = beservice.parse(mandate_file)
@@ -42,6 +44,10 @@ class LoadMandateWizard(models.TransientModel):
                     )
                 for sections in parsed_file.sections:
                     for info in sections.information_list:
+                        # Variables for the logging of what the process do
+                        mandate_id = None
+                        old_state = "Active"
+                        # Actual behaviour
                         partner = self.env['res.partner'].search([('ref', '=', int(info.customer_number))])
                         if info.transaction_code in [beservice.TransactionCode.MANDATE_CANCELLED_BY_BANK,
                                                      beservice.TransactionCode.MANDATE_CANCELLED_BY_BETALINGSSERVICE,
@@ -54,13 +60,15 @@ class LoadMandateWizard(models.TransientModel):
                                     )
                                     % info.mandate_number)
                             partner = res.partner_id
-                            partner.valid_mandate_id.cancel()
+                            mandate_id = partner.valid_mandate_id
+                            mandate_id.cancel()
                         elif info.transaction_code == beservice.TransactionCode.MANDATE_REGISTERED:
+                            old_state = "None"
                             # we need to update all contract that the sponsor pays with the new mandate number received.
                             active_dd_contract = partner.sponsorship_ids.filtered(
                                 lambda a: a.state not in ('terminated', 'cancelled') and a.partner_id == partner)
                             payment_mode_id = self.env['account.payment.mode'].search([
-                                ('payment_method_id.code','=','denmark_direct_debit')])[0].id
+                                ('payment_method_id.code', '=', 'denmark_direct_debit')])[0].id
                             for em in active_dd_contract:
                                 em.group_id.update({
                                     'ref': info.mandate_number,
@@ -88,5 +96,13 @@ class LoadMandateWizard(models.TransientModel):
                                     }
                                 )
                                 mandate.validate()
+                                mandate_id = mandate.id
+                            else:
+                                mandate_id = valid.id
+                        data_dict['mandate_id'] = mandate_id
+                        data_dict['old_mandate_state'] = old_state
+                        if data_dict not in data:
+                            data.append(data_dict)
+            self._log_results(data)
         else:
             super().generate_new_mandate()
