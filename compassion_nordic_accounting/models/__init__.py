@@ -7,8 +7,10 @@
 #    The licence is in the file __manifest__.py
 #
 ##############################################################################
+from . import account_banking_mandate_compassion
+from . import account_move
+from . import bank_statement
 from . import contract_group
+from . import partner_bank_compassion
 from . import recurring_contract_line
 from . import res_partner
-from . import bank_statement
-from . import account_move
