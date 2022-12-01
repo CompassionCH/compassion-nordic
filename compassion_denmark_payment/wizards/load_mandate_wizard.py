@@ -60,8 +60,9 @@ class LoadMandateWizard(models.TransientModel):
                                     )
                                     % info.mandate_number)
                             partner = res.partner_id
-                            mandate_id = partner.valid_mandate_id
-                            mandate_id.cancel()
+                            mandate = partner.valid_mandate_id
+                            mandate.cancel()
+                            mandate_id = mandate.id
                         elif info.transaction_code == beservice.TransactionCode.MANDATE_REGISTERED:
                             old_state = "None"
                             # we need to update all contract that the sponsor pays with the new mandate number received.
