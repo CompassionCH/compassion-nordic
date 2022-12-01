@@ -56,7 +56,7 @@ class LoadMandateWizard(models.TransientModel):
         except NotImplementedError:
             raise UserError(_("The company that you are on doesn't support this feature."))
 
-    def _log_results(self, data):
-        for dict in data:
-            if dict['mandate_id']:
-                self.env['load.mandate.wizard'].create(dict)
+    def _log_results(self, vals_list):
+        for vals in vals_list:
+            if vals.get('mandate_id'):
+                self.env['load.mandate.wizard'].create(vals)
