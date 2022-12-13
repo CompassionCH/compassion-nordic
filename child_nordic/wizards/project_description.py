@@ -8,6 +8,7 @@ class ChildDescription(models.TransientModel):
         "sv_SE": "desc_se",
         "nb_NO": "desc_no",
         "da_DK": "desc_da",
+        "fi_FI": "desc_en",
     }
 
     @api.model

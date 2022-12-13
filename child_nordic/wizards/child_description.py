@@ -164,4 +164,5 @@ class ChildDescriptionCH(models.TransientModel):
             "nb_NO": "desc_no",
             "sv_SE": "desc_se",
             "da_DK": "desc_da",
+            "fi_FI": "desc_en"
         }

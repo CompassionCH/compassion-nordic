@@ -11,9 +11,8 @@
         <field name="margin_left">0</field>
         <field name="margin_right">0</field>
         <field name="header_line" eval="False"/>
-        <field name="header_spacing">3</field>
+        <field name="header_spacing">35</field>
         <field name="dpi">96</field>
-        <field name="custom_params" eval="[(0, 0, {'name': '--disable-smart-shrinking'})]"/>
     </record>
 
     <record id="paperformat_a4_childpack" model="report.paperformat">
@@ -26,9 +25,8 @@
         <field name="margin_left">0</field>
         <field name="margin_right">0</field>
         <field name="header_line" eval="False"/>
-        <field name="header_spacing">3</field>
+        <field name="header_spacing">35</field>
         <field name="dpi">96</field>
-        <field name="custom_params" eval="[(0, 0, {'name': '--disable-smart-shrinking'})]"/>
     </record>
 
     <report id="report_childpack_full"
@@ -65,26 +63,23 @@
         <t t-set="small" t-value="not full"/>
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
-                <div class="article">
-                    <t t-call="child_nordic.childpack_document" t-lang="lang"/>
-                </div>
+                <t t-call="child_nordic.childpack_document" t-lang="lang"/>
             </t>
         </t>
     </template>
 
     <template id="childpack_document">
         <t t-set="o" t-value="o.with_context({'lang': lang})" />
-        <t t-call="web.report_layout">
+        <t t-call="web.external_layout">
             <t t-call="child_nordic.childpack_style"/>
-            <div class="page">
                 <t t-if="is_pdf">
-                    <div id="background">
+                    <div class="background">
                         <img t-attf-src="http://localhost:8070/child_nordic/static/img/#{ type }/1904_dossier_#{ lang }.jpg"/>
                     </div>
                 </t>
                 <t t-if="formMargin">
                     <div class="local_id">
-                        <span>Available until: </span><span t-raw="o.get_date('hold_expiration')" id="due_date"/> <!-- keep space -->
+                        <span>Available until: </span><span t-raw="o.get_date('hold_expiration')" class="due_date"/> <!-- keep space -->
                         <span t-field="o.local_id"/>
                     </div>
                 </t>
@@ -95,7 +90,7 @@
                             <span>About the child development center</span>
                         </h6>
                         <t t-raw="o.project_id.description_left"/>
-                        <p t-field="o.local_id" id="child-ref"/>
+                        <p t-field="o.local_id" class="child-ref"/>
                     </div>
                     <div class="right">
                         <t t-raw="o.description_right"/>
@@ -127,8 +122,6 @@
                     </p>
                     <p t-field="o.project_id.country_id.name" class="summary_field country"/>
                 </div>
-                <p style="page-break-after:always;"/>
-            </div>
         </t>
     </template>
 
@@ -150,11 +143,13 @@
                 transform: rotate(-90deg);
                 white-space:nowrap;
             }
-            #due_date {
+            .due_date {
                 margin-right: 15mm;
             }
             .desc {
                 position: absolute;
+                top: 0mm;
+                left: 0mm;
                 margin-left: <t t-esc="marginLeft+14.7"/>mm;
                 margin-top: 29mm;
                 width: 130mm;
@@ -201,8 +196,8 @@
             }
             .photo {
                 position: absolute;
-                margin-left: <t t-esc="marginLeft+156"/>mm;
-                margin-top: 48mm;
+                left: <t t-esc="marginLeft+156"/>mm;
+                top: 40mm;
                 width: 88mm;
                 height: 125mm;
             }
@@ -210,14 +205,14 @@
                 max-width: 100%;
                 max-height: 100%;
             }
-            #child-ref {
+            .child-ref {
                 font-size: small;
                 margin-top: 40mm;
             }
             .summary {
                 position: absolute;
-                margin-left: <t t-esc="marginLeft+189"/>mm;
-                margin-top: 182mm;
+                left: <t t-esc="marginLeft+189"/>mm;
+                top: 180mm;
                 width: 100%;
             }
             .summary_field {
@@ -233,11 +228,10 @@
             }
             .summary_field.birthday {
                 font-size: 10pt;
-                margin-top: 2mm;
+                margin-top: 1mm;
             }
             .summary_field.country {
                 font-size: 9pt;
-                margin-top: 1mm;
             }
             .activities {
                 display: none;
@@ -256,21 +250,23 @@
             li:last-child:after {
                 content: "";
             }
-            #background {
+            .background {
                 <t t-if="small">
                     position: absolute;
                     left: 0mm;
+                    top: 0mm;
                     width: 297mm;
                     height: 210mm;
                 </t>
                 <t t-if="full">
                     position: absolute;
                     left: 0mm;
+                    top: 0mm;
                     width: 420mm;
                     height: 210mm;
                 </t>
             }
-            #background img {
+            .background img {
                 max-width: 100%;
                 max-height: 100%;
                 margin: auto;
@@ -281,6 +277,9 @@
               margin-top: 10mm;
               width: 23mm;
               height: 23mm;
+            }
+            .header,.footer {
+                display: none;
             }
         </style>
     </template>
