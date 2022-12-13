@@ -63,7 +63,7 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
         return (
             currency_code,
             account_number,
-            [assignement_dict for assignement_dict in assignement_dict_list],
+            assignement_dict_list,
         )
 
     @api.model
