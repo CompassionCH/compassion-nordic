@@ -46,7 +46,7 @@ class PartnerCommunication(models.Model):
         - Set onboarding_start_date when first communication is sent
         :return: True
         """
-        super().send()
+        res = super().send()
         welcome_onboarding = self.env.ref(
             "partner_communication_nordic.config_onboarding_sponsorship_confirmation"
         )
@@ -58,4 +58,4 @@ class PartnerCommunication(models.Model):
             welcome_comms.get_objects().write(
                 {"onboarding_start_date": datetime.today()}
             )
-        return True
+        return res

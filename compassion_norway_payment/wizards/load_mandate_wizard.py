@@ -21,7 +21,9 @@ class LoadMandateWizard(models.TransientModel):
     def generate_new_mandate(self):
         # When we aren't on the norway company we call the parent to try other childrens modules
         if self.env.company.country_id == self.env.ref('base.no'):
+            data = list()
             for wizard in self:
+                data_dict = {"name_file": wizard.name_file}
                 mandate_file = base64.decodebytes(wizard.data_mandate).decode('iso-8859-1')
                 try:
                     parsed_file = netsgiro.parse(mandate_file)
@@ -29,12 +31,19 @@ class LoadMandateWizard(models.TransientModel):
                     raise ValidationError(f"Incorrect File Format{e}")
                 for assignment in parsed_file.assignments:
                     for transaction in assignment.transactions:
+                        # Variables for the logging of what the process do
+                        mandate_id = None
+                        old_state = "Active"
+                        # Actual behaviour
                         res = self.env['recurring.contract.group'].search([('ref', '=', transaction.kid)])
                         partner = res.partner_id
                         res.update({"notify_payee": transaction.notify})
                         if transaction.registration_type == netsgiro.AvtaleGiroRegistrationType.DELETED_AGREEMENT:
+                            mandate_id = partner.valid_mandate_id.id
                             partner.valid_mandate_id.cancel()
-                        elif transaction.registration_type == netsgiro.AvtaleGiroRegistrationType.ACTIVE_AGREEMENT:
+                        elif transaction.registration_type in (netsgiro.AvtaleGiroRegistrationType.ACTIVE_AGREEMENT,
+                                                               netsgiro.AvtaleGiroRegistrationType.NEW_OR_UPDATED_AGREEMENT):
+                            old_state = "None"
                             company_id = self.env.company.id
                             bank_account = partner.bank_ids.filtered(lambda b: b.acc_number == transaction.kid)
                             if not bank_account:
@@ -58,5 +67,13 @@ class LoadMandateWizard(models.TransientModel):
                                     }
                                 )
                                 mandate.validate()
+                                mandate_id = mandate.id
+                            else:
+                                mandate_id = valid.id
+                        data_dict['mandate_id'] = mandate_id
+                        data_dict['old_mandate_state'] = old_state
+                        if data_dict not in data:
+                            data.append(data_dict)
+            self._log_results(data)
         else:
             super().generate_new_mandate()

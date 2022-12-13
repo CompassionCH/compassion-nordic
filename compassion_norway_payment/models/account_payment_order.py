@@ -19,7 +19,7 @@ class AccountPaymentOrder(models.Model):
     _inherit = "account.payment.order"
 
     def format_transmission_number(self):
-        return "{}1".format(self.create_date.strftime("%d%m%y"))
+        return "{}1".format(self.date_generated.strftime("%d%m%y"))
 
     def generate_payment_file(self):
         self.ensure_one()
@@ -43,6 +43,6 @@ class AccountPaymentOrder(models.Model):
                 payment_line.move_line_id.move_id.line_ids.mapped('contract_id').group_id.notify_payee,
                 due_date=payment_line.date,
                 amount=payment_line.amount_currency,
-                reference=payment_line.name,
-                payer_name=payment_line.partner_id.ref)
+                reference="{:>25}".format(payment_line.name),
+                payer_name="{:>10}".format(payment_line.partner_id.ref))
         return transmission.to_ocr().encode('iso-8859-1'), "{}.txt".format(self.name)

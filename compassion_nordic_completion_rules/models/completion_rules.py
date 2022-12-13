@@ -43,19 +43,17 @@ class StatementCompletionRule(models.Model):
         """ If line is reconciled in another bankstatement. The account is set directly as suspense account """
 
         journal_id = self.env['account.journal'].browse(stmts_vals['journal_id'])
-        suspense_strings = [
-            "Autogiro inbetalning",
-            "Bankgiro inbetalning",
-            "Swish +",
-            # "Överföring",  # transfert
-            # "Pris betalning",  # financial fees
-        ]
+        if journal_id.suspense_account_id:
+            suspense_strings = [
+                "Autogiro inbetalning",
+                "Bankgiro inbetalning",
+                "Swish +",
+                # "Överföring",  # transfert
+                # "Pris betalning",  # financial fees
+            ]
 
-        if float(st_line["amount"]) >= 0:
-            is_suspense = any(s in st_line["payment_ref"] for s in suspense_strings)
-            if is_suspense:
-                if journal_id.suspense_account_id:
-                    return {"account_id": journal_id.suspense_account_id.id}
+            if float(st_line["amount"]) >= 0 and any(s in st_line["payment_ref"] for s in suspense_strings):
+                return {"counterpart_account_id": journal_id.suspense_account_id.id}
         return {}
 
     def get_partner_from_phone_swish(self, stmt_vals, st_line_vals):
@@ -74,6 +72,8 @@ class StatementCompletionRule(models.Model):
             partner_id = self.env.cr.fetchone()
             if partner_id:
                 res["partner_id"] = partner_id
+                if self._swish_update_partner_mobile(stmt_vals, partner_id, phone_number):
+                    res["narration"] = phone_number + "\n(updated on the matched partner)."
         return res
 
     def get_partner_fuzzy(self, stmt_vals, st_line_vals):
@@ -88,12 +88,7 @@ class StatementCompletionRule(models.Model):
         """, [partner_name] * 2)
         row = self.env.cr.fetchone()
         if row:
-            partner_id = row[0]
-            phone_number = st_line_vals.get("narration")
-            if phone_number and phone_number[1:].isdigit():
-                if self._swish_update_partner_mobile(stmt_vals, partner_id, phone_number):
-                    res["narration"] = phone_number + "\n(updated on the matched partner)."
-            res["partner_id"] = partner_id
+            res["partner_id"] = row[0]
         return res
 
     def get_partner_swedbank(self, stmt_vals, st_line_vals):
