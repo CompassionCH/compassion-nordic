@@ -10,7 +10,6 @@
 
 import itertools
 import logging
-from decimal import Decimal
 from io import StringIO
 from os import path
 
@@ -41,45 +40,41 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
             path.basename(filename),
         )
         file_data = netsgiro.parse(StringIO(data_file.decode("iso-8859-1")).read())
-        lines = file_data.assignments[0].transactions
-        if not lines:
-            return currency_code, account_number, [{"name": name, "transactions": []}]
-        date = file_data.assignments[0].date
-        transactions = list(
-            itertools.chain.from_iterable(
-                map(lambda line: self._convert_line_to_transactions(line), lines)
+        assignement_dict_list = []
+        for assignement in file_data.assignments:
+            lines = assignement.transactions
+            if not lines:
+                assignement_dict_list.append({"name": name, "transactions": []})
+                continue
+            date = assignement.date
+            transactions = list(
+                itertools.chain.from_iterable(
+                    map(lambda line: self._convert_line_to_transactions(line), lines)
+                )
             )
-        )
-
+            assignement_dict_list.append(
+                    {
+                        "name": name,
+                        "date": date,
+                        "balance_start": float(-assignement.get_total_amount()),
+                        "balance_end_real": float(0),
+                        "transactions": transactions,
+                    })
         return (
             currency_code,
             account_number,
-            [
-                {
-                    "name": name,
-                    "date": date,
-                    "balance_start": float(-file_data.assignments[0].get_total_amount()),
-                    "balance_end_real": float(0),
-                    "transactions": transactions,
-                }
-            ],
+            [assignement_dict for assignement_dict in assignement_dict_list],
         )
 
     @api.model
     def _convert_line_to_transactions(self, line: netsgiro.Transaction):
-        transactions = []
-        details = line.reference
-        gross_amount = line.amount
-        res = self.env['recurring.contract.group'].search([('ref', '=', line.kid)])
-        bank_account = res.partner_id.bank_ids
+        pay_opt = self.env['recurring.contract.group'].search([('ref', '=', line.kid)])
         transaction = {
-            "partner_id": res.partner_id.id,
-            "amount": str(gross_amount),
+            "partner_id": pay_opt.partner_id.id,
+            "amount": str(line.amount),
             "date": line.date,
             "ref": line.kid,
-            "account_number": bank_account.acc_number,
-            "payment_ref":  details or ""
+            "account_number": pay_opt.partner_id.bank_ids[:1].acc_number,
+            "payment_ref": line.reference or ""
         }
-        transactions.append(transaction)
-
-        return transactions
+        return [transaction]
