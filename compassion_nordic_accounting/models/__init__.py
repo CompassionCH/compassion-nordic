@@ -7,7 +7,7 @@
 #    The licence is in the file __manifest__.py
 #
 ##############################################################################
-from . import contract_group
+from . import recurring_contract
 from . import recurring_contract_line
 from . import res_partner
 from . import bank_statement

@@ -17,6 +17,11 @@ from odoo import api, fields, models, _
 class RecurringContract(models.Model):
     _inherit = "recurring.contract"
 
+    company_id = fields.Many2one(
+        # Show selection of all companies except Norden (id = 1)
+        domain="[('id', '!=', 1)]",
+    )
+
     @api.onchange('partner_id')
     def change_price(self):
         if self.partner_id.property_product_pricelist.exists():
