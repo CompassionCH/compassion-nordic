@@ -59,16 +59,12 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
 
     @api.model
     def _convert_line_to_transactions(self, line: bggiro.Payment):
-        details = line.reference
-        gross_amount = line.amount
-        res = self.env['recurring.contract.group'].search([('ref', '=', line.payer_number)], limit=1)
-        bank_account = res.partner_id.bank_ids
+        pay_opt = self.env['recurring.contract.group'].search([('ref', '=', line.payer_number)], limit=1)
         return {
-            "partner_id": res.partner_id.id,
-            "amount": str(gross_amount),
+            "partner_id": pay_opt.partner_id.id,
+            "amount": str(line.amount),
             "date": line.payment_date,
-            # TODO : account number should be added from the statement line.payer_bankgiro_number
-            "account_number": False,
+            "account_number": str(line.payer_bankgiro_number),
             "ref": line.payer_number,
-            "payment_ref": details or ""
+            "payment_ref": line.reference or ""
         }
