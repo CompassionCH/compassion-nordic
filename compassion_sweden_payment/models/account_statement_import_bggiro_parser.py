@@ -64,7 +64,8 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
             "partner_id": pay_opt.partner_id.id,
             "amount": str(line.amount),
             "date": line.payment_date,
-            "account_number": str(line.payer_bankgiro_number),
+            # str(line.payer_bankgiro_number) We do not implement the account_number see cp-264 comment
+            "account_number": False,
             "ref": line.payer_number,
             "payment_ref": line.reference or ""
         }
