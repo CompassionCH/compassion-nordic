@@ -8,19 +8,15 @@
 #
 ##############################################################################
 import base64
-import csv
-from functools import reduce
-from itertools import groupby
-from odoo import api, models, fields
-import io
-from datetime import datetime
 import xml.etree.ElementTree as ET
+from datetime import datetime
 from xml.dom import minidom
 
+from odoo import models
 from odoo.exceptions import ValidationError
 
 
-class GenerateTaxWizard(models.Model):
+class GenerateTaxWizard(models.TransientModel):
     _inherit = "generate.tax.wizard"
 
     def generate_tax(self):
@@ -33,8 +29,8 @@ class GenerateTaxWizard(models.Model):
         ret = self.env['account.move'].read_group([
             ('payment_state', '=', 'paid'),
             ('company_id', '=', company.id),
-            ('last_payment', '>=', datetime(int(self.year), 1, 1)),
-            ('last_payment', '<=', datetime(int(self.year), 12, 31)),
+            ('last_payment', '>=', datetime(int(self.tax_year), 1, 1)),
+            ('last_payment', '<=', datetime(int(self.tax_year), 12, 31)),
         ], ['amount_total', 'last_payment'],
             groupby=['partner_id', 'last_payment:day'], lazy=False)
         total_amount_year = {}
@@ -101,7 +97,7 @@ class GenerateTaxWizard(models.Model):
                 Blankett = ET.SubElement(Skatteverket, "ku:Blankett", nummer="2314")
                 Arendeinformation = ET.SubElement(Blankett, "ku:Arendeinformation")
                 text_map(Arendeinformation, {'Arendeagare': Orgnr,
-                                             'Period': str(self.year)})
+                                             'Period': str(self.tax_year)})
                 Blankettinnehall = ET.SubElement(Blankett, "ku:Blankettinnehall")
                 KU65 = ET.SubElement(Blankettinnehall, "ku:KU65")
 
@@ -110,7 +106,7 @@ class GenerateTaxWizard(models.Model):
                 text_map_faltkod(UppgiftslamnareKU65, {"UppgiftslamnarId": (Orgnr, "201"),
                                                        "NamnUppgiftslamnare": (partner.name, '202')})
 
-                text_map_faltkod(KU65, {'Inkomstar': (str(self.year), '203'),
+                text_map_faltkod(KU65, {'Inkomstar': (str(self.tax_year), '203'),
                                         'MottagetGavobelopp': (str(int(amount)), '621'),
                                         'Specifikationsnummer': (str(partner.ref), '570')
                                         })
@@ -125,7 +121,7 @@ class GenerateTaxWizard(models.Model):
         # create attachment
         data = base64.b64encode(xml_str)
         attachment_id = attachment_obj.create(
-            [{'name': f"Tax_{self.year}_{company.name}.xml", 'datas': data}])
+            [{'name': f"Tax_{self.tax_year}_{company.name}.xml", 'datas': data}])
         # prepare download url
         download_url = '/web/content/' + str(attachment_id.id) + '?download=true'
         # download

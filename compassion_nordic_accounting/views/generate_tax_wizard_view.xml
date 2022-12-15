@@ -3,22 +3,23 @@
     <record id="generate_tax_wizard" model="ir.ui.view">
         <field name="name">Generate Tax File</field>
         <field name="model">generate.tax.wizard</field>
-            <field name="arch" type="xml">
-                <form string="File uploading">
-                    <sheet>
-                        <group>
-                            <field name = "year"/>
-                            <field name = "xml_version" />
-                        </group>
-                    </sheet>
-                    <footer>
-                        <button type="object"
-                                name="generate_tax"
-                                string="Generate Tax file"
-                                class="btn-primary"
-                               />
-                    </footer>
-                </form>
-            </field>
+        <field name="arch" type="xml">
+            <form string="File uploading">
+                <sheet>
+                    <group>
+                        <field name="tax_year"/>
+                        <field name="xml_version" attrs="{'invisible': [('is_sweden', '!=', True)]}"/>
+                        <field name="is_sweden" invisible="1"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button type="object"
+                            name="generate_tax"
+                            string="Generate Tax file"
+                            class="btn-primary"
+                    />
+                </footer>
+            </form>
+        </field>
     </record>
 </odoo>

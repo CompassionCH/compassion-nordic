@@ -8,13 +8,14 @@
 #
 ##############################################################################
 import base64
-from odoo import api, models, fields
-from datetime import datetime
 import xml.etree.ElementTree as ET
+from datetime import datetime
 from xml.dom import minidom
 
+from odoo import models
 
-class GenerateTaxWizard(models.Model):
+
+class GenerateTaxWizard(models.TransientModel):
     _inherit = "generate.tax.wizard"
 
     def generate_tax(self):
@@ -24,8 +25,8 @@ class GenerateTaxWizard(models.Model):
         ret = self.env['account.move'].read_group([
             ('company_id', '=', company.id),
             ('payment_state', '=', 'paid'),
-            ('last_payment', '>=', datetime(int(self.year), 1, 1)),
-            ('last_payment', '<=', datetime(int(self.year), 12, 31)),
+            ('last_payment', '>=', datetime(int(self.tax_year), 1, 1)),
+            ('last_payment', '<=', datetime(int(self.tax_year), 12, 31)),
             ('invoice_category', 'in', ['fund', 'sponsorship']),
         ], ['amount_total', 'last_payment'],
             groupby=['partner_id'], lazy=False)
@@ -64,8 +65,8 @@ class GenerateTaxWizard(models.Model):
                  {'navn': currently_connected.name, 'telefonnummer': currently_connected.phone,
                   'varselEpostadresse': currently_connected.email,
                   })
-        text_map(leveranse, {'interektsaar': str(self.year),
-                             'oppgavegiversLeveranseReferanse': f'REF{self.year}{datetime.now():%d%m%Y}',
+        text_map(leveranse, {'interektsaar': str(self.tax_year),
+                             'oppgavegiversLeveranseReferanse': f'REF{self.tax_year}{datetime.now():%d%m%Y}',
                              'leveransetype': 'ordinaer'})
         total_amount = 0
         for partner_id, amount in grouped_amounts.items():
@@ -84,9 +85,9 @@ class GenerateTaxWizard(models.Model):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
         attachment_obj = self.env['ir.attachment']
         # create attachment
-        data = base64.b64encode(str.encode(xmlstr, 'utf-8'))
+        data = base64.b64encode(xmlstr)
         attachment_id = attachment_obj.create(
-            [{'name': f"Tax_{self.year}_{company.name}.xml", 'datas': data}])
+            [{'name': f"Tax_{self.tax_year}_{company.name}.xml", 'datas': data}])
         # prepare download url
         download_url = '/web/content/' + str(attachment_id.id) + '?download=true'
         # download
