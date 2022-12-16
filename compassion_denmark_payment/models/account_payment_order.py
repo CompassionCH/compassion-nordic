@@ -8,11 +8,7 @@
 #
 ##############################################################################
 
-from lxml import etree
-
-from odoo import _, exceptions, fields, models
-from odoo.exceptions import UserError
-from datetime import date
+from odoo import _, models
 from .. import beservice
 
 
@@ -40,12 +36,25 @@ class AccountPaymentOrder(models.Model):
             text_lines = []
             for line in bank_line.payment_line_ids:
                 for invoice_line in line.move_line_id.move_id.invoice_line_ids:
-                    text_lines.append((invoice_line.product_id.id, f"{int(invoice_line.credit)}  {invoice_line.name}"))
+                    child = invoice_line.contract_id.child_id
+                    str_child = ""
+                    if child:
+                        # Build a string that looks like (BF Maria-Louisa)
+                        str_child = f"({child.field_office_id.country_id.code + ' ' or None}" \
+                                    f"{child.preferred_name or None})"
+                    text_lines.append(
+                        (
+                            invoice_line.product_id.id,
+                            f"{int(invoice_line.credit)} {_(invoice_line.product_id.name)} " + str_child
+                        )
+                    )
             text_lines.sort(key=lambda a: a[0])
 
             data_delivery.sections[0].add_payment(customer_number=f'{bank_line.partner_id.ref:15}',
                                                   mandate_number=bank_line.payment_line_ids[0].move_line_id.move_id.
                                                   line_ids.mapped('contract_id').group_id.ref,
+                                                  reference=(bank_line.date.strftime("%b").capitalize()
+                                                             + ' ' + bank_line.payment_line_ids[0].payment_type.capitalize())[:20],
                                                   amount=bank_line.amount_currency,
                                                   sign_code=beservice.SignCode.COLLECTION,
                                                   payment_date=bank_line.date,

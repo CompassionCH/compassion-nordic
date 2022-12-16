@@ -8,12 +8,13 @@
 #    Inspired by Netsgiro structure
 ##############################################################################
 
-import datetime
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from typing import TYPE_CHECKING, Iterable, List, Tuple
 from typing import OrderedDict as OrderedDictType
+from typing import TYPE_CHECKING, Iterable, List, Tuple
+
 from attrs import Factory, define, field
+
 from .converters import *
 from .enums import SignCode, SectionType, TransactionCode, DeliveryType
 from .records import (
@@ -196,7 +197,8 @@ class Section(ABC):
             rec_num = text_line[0]
             if rec_num not in parsed_text_lines:
                 parsed_text_lines[rec_num] = []
-            parsed_text_lines[rec_num].append(text_line[1])
+            # In case we should truncate the string because the file can only accept 60 characters
+            parsed_text_lines[rec_num].append(text_line[1][:60].rsplit(' ', 1) if text_line[1][:60] != text_line[1] else text_line[1])
         return parsed_text_lines
 
     def add_payment(self, customer_number: str, mandate_number: int, payment_date: datetime.date, sign_code: 'SignCode',
