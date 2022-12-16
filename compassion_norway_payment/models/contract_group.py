@@ -29,7 +29,8 @@ class RecurringContract(models.Model):
 
     def create(self, vals):
         group = self.env['recurring.contract.group'].browse(vals.get('group_id'))
-        if group.payment_mode_id.company_id.country_id == self.env.ref('base.no'):
+        if group.payment_mode_id.company_id.country_id == self.env.ref('base.no')\
+                and not group.ref:
             if vals.get('reference', '/') == '/':
                 vals['reference'] = self.env['ir.sequence'].next_by_code(
                     'recurring.contract.ref')
