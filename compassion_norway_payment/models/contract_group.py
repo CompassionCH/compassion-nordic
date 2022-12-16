@@ -11,7 +11,7 @@
 
 from functools import reduce
 
-from odoo import api, fields, models, _
+from odoo import fields, models
 
 
 class ContractGroup(models.Model):
@@ -27,7 +27,6 @@ class ContractGroup(models.Model):
 class RecurringContract(models.Model):
     _inherit = "recurring.contract"
 
-    @api.model
     def create(self, vals):
         group = self.env['recurring.contract.group'].browse(vals.get('group_id'))
         if group.payment_mode_id.company_id.country_id == self.env.ref('base.no'):

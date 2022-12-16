@@ -20,8 +20,8 @@ class RecurringContract(models.Model):
 
     @api.model
     def create(self, vals):
-        if self.env.company.country_id == self.env.ref('base.se'):
-            group = self.env['recurring.contract.group'].browse(vals.get('group_id'))
+        group = self.env['recurring.contract.group'].browse(vals.get('group_id'))
+        if group.payment_mode_id.company_id.country_id == self.env.ref('base.se'):
             if vals.get('reference', '/') == '/':
                 vals['reference'] = self.env['ir.sequence'].next_by_code(
                     'recurring.contract.ref')
