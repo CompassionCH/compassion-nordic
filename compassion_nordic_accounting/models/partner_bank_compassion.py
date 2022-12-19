@@ -39,6 +39,7 @@ class ResPartnerBank(models.Model):
 
         return result
 
+    @api.model
     def unlink(self):
         """Override function to notify delte in a message
         """
