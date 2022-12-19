@@ -29,6 +29,7 @@ class ResPartnerBank(models.Model):
             type="comment",
         )
 
+    @api.model
     def create(self, data):
         """Override function to notify creation in a message
         """
@@ -38,6 +39,7 @@ class ResPartnerBank(models.Model):
 
         return result
 
+    @api.model
     def unlink(self):
         """Override function to notify delte in a message
         """

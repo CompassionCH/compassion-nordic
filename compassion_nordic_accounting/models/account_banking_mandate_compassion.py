@@ -85,6 +85,7 @@ class AccountBankingMandate(models.Model):
         super().back2draft()
         return True
 
+    @api.model
     def unlink(self):
         """
         Override function to notify removal in a message on partner feed
