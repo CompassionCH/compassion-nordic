@@ -29,6 +29,7 @@ class ResPartnerBank(models.Model):
             type="comment",
         )
 
+    @api.model
     def create(self, data):
         """Override function to notify creation in a message
         """
