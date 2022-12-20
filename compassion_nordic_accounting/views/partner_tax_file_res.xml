@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- LIST VIEW for the result -->
+    <record id="partner_tax_file_res" model="ir.ui.view">
+        <field name="name">Partner not eligible for tax exemption</field>
+        <field name="model">res.partner.tax.file.result</field>
+        <field name="arch" type="xml">
+            <tree decoration-danger="state in ['invalid_ssn','under_ssn','empty_ssn']"
+                  decoration-success="state == 'valid'"
+                  create="false" edit="false">
+                <field name="tax_year"/>
+                <field name="tax_company_id" widget="many2one"/>
+                <field name="partner_country"/>
+                <field name="partner_id" widget="many2one"/>
+                <field name="partner_email" widget="email"/>
+                <field name="partner_phone"/>
+                <field name="yearly_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_partner_tax_file_res_filter" model="ir.ui.view">
+        <field name="name">partner tax file result filter</field>
+        <field name="model">res.partner.tax.file.result</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+                <filter name="Empty SSN" string="Empty SSN" domain="[('state','=','empty_ssn')]" help="Partner that doesn't have a SSN filled up"/>
+                <filter name="Invalid SSN" string="Invalid SSN" domain="[('state','=','invalid_ssn')]" help="Partner with incorrect SSN format"/>
+                <filter name="Under 18" string="Under 18" domain="[('state','=','under_18')]" help="Partner with SSN that are minor"/>
+                <filter name="valid" string="Valid" domain="[('state','=','valid')]" help="Partner exported in the tax file"/>
+                <group expand="0" string="Group By...">
+                    <filter name="group_state" string="States" domain="[]" context="{'group_by':'state'}"/>
+                    <filter name="group_tax_company" string="Tax Company" domain="[]" context="{'group_by':'tax_company_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

@@ -13,68 +13,51 @@ import logging
 from stdnum.exceptions import InvalidLength, InvalidFormat, InvalidChecksum, InvalidComponent
 from stdnum.no import fodselsnummer
 from stdnum.se import personnummer
+from stdnum.dk import cpr
+from stdnum.fi import veronumero
 
 from odoo import models, api, fields
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
-
+ERROR_MESSAGE = "SSN (Social Security Number): {err_msg}"
+# Library for sweden, norway, denmark, finland
+SSN_CONTRY_FMT_LIST = [personnummer, fodselsnummer, cpr, veronumero]
 
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
     social_sec_nr = fields.Char(string="Social security number")
     _country_id = False
-    # TODO implement ref_social_sec_nr to activate that constaints again
-    # _sql_constraints = [
-    #     ('social_sec_nr_unique',
-    #      'UNIQUE(social_sec_nr)',
-    #      'social security number field needs to be unique'
-    #      )
-    # ]
-
-    def _is_swedish(self, partner_country_id):
-        return partner_country_id == self.env.ref("base.se")
-
-    def _is_norwegian(self, partner_country_id):
-        return partner_country_id == self.env.ref("base.no")
 
     @api.depends('social_sec_nr')
     @api.constrains("social_sec_nr")
-    def calculate_age(self):
+    def _compute_sec_nr(self):
         for partner in self:
-            partner_country = partner.country_id
-            # If a social security number has been filled in we check the format
-            # Then we extract gender bday from it
-            # The format for swedish and norwegian one aren't the same
-            if self._is_swedish(partner_country):
-                social_sec = partner.social_sec_nr
-                if social_sec:
-                    self._validate_sec_nr(partner.country_id, social_sec)
-                    partner.gender = personnummer.get_gender(social_sec)
-                    partner.birthdate_date = personnummer.get_birth_date(social_sec)
-                    partner._compute_age()
-            elif self._is_norwegian(partner_country):
-                social_sec = partner.social_sec_nr
-                if social_sec:
-                    self._validate_sec_nr(partner.country_id, social_sec)
-                    partner.gender = fodselsnummer.get_gender(social_sec)
-                    partner.birthdate_date = fodselsnummer.get_birth_date(social_sec)
-                    partner._compute_age()
+            if partner.social_sec_nr:
+                # If a social security number has been filled in we check the format
+                # Then we extract informations from it if it's possible
+                # (certain formats have no informations)
+                is_valid, valid_fmt = self._validate_ssn()
+                if is_valid:
+                    if valid_fmt in self._list_has_bday():
+                        if valid_fmt in del_from_lib(SSN_CONTRY_FMT_LIST, [veronumero, cpr]):
+                            partner.gender = valid_fmt.get_gender(self.social_sec_nr)
+                        partner.birthdate_date = valid_fmt.get_birth_date(self.social_sec_nr)
+                        partner._compute_age()
+                else:
+                    raise UserError(ERROR_MESSAGE.format(err_msg="Not a valid social security number."))
 
+    def _validate_ssn(self):
+        self.ensure_one()
+        for ssn_country_frmt in SSN_CONTRY_FMT_LIST:
+            if ssn_country_frmt.is_valid(self.social_sec_nr):
+                return True, ssn_country_frmt
+        return False, None
 
-    def _validate_sec_nr(self, country, social_sec):
-        ERROR_MESSAGE = "SSN (Social Security Number): {err_msg}"
-        try:
-            if self._is_swedish(country):
-                personnummer.validate(social_sec)
-            elif self._is_norwegian(country):
-                fodselsnummer.validate(social_sec)
-        except InvalidLength as e:
-            raise UserError(ERROR_MESSAGE.format(err_msg=e.message))
-        except InvalidFormat as e:
-            raise UserError(ERROR_MESSAGE.format(err_msg=e.message))
-        except InvalidChecksum as e:
-            raise UserError(ERROR_MESSAGE.format(err_msg=e.message))
-        except InvalidComponent as e:
-            raise UserError(ERROR_MESSAGE.format(err_msg="The birthdate can not be in the future"))
+    @staticmethod
+    def _list_has_bday():
+        return del_from_lib(SSN_CONTRY_FMT_LIST, [veronumero])
+
+def del_from_lib(orig_lib_list, lib_list):
+    return [fmt for fmt in orig_lib_list if fmt not in lib_list]

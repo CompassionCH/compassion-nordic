@@ -19,12 +19,13 @@ class GenerateTaxWizard(models.TransientModel):
     _inherit = "generate.tax.wizard"
 
     def generate_tax(self):
+        self._del_old_entry()
         company = self.env.company
         if company.country_id.name != "Norway":
             return super().generate_tax()
         ret = self.env['account.move'].read_group([
-            ('company_id', '=', company.id),
             ('payment_state', '=', 'paid'),
+            ('company_id', '=', company.id),
             ('last_payment', '>=', datetime(int(self.tax_year), 1, 1)),
             ('last_payment', '<=', datetime(int(self.tax_year), 12, 31)),
             ('invoice_category', 'in', ['fund', 'sponsorship']),
@@ -70,13 +71,14 @@ class GenerateTaxWizard(models.TransientModel):
                              'leveransetype': 'ordinaer'})
         total_amount = 0
         for partner_id, amount in grouped_amounts.items():
-            partner = self.env['res.partner'].browse(partner_id)
-            if partner.social_sec_nr:
-                oppgave = ET.SubElement(leveranse, 'oppgave')
-                oppgaveeier = ET.SubElement(oppgave, 'oppgaveeier')
-                text_map(oppgaveeier, {'foedselsnummer': str(partner.social_sec_nr), 'navn': partner.name})
-                text_map(oppgave, {'beloep': str(int(amount))})
-                total_amount += amount
+            if self._validate_partner_tax_eligibility(partner_id, amount):
+                partner = self.env['res.partner'].browse(partner_id)
+                if partner.social_sec_nr:
+                    oppgave = ET.SubElement(leveranse, 'oppgave')
+                    oppgaveeier = ET.SubElement(oppgave, 'oppgaveeier')
+                    text_map(oppgaveeier, {'foedselsnummer': str(partner.social_sec_nr), 'navn': partner.name})
+                    text_map(oppgave, {'beloep': str(int(amount))})
+                    total_amount += amount
         oppgaveoppsummering = ET.SubElement(leveranse, 'oppgaveoppsummering')
         text_map(oppgaveoppsummering, {'antallOppgaver': str(len(grouped_amounts)),
                                        'sumBeloep': str(int(total_amount))})
