@@ -94,26 +94,25 @@ class GenerateTaxWizard(models.TransientModel):
         for partner_id, amount in total_amount_year.items():
             if self._validate_partner_tax_eligibility(partner_id, amount):
                 partner = self.env["res.partner"].browse(partner_id)
-                if partner.social_sec_nr:
-                    Blankett = ET.SubElement(Skatteverket, "ku:Blankett", nummer="2314")
-                    Arendeinformation = ET.SubElement(Blankett, "ku:Arendeinformation")
-                    text_map(Arendeinformation, {'Arendeagare': Orgnr,
-                                                 'Period': str(self.tax_year)})
-                    Blankettinnehall = ET.SubElement(Blankett, "ku:Blankettinnehall")
-                    KU65 = ET.SubElement(Blankettinnehall, "ku:KU65")
+                Blankett = ET.SubElement(Skatteverket, "ku:Blankett", nummer="2314")
+                Arendeinformation = ET.SubElement(Blankett, "ku:Arendeinformation")
+                text_map(Arendeinformation, {'Arendeagare': Orgnr,
+                                             'Period': str(self.tax_year)})
+                Blankettinnehall = ET.SubElement(Blankett, "ku:Blankettinnehall")
+                KU65 = ET.SubElement(Blankettinnehall, "ku:KU65")
 
-                    UppgiftslamnareKU65 = ET.SubElement(KU65, 'ku:UppgiftslamnareKU65')
+                UppgiftslamnareKU65 = ET.SubElement(KU65, 'ku:UppgiftslamnareKU65')
 
-                    text_map_faltkod(UppgiftslamnareKU65, {"UppgiftslamnarId": (Orgnr, "201"),
-                                                           "NamnUppgiftslamnare": (partner.name, '202')})
+                text_map_faltkod(UppgiftslamnareKU65, {"UppgiftslamnarId": (Orgnr, "201"),
+                                                       "NamnUppgiftslamnare": (partner.name, '202')})
 
-                    text_map_faltkod(KU65, {'Inkomstar': (str(self.tax_year), '203'),
-                                            'MottagetGavobelopp': (str(int(amount)), '621'),
-                                            'Specifikationsnummer': (str(partner.ref), '570')
-                                            })
-                    InkomsttagareKU65 = ET.SubElement(KU65, 'ku:InkomsttagareKU65')
-                    text_map_faltkod(InkomsttagareKU65,
-                                     {"Inkomsttagare": (partner.social_sec_nr.replace("-", ""), "215"), })
+                text_map_faltkod(KU65, {'Inkomstar': (str(self.tax_year), '203'),
+                                        'MottagetGavobelopp': (str(int(amount)), '621'),
+                                        'Specifikationsnummer': (str(partner.ref), '570')
+                                        })
+                InkomsttagareKU65 = ET.SubElement(KU65, 'ku:InkomsttagareKU65')
+                text_map_faltkod(InkomsttagareKU65,
+                                 {"Inkomsttagare": (partner.social_sec_nr.replace("-", ""), "215"), })
 
         xml_str = minidom.parseString(ET.tostring(Skatteverket)).toprettyxml(indent="   ", encoding='UTF-8')
 

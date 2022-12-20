@@ -73,12 +73,11 @@ class GenerateTaxWizard(models.TransientModel):
         for partner_id, amount in grouped_amounts.items():
             if self._validate_partner_tax_eligibility(partner_id, amount):
                 partner = self.env['res.partner'].browse(partner_id)
-                if partner.social_sec_nr:
-                    oppgave = ET.SubElement(leveranse, 'oppgave')
-                    oppgaveeier = ET.SubElement(oppgave, 'oppgaveeier')
-                    text_map(oppgaveeier, {'foedselsnummer': str(partner.social_sec_nr), 'navn': partner.name})
-                    text_map(oppgave, {'beloep': str(int(amount))})
-                    total_amount += amount
+                oppgave = ET.SubElement(leveranse, 'oppgave')
+                oppgaveeier = ET.SubElement(oppgave, 'oppgaveeier')
+                text_map(oppgaveeier, {'foedselsnummer': str(partner.social_sec_nr), 'navn': partner.name})
+                text_map(oppgave, {'beloep': str(int(amount))})
+                total_amount += amount
         oppgaveoppsummering = ET.SubElement(leveranse, 'oppgaveoppsummering')
         text_map(oppgaveoppsummering, {'antallOppgaver': str(len(grouped_amounts)),
                                        'sumBeloep': str(int(total_amount))})
