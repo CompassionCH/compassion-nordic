@@ -9,9 +9,9 @@
 ##############################################################################
 
 import logging
-import stdnum
-from stdnum.se import personnummer, vat
-from stdnum.no import fodselsnummer, mva
+
+from stdnum.se import personnummer, orgnr as se_org
+from stdnum.no import fodselsnummer, orgnr as no_org
 from stdnum.dk import cpr, cvr
 from stdnum.fi import veronumero, alv
 
@@ -23,7 +23,8 @@ ERROR_MESSAGE = "SSN (Social Security Number): {err_msg}"
 
 # Library for sweden, norway, denmark, finland
 SSN_CONTRY_FMT_LIST = [personnummer, fodselsnummer, cpr, veronumero]
-VAT_COUNTRY_FMT_LIST = [vat, mva, cvr, alv]
+VAT_COUNTRY_FMT_LIST = [se_org, no_org, cvr, alv]
+
 
 class ResPartner(models.Model):
     _inherit = "res.partner"

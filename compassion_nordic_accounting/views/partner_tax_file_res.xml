@@ -5,7 +5,7 @@
         <field name="name">Partner not eligible for tax exemption</field>
         <field name="model">res.partner.tax.file.result</field>
         <field name="arch" type="xml">
-            <tree decoration-danger="state in ['invalid_ssn','under_ssn','empty_ssn']"
+            <tree decoration-danger="state in ['invalid_ssn','under_ssn','empty_ssn','empty_vat', 'invalid_vat']"
                   decoration-success="state == 'valid'"
                   create="false" edit="false">
                 <field name="tax_year"/>
