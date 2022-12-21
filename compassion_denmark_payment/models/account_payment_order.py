@@ -45,7 +45,7 @@ class AccountPaymentOrder(models.Model):
                     text_lines.append(
                         (
                             invoice_line.product_id.id,
-                            f"{int(invoice_line.credit)} {_(invoice_line.product_id.name)} " + str_child
+                            f"{int(invoice_line.credit)} {invoice_line.product_id.with_context({'lang': invoice_line.partner_id.lang}).name} " + str_child
                         )
                     )
             text_lines.sort(key=lambda a: a[0])
