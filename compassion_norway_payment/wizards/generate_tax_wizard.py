@@ -71,11 +71,18 @@ class GenerateTaxWizard(models.TransientModel):
                              'leveransetype': 'ordinaer'})
         total_amount = 0
         for partner_id, amount in grouped_amounts.items():
-            if self._validate_partner_tax_eligibility(partner_id, amount):
-                partner = self.env['res.partner'].browse(partner_id)
+            partner = self.env['res.partner'].browse(partner_id)
+            is_taxable = False
+            if (not partner.is_company) and self._validate_partner_tax_eligibility(partner, amount):
+                is_taxable = True
+                identifier = partner.social_sec_nr
+            elif partner.is_company and self._validate_vat_company(partner, amount):
+                is_taxable = True
+                identifier = partner.vat
+            if is_taxable:
                 oppgave = ET.SubElement(leveranse, 'oppgave')
                 oppgaveeier = ET.SubElement(oppgave, 'oppgaveeier')
-                text_map(oppgaveeier, {'foedselsnummer': str(partner.social_sec_nr), 'navn': partner.name})
+                text_map(oppgaveeier, {"fodelsnummer": str(identifier), 'navn': partner.name})
                 text_map(oppgave, {'beloep': str(int(amount))})
                 total_amount += amount
         oppgaveoppsummering = ET.SubElement(leveranse, 'oppgaveoppsummering')
@@ -97,3 +104,4 @@ class GenerateTaxWizard(models.TransientModel):
             "url": str(base_url) + str(download_url),
             "target": "new",
         }
+

@@ -9,20 +9,21 @@
 ##############################################################################
 
 import logging
-
-from stdnum.exceptions import InvalidLength, InvalidFormat, InvalidChecksum, InvalidComponent
-from stdnum.no import fodselsnummer
-from stdnum.se import personnummer
-from stdnum.dk import cpr
-from stdnum.fi import veronumero
+import stdnum
+from stdnum.se import personnummer, vat
+from stdnum.no import fodselsnummer, mva
+from stdnum.dk import cpr, cvr
+from stdnum.fi import veronumero, alv
 
 from odoo import models, api, fields
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 ERROR_MESSAGE = "SSN (Social Security Number): {err_msg}"
+
 # Library for sweden, norway, denmark, finland
 SSN_CONTRY_FMT_LIST = [personnummer, fodselsnummer, cpr, veronumero]
+VAT_COUNTRY_FMT_LIST = [vat, mva, cvr, alv]
 
 class ResPartner(models.Model):
     _inherit = "res.partner"
@@ -50,10 +51,17 @@ class ResPartner(models.Model):
 
     def _validate_ssn(self):
         self.ensure_one()
-        for ssn_country_frmt in SSN_CONTRY_FMT_LIST:
-            if ssn_country_frmt.is_valid(self.social_sec_nr):
-                return True, ssn_country_frmt
-        return False, None
+        for ssn_country_fmt in SSN_CONTRY_FMT_LIST:
+            if ssn_country_fmt.is_valid(self.social_sec_nr):
+                return True, ssn_country_fmt
+        return False, False
+
+    def _validate_vat(self):
+        self.ensure_one()
+        for vat_country_fmt in VAT_COUNTRY_FMT_LIST:
+            if vat_country_fmt.is_valid(self.vat):
+                return True, vat_country_fmt
+        return False, False
 
     @staticmethod
     def _list_has_bday():

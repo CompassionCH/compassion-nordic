@@ -42,7 +42,7 @@
         <field name="res_model">res.partner.tax.file.result</field>
         <field name="view_mode">tree</field>
         <field name="target">current</field>
-        <field name="context">{'group_by': ['tax_company_id', 'state']}</field>
+        <field name="context">{'search_default_group_state': 2, 'search_default_group_company': 1}</field>
         <field name="view_id" ref="partner_tax_file_res"/>
     </record>
     <menuitem action="show_partner_tax_file_res"

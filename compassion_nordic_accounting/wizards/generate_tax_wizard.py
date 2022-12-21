@@ -46,9 +46,28 @@ class GenerateTaxWizard(models.TransientModel):
         except NotImplementedError:
             raise UserError("The company that you are on doesn't support this feature.")
 
-    def _validate_partner_tax_eligibility(self, partner_id, amount):
+    def _validate_vat_company(self, partner, amount):
         state = "valid"
-        partner = self.env["res.partner"].browse(partner_id)
+        is_valid, valid_fmt = partner._validate_vat()
+        if not partner.vat:
+            state = "empty_vat"
+        elif not is_valid:
+            state = "invalid_vat"
+        # Log the entry in the model made for this
+        self.env["res.partner.tax.file.result"].create({
+            "partner_id": partner.id,
+            "tax_company_id": self.env.company.id,
+            "tax_year": self.tax_year,
+            "yearly_amount": amount,
+            "state": state
+        })
+
+        if state in ["empty_vat", "invalid_vat"]:
+            return False
+        return True
+
+    def _validate_partner_tax_eligibility(self, partner, amount):
+        state = "valid"
         is_valid, valid_fmt = partner._validate_ssn()
         if not partner.social_sec_nr:
             state = "empty_ssn"
@@ -66,7 +85,7 @@ class GenerateTaxWizard(models.TransientModel):
             "state": state
         })
 
-        if state in ["invalid_ssn", "under_18", "empty"]:
+        if state in ["invalid_ssn", "under_18", "empty_ssn"]:
             return False
         return True
 
