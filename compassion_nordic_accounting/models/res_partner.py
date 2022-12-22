@@ -32,8 +32,7 @@ class ResPartner(models.Model):
     social_sec_nr = fields.Char(string="Social security number")
     _country_id = False
 
-    @api.depends('social_sec_nr')
-    @api.constrains("social_sec_nr")
+    @api.depends("social_sec_nr")
     def _compute_sec_nr(self):
         for partner in self:
             if partner.social_sec_nr:
@@ -41,13 +40,17 @@ class ResPartner(models.Model):
                 # Then we extract informations from it if it's possible
                 # (certain formats have no informations)
                 is_valid, valid_fmt = self._validate_ssn()
-                if is_valid:
-                    if valid_fmt in self._list_has_bday():
-                        if valid_fmt in del_from_lib(SSN_CONTRY_FMT_LIST, [veronumero, cpr]):
-                            partner.gender = valid_fmt.get_gender(self.social_sec_nr)
-                        partner.birthdate_date = valid_fmt.get_birth_date(self.social_sec_nr)
-                        partner._compute_age()
-                else:
+                if valid_fmt in self._list_has_bday():
+                    if valid_fmt in del_from_lib(SSN_CONTRY_FMT_LIST, [veronumero, cpr]):
+                        partner.gender = valid_fmt.get_gender(self.social_sec_nr)
+                    partner.birthdate_date = valid_fmt.get_birth_date(self.social_sec_nr)
+                    partner._compute_age()
+
+    @api.constrains("social_sec_nr")
+    def _constrains_ssn(self):
+        for partner in self:
+            if partner.social_sec_nr:
+                if not self._validate_ssn():
                     raise UserError(ERROR_MESSAGE.format(err_msg="Not a valid social security number."))
 
     def _validate_ssn(self):

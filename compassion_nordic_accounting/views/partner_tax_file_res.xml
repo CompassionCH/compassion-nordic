@@ -21,7 +21,7 @@
             </tree>
         </field>
     </record>
-    $
+
     <record id="view_partner_tax_file_res_filter" model="ir.ui.view">
         <field name="name">partner tax file result filter</field>
         <field name="model">res.partner.tax.file.result</field>
