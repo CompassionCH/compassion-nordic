@@ -35,6 +35,7 @@ class GenerateTaxWizard(models.TransientModel):
     def _year_selection(self):
         curr_year = datetime.today().year
         year_list = []
+        # We give 8 year because the legislation ask for 7 years archive in the nordics countries
         while curr_year >= datetime.today().year - 8:
             year_list.append((str(curr_year), str(curr_year)))
             curr_year -= 1
