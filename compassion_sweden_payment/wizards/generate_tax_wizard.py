@@ -20,7 +20,7 @@ class GenerateTaxWizard(models.TransientModel):
     _inherit = "generate.tax.wizard"
 
     def generate_tax(self):
-
+        self._del_old_entry()
         company = self.env.company
         if company.country_id.name != "Sweden":
             return super().generate_tax()
@@ -93,7 +93,17 @@ class GenerateTaxWizard(models.TransientModel):
 
         for partner_id, amount in total_amount_year.items():
             partner = self.env["res.partner"].browse(partner_id)
-            if partner.social_sec_nr:
+            is_taxable = False
+            # We test if the tax identifier is valid or not
+            if not partner.is_company and self._validate_partner_tax_eligibility(partner, amount):
+                is_taxable = True
+                identifier = partner.social_sec_nr.replace("-", "")
+            if partner.is_company and self._validate_vat_company(partner, amount):
+                is_taxable = True
+                identifier = partner.vat
+            # If the partner is eligible we put it in the file
+            # (there's no specific XML tag for company (at least on the 22.12.2022))
+            if is_taxable:
                 Blankett = ET.SubElement(Skatteverket, "ku:Blankett", nummer="2314")
                 Arendeinformation = ET.SubElement(Blankett, "ku:Arendeinformation")
                 text_map(Arendeinformation, {'Arendeagare': Orgnr,
@@ -112,7 +122,7 @@ class GenerateTaxWizard(models.TransientModel):
                                         })
                 InkomsttagareKU65 = ET.SubElement(KU65, 'ku:InkomsttagareKU65')
                 text_map_faltkod(InkomsttagareKU65,
-                                 {"Inkomsttagare": (partner.social_sec_nr.replace("-", ""), "215"), })
+                                 {"Inkomsttagare": (identifier, "215"), })
 
         xml_str = minidom.parseString(ET.tostring(Skatteverket)).toprettyxml(indent="   ", encoding='UTF-8')
 
