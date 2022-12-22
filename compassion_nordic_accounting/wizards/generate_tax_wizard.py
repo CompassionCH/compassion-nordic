@@ -47,6 +47,11 @@ class GenerateTaxWizard(models.TransientModel):
             raise UserError("The company that you are on doesn't support this feature.")
 
     def _validate_vat_company(self, partner, amount):
+        """ Log the company in the model used for result of tax generation
+            Some company may have a bad VAT number format or an empty one we log the detail
+
+            @return we return a boolean that define if a company is eligible or not
+        """
         state = "valid"
         is_valid, valid_fmt = partner._validate_vat()
         if not partner.vat:
@@ -67,6 +72,11 @@ class GenerateTaxWizard(models.TransientModel):
         return True
 
     def _validate_partner_tax_eligibility(self, partner, amount):
+        """ Log the partner in the model used for result of tax generation
+            Some partner may have a bad SSN format or an empty one we log the detail
+
+            @return we return a boolean that define if a partner is eligible or not
+        """
         state = "valid"
         is_valid, valid_fmt = partner._validate_ssn()
         if not partner.social_sec_nr:

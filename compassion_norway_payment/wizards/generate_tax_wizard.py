@@ -73,12 +73,15 @@ class GenerateTaxWizard(models.TransientModel):
         for partner_id, amount in grouped_amounts.items():
             partner = self.env['res.partner'].browse(partner_id)
             is_taxable = False
+            # We test the tax identifier to make sure it is valid
             if (not partner.is_company) and self._validate_partner_tax_eligibility(partner, amount):
                 is_taxable = True
                 identifier = partner.social_sec_nr
             elif partner.is_company and self._validate_vat_company(partner, amount):
                 is_taxable = True
                 identifier = partner.vat
+            # If the partner is eligible we put it in the file
+            # (there's no specific XML tag for company (at least on the 22.12.2022))
             if is_taxable:
                 oppgave = ET.SubElement(leveranse, 'oppgave')
                 oppgaveeier = ET.SubElement(oppgave, 'oppgaveeier')

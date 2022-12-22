@@ -94,12 +94,15 @@ class GenerateTaxWizard(models.TransientModel):
         for partner_id, amount in total_amount_year.items():
             partner = self.env["res.partner"].browse(partner_id)
             is_taxable = False
+            # We test if the tax identifier is valid or not
             if not partner.is_company and self._validate_partner_tax_eligibility(partner, amount):
                 is_taxable = True
                 identifier = partner.social_sec_nr.replace("-", "")
             if partner.is_company and self._validate_vat_company(partner, amount):
                 is_taxable = True
                 identifier = partner.vat
+            # If the partner is eligible we put it in the file
+            # (there's no specific XML tag for company (at least on the 22.12.2022))
             if is_taxable:
                 Blankett = ET.SubElement(Skatteverket, "ku:Blankett", nummer="2314")
                 Arendeinformation = ET.SubElement(Blankett, "ku:Arendeinformation")
