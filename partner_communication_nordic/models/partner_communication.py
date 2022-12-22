@@ -11,13 +11,23 @@ import logging
 from datetime import datetime
 
 
-from odoo import models, _
+from odoo import api, models, _
 
 _logger = logging.getLogger(__name__)
 
 
 class PartnerCommunication(models.Model):
     _inherit = "partner.communication.job"
+
+    @api.depends("partner_id")
+    def _compute_company(self):
+        # We don't want to associate Norden Company, and fallback to Sweden instead
+        sweden = self.env.ref("base.se")
+        sw_company = self.env["res.company"].search([("country_id", "=", sweden.id)])
+        super()._compute_company()
+        for record in self:
+            if record.company_id.id == 1:
+                record.company_id = sw_company
 
     def get_photo_by_post_attachment(self):
         self.ensure_one()
