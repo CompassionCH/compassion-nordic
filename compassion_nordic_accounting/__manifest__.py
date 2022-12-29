@@ -58,6 +58,7 @@
         "views/generate_tax_wizard_view.xml",
         "views/res_partner_view.xml",
         "views/account_statement_import_view.xml",
+        "views/mandate_staff_notif_settings_view.xml",
         'security/ir.model.access.csv'
     ],
     "installable": True,

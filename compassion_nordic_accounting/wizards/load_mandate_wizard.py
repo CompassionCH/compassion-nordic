@@ -8,6 +8,7 @@
 #
 ##############################################################################
 import csv
+from datetime import datetime, timedelta
 
 from odoo import api, models, fields, _
 from odoo.exceptions import UserError
@@ -59,4 +60,21 @@ class LoadMandateWizard(models.TransientModel):
     def _log_results(self, vals_list):
         for vals in vals_list:
             if vals.get('mandate_id'):
+                is_cancelled = vals.pop("is_cancelled")
+                # Enter a value in the table
                 self.env['load.mandate.wizard'].create(vals)
+                # Create a scheduled activity for mandate that has been cancelled
+                if is_cancelled:
+                    user_id = self.env["res.config.settings"].sudo().get_param("mandate_notif_id")
+                    self.env["mail.activity"].create(
+                        {
+                            "activity_type_id": self.env['mail.activity.type'].search([('name', '=', 'To Do')],
+                                                                                      limit=1).id or False,
+                            "res_id": vals.get("mandate_id"),
+                            "res_model_id": self.env["ir.model"]._get("account.banking.mandate").id,
+                            "user_id": user_id,
+                            "date_deadline": datetime.today() + timedelta(days=7),
+                            "summary": "Mandate Cancelled",
+                            "note": f"Contact sponsor, mandate was cancelled on {datetime.today().date()}"
+                        }
+                    ).action_close_dialog()

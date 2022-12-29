@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2016 Compassion (http://www.compassion.ch)
+    @author Emanuel Cino <ecino@compassion.ch>
+    The licence is in the file __manifest__.py
+-->
+<odoo>
+    <record id="notification_settings" model="ir.ui.view">
+        <field name="name">staff.notification.settings.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="message_center_compassion.notification_settings"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='compassion_settings']//div[@name='notification_configuration']//div[@name='right_group']">
+                <div class="row" name="mandate_notif">
+                    <label for="mandate_notif_id" class="col-md-5 o_light_label"/>
+                    <field name="mandate_notif_id"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
