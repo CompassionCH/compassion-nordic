@@ -24,18 +24,18 @@ class MandateStaffNotifSettings(models.TransientModel):
         readonly=False,
     )
 
-    def set_values(self):
-        super().set_values()
-        config = self.env["ir.config_parameter"].sudo()
-        config.set_param(
-            "compassion_nordic_accounting.mandate_notif_id", str(self.mandate_notif_id.id or 0)
-        )
-
     @api.model
     def get_values(self):
         res = super().get_values()
         config = self.env["ir.config_parameter"].sudo()
         res["mandate_notif_id"] = int(
-            config.get_param("compassion_nordic_accounting.mandate_notif_id", 0)
+            config.get_param(f"compassion_nordic_accounting.mandate_notif_{self.env.company.id}", 0)
         )
         return res
+
+    def set_values(self):
+        company_id = self.env.company.id
+        self.env["ir.config_parameter"].set_param(
+            f"compassion_nordic_accounting.mandate_notif_{company_id}", str(self.mandate_notif_id.id)
+        )
+        super().set_values()
