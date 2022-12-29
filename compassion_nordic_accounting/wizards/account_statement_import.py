@@ -21,12 +21,13 @@ class AccountStatementImport(models.TransientModel):
 
     large_file_import = fields.Boolean(
         help="Use this for large statement files. The process will run in the background so that you can continue "
-             "to work in the meantime."
+             "to work in the meantime.",
+        default=True
     )
     maximum_lines = fields.Integer(
         help="Use this to split large statements into multiple smaller ones. It can be useful for speeding up "
              "the reconcile process afterwards. (use 0 for keeping it all together)",
-        default=1000
+        default=500
     )
     auto_post = fields.Boolean(
         help="Post automatically the statement after import",
@@ -39,11 +40,19 @@ class AccountStatementImport(models.TransientModel):
             self.env.user.notify_success(message=_(
                 "Import job launched. Come back in a few minutes to check your statements."))
         else:
-            return super().import_file_button()
+            return_action = super().import_file_button()
+            # Lauch a job for bank statements auto reconciliations
+            statements = self.env["account.bank.statement"].browse(return_action["res_id"])
+            statements.with_delay().auto_reconcile()
+            return return_action
 
     def _import_file_with_journal(self, journal_id):
-        return self.with_context(
+        result = self.with_context(
             journal_id=journal_id, from_large_import=True, auto_post=self.auto_post)._import_file()
+        # Lauch a job for bank statements auto reconciliations
+        statements = self.env["account.bank.statement"].browse(result["statement_ids"])
+        statements.with_delay().auto_reconcile()
+        return result
 
     def import_single_file(self, file_data, result):
         if self.large_file_import and self.maximum_lines:
