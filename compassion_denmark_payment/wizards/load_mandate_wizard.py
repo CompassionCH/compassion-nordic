@@ -47,11 +47,13 @@ class LoadMandateWizard(models.TransientModel):
                         # Variables for the logging of what the process do
                         mandate_id = None
                         old_state = "Active"
+                        is_cancelled = False
                         # Actual behaviour
                         partner = self.env['res.partner'].search([('ref', '=', int(info.customer_number))])
                         if info.transaction_code in [beservice.TransactionCode.MANDATE_CANCELLED_BY_BANK,
                                                      beservice.TransactionCode.MANDATE_CANCELLED_BY_BETALINGSSERVICE,
                                                      beservice.TransactionCode.MANDATE_CANCELLED_BY_CREDITOR]:
+                            is_cancelled = True
                             res = self.env['recurring.contract.group'].search([('ref', '=', info.mandate_number)])
                             if not res:
                                 raise ValidationError(
@@ -102,6 +104,7 @@ class LoadMandateWizard(models.TransientModel):
                                 mandate_id = valid.id
                         data_dict['mandate_id'] = mandate_id
                         data_dict['old_mandate_state'] = old_state
+                        data_dict["is_cancelled"] = is_cancelled
                         if data_dict not in data:
                             data.append(data_dict)
             self._log_results(data)

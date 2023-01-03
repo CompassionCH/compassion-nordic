@@ -34,6 +34,7 @@ class LoadMandateWizard(models.TransientModel):
                         # Variables for the logging of what the process do
                         mandate_id = None
                         old_state = "Active"
+                        is_cancelled = False
                         # Actual behaviour
                         res = self.env['recurring.contract.group'].search([('ref', '=', transaction.kid)])
                         partner = res.partner_id
@@ -41,6 +42,7 @@ class LoadMandateWizard(models.TransientModel):
                         if transaction.registration_type == netsgiro.AvtaleGiroRegistrationType.DELETED_AGREEMENT:
                             mandate_id = partner.valid_mandate_id.id
                             partner.valid_mandate_id.cancel()
+                            is_cancelled = True
                         elif transaction.registration_type in (netsgiro.AvtaleGiroRegistrationType.ACTIVE_AGREEMENT,
                                                                netsgiro.AvtaleGiroRegistrationType.NEW_OR_UPDATED_AGREEMENT):
                             old_state = "None"
@@ -72,6 +74,7 @@ class LoadMandateWizard(models.TransientModel):
                                 mandate_id = valid.id
                         data_dict['mandate_id'] = mandate_id
                         data_dict['old_mandate_state'] = old_state
+                        data_dict['is_cancelled'] = is_cancelled
                         if data_dict not in data:
                             data.append(data_dict)
             self._log_results(data)

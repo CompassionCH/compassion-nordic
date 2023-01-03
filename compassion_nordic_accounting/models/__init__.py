@@ -10,6 +10,7 @@
 from . import account_banking_mandate_compassion
 from . import account_move
 from . import bank_statement
+from . import mandate_staff_notif_settings
 from . import partner_tax_file_res
 from . import recurring_contract
 from . import partner_bank_compassion
