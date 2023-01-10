@@ -15,7 +15,7 @@ from odoo.exceptions import UserError
 import io
 
 
-class LoadMandateWizard(models.TransientModel):
+class LoadMandateWizard(models.Model):
     _name = "load.mandate.wizard"
     _description = "Link gifts with letters"
     _order = "create_date desc"

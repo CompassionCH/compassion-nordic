@@ -14,7 +14,7 @@ from odoo import models
 from odoo.exceptions import ValidationError
 
 
-class LoadMandateWizard(models.TransientModel):
+class LoadMandateWizard(models.Model):
     _inherit = "load.mandate.wizard"
     _description = "Link gifts with letters"
 
@@ -78,5 +78,6 @@ class LoadMandateWizard(models.TransientModel):
                         if data_dict not in data:
                             data.append(data_dict)
             self._log_results(data)
+            return self.load_views
         else:
             super().generate_new_mandate()

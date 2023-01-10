@@ -17,7 +17,7 @@ from odoo.exceptions import ValidationError
 import io
 
 
-class LoadMandateWizard(models.TransientModel):
+class LoadMandateWizard(models.Model):
     _inherit = "load.mandate.wizard"
     _description = "Link gifts with letters"
 
