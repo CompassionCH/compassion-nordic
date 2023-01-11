@@ -98,9 +98,10 @@ class GenerateTaxWizard(models.TransientModel):
             if not partner.is_company and self._validate_partner_tax_eligibility(partner, amount):
                 is_taxable = True
                 identifier = partner.social_sec_nr.replace("-", "")
-            if partner.is_company and self._validate_vat_company(partner, amount):
-                is_taxable = True
-                identifier = partner.vat
+            # The swedish doesn't include company anymore
+            # if partner.is_company and self._validate_vat_company(partner, amount):
+            #     is_taxable = True
+            #     identifier = partner.vat
             # If the partner is eligible we put it in the file
             # (there's no specific XML tag for company (at least on the 22.12.2022))
             if is_taxable:
