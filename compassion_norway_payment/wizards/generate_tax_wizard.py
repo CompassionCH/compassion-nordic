@@ -59,7 +59,7 @@ class GenerateTaxWizard(models.TransientModel):
         kildesystem = ET.SubElement(leveranse, 'kildesystem')
         kildesystem.text = "Kildesystemet v2.0.5"
         oppgavegiver = ET.SubElement(leveranse, 'oppgavegiver')
-        text_map(oppgavegiver, {'organisasjonsnummer': company.company_registry, 'organisasjonsnavn': company.name})
+        text_map(oppgavegiver, {'organisasjonsnummer': company.company_registry.replace(' ', ''), 'organisasjonsnavn': company.name})
         kontaktinformasjon = ET.SubElement(oppgavegiver, 'kontaktinformasjon')
         text_map(kontaktinformasjon,
                  {'navn': company.partner_id.name, 'telefonnummer': company.partner_id.phone,
