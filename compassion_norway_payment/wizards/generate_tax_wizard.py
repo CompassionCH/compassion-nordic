@@ -48,7 +48,6 @@ class GenerateTaxWizard(models.TransientModel):
                 sub_with_txt(parent, key, value)
 
         melding = ET.Element('melding')
-        currently_connected = self.env.user.partner_id
         melding.attrib = {'xmlns': "urn:ske:fastsetting:innsamling:gavefrivilligorganisasjon:v2",
                           'xmlns:xsi': "http://www.w3.org/2001/XMLSchema-instance",
                           ' xsi:schemaLocation': "urn:ske:fastsetting:innsamling:gavefrivilligorganisasjon:v2 "
@@ -60,11 +59,11 @@ class GenerateTaxWizard(models.TransientModel):
         kildesystem = ET.SubElement(leveranse, 'kildesystem')
         kildesystem.text = "Kildesystemet v2.0.5"
         oppgavegiver = ET.SubElement(leveranse, 'oppgavegiver')
-        text_map(oppgavegiver, {'organisasjonsnummer': company.vat, 'organisasjonsnavn': company.name})
+        text_map(oppgavegiver, {'organisasjonsnummer': company.company_registry.replace(' ', ''), 'organisasjonsnavn': company.name})
         kontaktinformasjon = ET.SubElement(oppgavegiver, 'kontaktinformasjon')
         text_map(kontaktinformasjon,
-                 {'navn': currently_connected.name, 'telefonnummer': currently_connected.phone,
-                  'varselEpostadresse': currently_connected.email,
+                 {'navn': company.partner_id.name, 'telefonnummer': company.partner_id.phone,
+                  'varselEpostadresse': company.partner_id.email,
                   })
         text_map(leveranse, {'interektsaar': str(self.tax_year),
                              'oppgavegiversLeveranseReferanse': f'REF{self.tax_year}{datetime.now():%d%m%Y}',
