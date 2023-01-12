@@ -32,9 +32,9 @@ class AccountPaymentOrder(models.Model):
                                   pbs_number=self.payment_mode_id.initiating_party_issuer,
                                   debtor_group_number=1)
 
-        for bank_line in self.bank_line_ids:
+        for pymt_trx in self.payment_ids:
             text_lines = []
-            for line in bank_line.payment_line_ids:
+            for line in pymt_trx.payment_line_ids:
                 for invoice_line in line.move_line_id.move_id.invoice_line_ids:
                     child = invoice_line.contract_id.child_id
                     str_child = ""
@@ -50,14 +50,14 @@ class AccountPaymentOrder(models.Model):
                     )
             text_lines.sort(key=lambda a: a[0])
 
-            data_delivery.sections[0].add_payment(customer_number=f'{bank_line.partner_id.ref:15}',
-                                                  mandate_number=bank_line.payment_line_ids[0].move_line_id.move_id.
+            data_delivery.sections[0].add_payment(customer_number=f'{pymt_trx.partner_id.ref:15}',
+                                                  mandate_number=pymt_trx.payment_line_ids[0].move_line_id.move_id.
                                                   line_ids.mapped('contract_id').group_id.ref,
-                                                  reference=(bank_line.date.strftime("%b").capitalize()
-                                                             + ' ' + bank_line.payment_line_ids[0].payment_type.capitalize())[:20],
-                                                  amount=bank_line.amount_currency,
+                                                  reference=(pymt_trx.date.strftime("%b").capitalize()
+                                                             + ' ' + pymt_trx.payment_line_ids[0].payment_type.capitalize())[:20],
+                                                  amount=pymt_trx.amount,
                                                   sign_code=beservice.SignCode.COLLECTION,
-                                                  payment_date=bank_line.date,
+                                                  payment_date=pymt_trx.date,
                                                   text_lines=text_lines
                                                   )
         return data_delivery.to_ocr().encode('iso-8859-1'), "{}.txt".format(self.name)
