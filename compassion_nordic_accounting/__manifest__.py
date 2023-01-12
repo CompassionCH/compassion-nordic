@@ -59,6 +59,7 @@
         "views/res_partner_view.xml",
         "views/account_statement_import_view.xml",
         "views/mandate_staff_notif_settings_view.xml",
+        "views/contracts_view.xml",
         'security/ir.model.access.csv'
     ],
     "installable": True,
