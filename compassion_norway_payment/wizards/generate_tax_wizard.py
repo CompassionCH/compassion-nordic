@@ -84,7 +84,7 @@ class GenerateTaxWizard(models.TransientModel):
             if is_taxable:
                 oppgave = ET.SubElement(leveranse, 'oppgave')
                 oppgaveeier = ET.SubElement(oppgave, 'oppgaveeier')
-                text_map(oppgaveeier, {"fodelsnumme": str(identifier), 'navn': partner.name})
+                text_map(oppgaveeier, {"foedselsnumme": str(identifier), 'navn': partner.name})
                 text_map(oppgave, {'beloep': str(int(amount))})
                 total_amount += amount
         oppgaveoppsummering = ET.SubElement(leveranse, 'oppgaveoppsummering')
