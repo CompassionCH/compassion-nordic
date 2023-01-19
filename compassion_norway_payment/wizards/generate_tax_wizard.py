@@ -69,6 +69,7 @@ class GenerateTaxWizard(models.TransientModel):
                              'oppgavegiversLeveranseReferanse': f'REF{self.tax_year}{datetime.now():%d%m%Y}',
                              'leveransetype': 'ordinaer'})
         total_amount = 0
+        total_partner = 0
         for partner_id, amount in grouped_amounts.items():
             partner = self.env['res.partner'].browse(partner_id)
             is_taxable = False
@@ -87,8 +88,9 @@ class GenerateTaxWizard(models.TransientModel):
                 text_map(oppgaveeier, {"foedselsnummer": str(identifier), 'navn': partner.name})
                 text_map(oppgave, {'beloep': str(int(amount))})
                 total_amount += amount
+                total_partner += 1
         oppgaveoppsummering = ET.SubElement(leveranse, 'oppgaveoppsummering')
-        text_map(oppgaveoppsummering, {'antallOppgaver': str(len(grouped_amounts)),
+        text_map(oppgaveoppsummering, {'antallOppgaver': str(total_partner),
                                        'sumBeloep': str(int(total_amount))})
         xmlstr = minidom.parseString(ET.tostring(melding)).toprettyxml(indent="   ", encoding='UTF-8')
 
