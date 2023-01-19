@@ -39,7 +39,11 @@ class LoadMandateWizard(models.Model):
                         res = self.env['recurring.contract.group'].search([('ref', '=', transaction.kid)])
                         partner = res.partner_id
                         res.update({"notify_payee": transaction.notify})
-                        if transaction.registration_type == netsgiro.AvtaleGiroRegistrationType.DELETED_AGREEMENT:
+                        if not res:
+                            mandate_id = None
+                            is_cancelled = None
+                            old_state = "Another reference, actual reference : " + transaction.kid
+                        elif transaction.registration_type == netsgiro.AvtaleGiroRegistrationType.DELETED_AGREEMENT:
                             mandate_id = partner.valid_mandate_id.id
                             partner.valid_mandate_id.cancel()
                             is_cancelled = True
@@ -75,8 +79,9 @@ class LoadMandateWizard(models.Model):
                         data_dict['mandate_id'] = mandate_id
                         data_dict['old_mandate_state'] = old_state
                         data_dict['is_cancelled'] = is_cancelled
-                        if data_dict not in data:
+                        if data_dict['mandate_id'] not in data:
                             data.append(data_dict)
+                            data_dict = {}
             self._log_results(data)
             return self.load_views
         else:

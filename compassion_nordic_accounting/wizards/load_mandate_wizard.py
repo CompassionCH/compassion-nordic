@@ -59,18 +59,17 @@ class LoadMandateWizard(models.Model):
 
     def _log_results(self, vals_list):
         for vals in vals_list:
-            if vals.get('mandate_id'):
-                is_cancelled = vals.pop("is_cancelled")
-                # Enter a value in the table
-                self.env['load.mandate.wizard'].create(vals)
-                # Create a scheduled activity for mandate that has been cancelled
-                if is_cancelled:
-                    user_id = self.env["ir.config_parameter"].sudo().get_param(f"compassion_nordic_accounting.mandate_notif_{self.env.company.id}")
-                    self.env["account.banking.mandate"].browse(vals.get("mandate_id")).activity_schedule(
-                        activity_type_id=self.env['mail.activity.type'].search([('name', '=', 'To Do')],
-                                                                               limit=1).id or False,
-                        user_id=int(user_id),
-                        date_deadline=datetime.today() + timedelta(days=7),
-                        summary=_("Mandate Cancelled"),
-                        note=f"Contact sponsor, mandate was cancelled on {datetime.today().date()}"
-                    )
+            is_cancelled = vals.pop("is_cancelled")
+            # Enter a value in the table
+            self.env['load.mandate.wizard'].create(vals)
+            # Create a scheduled activity for mandate that has been cancelled
+            if is_cancelled:
+                user_id = self.env["ir.config_parameter"].sudo().get_param(f"compassion_nordic_accounting.mandate_notif_{self.env.company.id}")
+                self.env["account.banking.mandate"].browse(vals.get("mandate_id")).activity_schedule(
+                    activity_type_id=self.env['mail.activity.type'].search([('name', '=', 'To Do')],
+                                                                           limit=1).id or False,
+                    user_id=int(user_id),
+                    date_deadline=datetime.today() + timedelta(days=7),
+                    summary=_("Mandate Cancelled"),
+                    note=f"Contact sponsor, mandate was cancelled on {datetime.today().date()}"
+                )
