@@ -23,7 +23,6 @@ class LoadMandateWizard(models.Model):
         if self.env.company.country_id == self.env.ref('base.no'):
             data = list()
             for wizard in self:
-                data_dict = {"name_file": wizard.name_file}
                 mandate_file = base64.decodebytes(wizard.data_mandate).decode('iso-8859-1')
                 try:
                     parsed_file = netsgiro.parse(mandate_file)
@@ -76,12 +75,10 @@ class LoadMandateWizard(models.Model):
                                 mandate_id = mandate.id
                             else:
                                 mandate_id = valid.id
-                        data_dict['mandate_id'] = mandate_id
-                        data_dict['old_mandate_state'] = old_state
-                        data_dict['is_cancelled'] = is_cancelled
+                        data_dict = {"name_file": wizard.name_file, 'mandate_id': mandate_id,
+                                     'old_mandate_state': old_state, 'is_cancelled': is_cancelled}
                         if data_dict['mandate_id'] not in data:
                             data.append(data_dict)
-                            data_dict = {}
             self._log_results(data)
             return self.load_views
         else:
