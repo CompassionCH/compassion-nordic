@@ -46,11 +46,19 @@ class LoadMandateWizard(models.Model):
                             mandate_id = partner.valid_mandate_id.id
                             partner.valid_mandate_id.cancel()
                             is_cancelled = True
+                            payment_mode_id = self.env['account.payment.mode'].search([
+                                ('payment_method_id.code', '=', 'manual'),
+                                ('company_id', '=', self.env.company.id)], limit=1).id
+                            res.update({'payment_mode_id': payment_mode_id})
                         elif transaction.registration_type in (netsgiro.AvtaleGiroRegistrationType.ACTIVE_AGREEMENT,
                                                                netsgiro.AvtaleGiroRegistrationType.NEW_OR_UPDATED_AGREEMENT):
                             old_state = "None"
                             company_id = self.env.company.id
                             bank_account = partner.bank_ids.filtered(lambda b: b.acc_number == transaction.kid)
+                            # We have to update payment option
+                            payment_mode_id = self.env['account.payment.mode'].search([
+                                ('payment_method_id.code', '=', 'norway_direct_debit')], limit=1).id
+                            res.update({'payment_mode_id': payment_mode_id})
                             if not bank_account:
                                 bank_account = self.env["res.partner.bank"].create(
                                     {

@@ -26,7 +26,6 @@ class LoadMandateWizard(models.Model):
         if self.env.company.country_id == self.env.ref('base.dk'):
             data = list()
             for wizard in self:
-                data_dict = {"name_file": wizard.name_file}
                 mandate_file = base64.decodebytes(wizard.data_mandate).decode('iso-8859-1')
                 try:
                     parsed_file = beservice.parse(mandate_file)
@@ -65,17 +64,22 @@ class LoadMandateWizard(models.Model):
                             mandate = partner.valid_mandate_id
                             mandate.cancel()
                             mandate_id = mandate.id
+                            # We have to set the payment mode to bank transfer again
+                            active_dd_contract = partner.sponsorship_ids.filtered(
+                                lambda a: a.state not in ('terminated', 'cancelled')
+                                          and a.group_id.ref == info.mandate_number)
+                            payment_mode_id = self.env['account.payment.mode'].search([
+                                ('payment_method_id.code', '=', 'manual'),
+                                ('company_id', '=', self.env.company.id)], limit=1).id
+                            active_dd_contract.group_id.update({'payment_mode_id': payment_mode_id})
                         elif info.transaction_code == beservice.TransactionCode.MANDATE_REGISTERED:
                             old_state = "None"
                             # we need to update all contract that the sponsor pays with the new mandate number received.
-                            active_dd_contract = partner.sponsorship_ids.filtered(
-                                lambda a: a.state not in ('terminated', 'cancelled') and a.partner_id == partner)
+                            active_dd_contract = partner.sponsorship_ids.filtered(lambda a: a.state not in ('terminated', 'cancelled'))
                             payment_mode_id = self.env['account.payment.mode'].search([
-                                ('payment_method_id.code', '=', 'denmark_direct_debit')])[0].id
-                            for em in active_dd_contract:
-                                em.group_id.update({
-                                    'ref': info.mandate_number,
-                                    'payment_mode_id': payment_mode_id, })
+                                ('payment_method_id.code', '=', 'denmark_direct_debit')], limit=1).id
+                            active_dd_contract.group_id.update({'ref': info.mandate_number,
+                                                                'payment_mode_id': payment_mode_id})
                             company_id = self.env.company.id
                             bank_account = partner.bank_ids.filtered(lambda b: b.acc_number == info.customer_number)
                             if not bank_account:
@@ -102,10 +106,9 @@ class LoadMandateWizard(models.Model):
                                 mandate_id = mandate.id
                             else:
                                 mandate_id = valid.id
-                        data_dict['mandate_id'] = mandate_id
-                        data_dict['old_mandate_state'] = old_state
-                        data_dict["is_cancelled"] = is_cancelled
-                        if data_dict not in data:
+                        data_dict = {"name_file": wizard.name_file, 'mandate_id': mandate_id,
+                                     'old_mandate_state': old_state, 'is_cancelled': is_cancelled}
+                        if data_dict['mandate_id'] not in data:
                             data.append(data_dict)
             self._log_results(data)
         else:
