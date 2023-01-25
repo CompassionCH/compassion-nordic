@@ -23,7 +23,7 @@ class PartnerCommunication(models.Model):
     def _compute_company(self):
         # We don't want to associate Norden Company, and fallback to Sweden instead
         sweden = self.env.ref("base.se")
-        sw_company = self.env["res.company"].search([("country_id", "=", sweden.id)])
+        sw_company = self.env["res.company"].search([("country_id", "=", sweden.id)], limit=1)
         super()._compute_company()
         for record in self:
             if record.company_id.id == 1:
