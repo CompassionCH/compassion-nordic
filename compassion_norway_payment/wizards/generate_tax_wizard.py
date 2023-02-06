@@ -27,7 +27,8 @@ class GenerateTaxWizard(models.TransientModel):
             ('payment_state', '=', 'paid'),
             ('company_id', '=', company.id),
             ('last_payment', '>=', datetime(int(self.tax_year), 1, 1)),
-            ('last_payment', '<=', datetime(int(self.tax_year), 12, 31))
+            ('last_payment', '<=', datetime(int(self.tax_year), 12, 31)),
+            ('invoice_category', '!=', 'other')
         ], ['amount_total', 'last_payment'],
             groupby=['partner_id'], lazy=False)
         total_amount_year = {}
