@@ -5,7 +5,7 @@
          <field name="model">recurring.contract.group</field>
          <field name="inherit_id" ref="recurring_contract.view_group_contract_form"/>
          <field name="arch" type="xml">
-             <field name="advance_billing_months" position="after">
+             <field name="invoice_day" position="after">
                  <field name="notify_payee" position="attributes"/>
              </field>
          </field>
