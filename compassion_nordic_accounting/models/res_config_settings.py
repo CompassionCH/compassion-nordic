@@ -10,6 +10,7 @@
 
 from odoo import models, fields, api
 
+
 class MandateStaffNotifSettings(models.TransientModel):
     """ Settings configuration for any Notifications."""
     _inherit = "res.config.settings"
@@ -20,7 +21,7 @@ class MandateStaffNotifSettings(models.TransientModel):
         string="Mandate cancelled scheduled activity",
         domain=[("share", "=", False)],
         help="Define which user will be assigned to the scheduled actions.",
-        readonly=False,
+        readonly=False
     )
 
     @api.model
