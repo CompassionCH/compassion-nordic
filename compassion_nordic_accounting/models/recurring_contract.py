@@ -8,11 +8,7 @@
 #
 ##############################################################################
 
-
-from functools import reduce
-
 from odoo import api, fields, models, _
-
 
 class RecurringContract(models.Model):
     _inherit = "recurring.contract"
