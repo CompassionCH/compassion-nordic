@@ -1,0 +1,12 @@
+<odoo>
+    <record id="view_recurring_contract_group_form" model="ir.ui.view">
+        <field name="name">payment.option.hide.invoice.day</field>
+        <field name="model">recurring.contract.group</field>
+        <field name="inherit_id" ref="recurring_contract.view_group_contract_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_day']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>
