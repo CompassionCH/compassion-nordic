@@ -53,6 +53,7 @@
     "data": [
         "views/account_move_view.xml",
         "views/load_mandate_wizard_view.xml",
+        "views/contract_group_view.xml",
         "views/partner_tax_file_res.xml",
         "views/menu_finance_receivables.xml",
         "views/generate_tax_wizard_view.xml",
