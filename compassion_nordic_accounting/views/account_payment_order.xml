@@ -1,0 +1,12 @@
+<odoo>
+    <record id="account_payment_order_nordic" model="ir.ui.view">
+        <field name="name">account.payment.order.nordic.id</field>
+        <field name="model">account.payment.order</field>
+        <field name="inherit_id" ref="account_payment_order.account_payment_order_form"/>
+        <field name="arch" type="xml">
+            <field name="description" position="before">
+                <field name="skip_payment_line" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+            </field>
+        </field>
+    </record>
+</odoo>
