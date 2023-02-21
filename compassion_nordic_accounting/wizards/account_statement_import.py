@@ -35,8 +35,9 @@ class AccountStatementImport(models.TransientModel):
 
     def import_file_button(self):
         if self.large_file_import:
+            journal_id = self.env.context.get("journal_id")
             # Import in background and return a message.
-            self.with_delay()._import_file_with_journal(self.env.context.get("journal_id"))
+            self.with_company(self.env["account.journal"].browse(journal_id).company_id.id).with_delay()._import_file_with_journal(journal_id)
             self.env.user.notify_success(message=_(
                 "Import job launched. Come back in a few minutes to check your statements."))
         else:

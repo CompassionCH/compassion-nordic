@@ -39,6 +39,7 @@
         # OCA/bank-payment
         "account_banking_pain_base",
         "account_banking_mandate",
+        "account_payment_order",
         # OCA/partner-contact
         "partner_contact_birthdate",
         # OCA/account-invoicing
@@ -52,6 +53,7 @@
     ],
     "data": [
         "views/account_move_view.xml",
+        "views/account_payment_order.xml",
         "views/load_mandate_wizard_view.xml",
         "views/contract_group_view.xml",
         "views/partner_tax_file_res.xml",
