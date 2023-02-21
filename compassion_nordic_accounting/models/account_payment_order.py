@@ -8,6 +8,4 @@ class AccountPaymentOrder(models.Model):
                                        default=True)
 
     def draft2open(self):
-        ctx = self.env.context.copy()
-        ctx.update({"skip_payment_line": self.skip_payment_line})
-        return super(AccountPaymentOrder, self.with_context(ctx)).draft2open()
+        return super(AccountPaymentOrder, self.with_context(skip_payment_line=self.skip_payment_line)).draft2open()
