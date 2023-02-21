@@ -5,7 +5,6 @@ class AccountPaymentOrder(models.Model):
     _inherit = 'account.payment.order'
 
     skip_payment_line = fields.Boolean(string="Skip payment lines",
-                                       help="Should the payment lines be generated ?",
                                        default=True)
 
     def draft2open(self):
