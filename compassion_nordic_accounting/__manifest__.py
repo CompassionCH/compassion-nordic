@@ -52,6 +52,7 @@
         "web_notify"
     ],
     "data": [
+        "data/ir_cron.xml",
         "views/account_move_view.xml",
         "views/account_payment_order.xml",
         "views/load_mandate_wizard_view.xml",

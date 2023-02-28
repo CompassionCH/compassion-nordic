@@ -1,4 +1,7 @@
+import logging
 from odoo import api, models, fields
+
+_logger = logging.getLogger(__name__)
 
 
 class AccountMove(models.Model):
@@ -36,3 +39,20 @@ class AccountMove(models.Model):
         'line_ids.full_reconcile_id')
     def _compute_amount_custom(self):
         self._compute_amount()
+
+    def _prepare_rate_change(self, rate_change_date="2023-05-01"):
+        balance_product = self.env.ref("recurring_contract.product_balance_migr")
+        invoices = self.search([
+            ("invoice_category", "=", "sponsorship"),
+            ("state", "=", "posted"),
+            ("payment_state", "!=", "paid"),
+            ("invoice_date_due", ">=", rate_change_date),
+            ("line_ids.product_id", "=", balance_product.id)
+        ])
+        invoices.button_draft()
+        for inv in invoices:
+            balance_lines = inv.mapped("invoice_line_ids").filtered(lambda l: l.product_id == balance_product)
+            inv.write({"invoice_line_ids": [(2, line_id) for line_id in balance_lines.ids]})
+        invoices.action_post()
+        _logger.info("Removed balance on %s invoices", str(len(invoices)))
+        return invoices.ids
