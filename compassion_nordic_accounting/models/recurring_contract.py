@@ -27,7 +27,7 @@ class RecurringContract(models.Model):
         invoice_lines = super()._filter_open_invoices_to_cancel()
         modified_orders = self.env["account.payment.order"]
         for move_line in invoice_lines:
-            payment_line = self.env["account.payment.line"].search([
+            payment_line = self.env["account.payment.line"].sudo().search([
                 ("move_line_id.move_id", "=", move_line.move_id.id),
                 ("amount_currency", ">=", -move_line.amount_currency),
                 ("state", "!=", "cancel")
