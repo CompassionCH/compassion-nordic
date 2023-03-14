@@ -34,6 +34,12 @@ checkout = git clone 'https://github.com/oca/connector-telephony' 'connector-tel
 [mis-builder]
 checkout = git clone 'https://github.com/oca/mis-builder' 'mis-builder' -b 14.0
 
+[mis-builder-contrib]
+checkout = git clone 'https://github.com/oca/mis-builder-contrib' 'mis-builder-contrib' -b 14.0
+
+[multi-company]
+checkout = git clone 'https://github.com/oca/multi-company' 'multi-company' -b 14.0
+
 [partner-contact]
 checkout = git clone 'https://github.com/oca/partner-contact' 'partner-contact' -b 14.0
 
@@ -51,6 +57,9 @@ checkout = git clone 'https://github.com/oca/server-ux' 'server-ux' -b 14.0
 
 [server-tools]
 checkout = git clone 'https://github.com/oca/server-tools' 'server-tools' -b 14.0
+
+[stock-logistics-warehouse]
+checkout = git clone 'https://github.com/oca/stock-logistics-warehouse' 'stock-logistics-warehouse' -b 14.0
 
 [web]
 checkout = git clone 'https://github.com/oca/web' 'web' -b 14.0
