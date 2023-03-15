@@ -58,6 +58,7 @@
     </template>
 
     <template id="childpack_small">
+        <t t-set="disableFooter" t-value="1"/> <!-- Goes with a modification on the odoo template web.external_layout -->
         <t t-set="marginLeft" t-value="formMargin or 0"/>
         <t t-set="full" t-value="marginLeft > 0"/>
         <t t-set="small" t-value="not full"/>
@@ -278,6 +279,7 @@
               width: 23mm;
               height: 23mm;
             }
+            /* This doesn't work with wkhtmltopdf so we added a t-if in the base template of odoo */
             .header,.footer {
                 display: none;
             }
