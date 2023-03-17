@@ -43,17 +43,21 @@ class AccountStatementImport(models.TransientModel):
         else:
             return_action = super().import_file_button()
             # Lauch a job for bank statements auto reconciliations
-            statements = self.env["account.bank.statement"].browse(return_action["res_id"])
-            statements.with_delay().auto_reconcile()
+            self._run_auto_reconcile_on_bs(return_action["res_id"])
             return return_action
 
     def _import_file_with_journal(self, journal_id):
         result = self.with_context(
             journal_id=journal_id, from_large_import=True, auto_post=self.auto_post)._import_file()
         # Lauch a job for bank statements auto reconciliations
-        statements = self.env["account.bank.statement"].browse(result["statement_ids"])
-        statements.with_delay().auto_reconcile()
+        self._run_auto_reconcile_on_bs(result["statement_ids"])
         return result
+
+    def _run_auto_reconcile_on_bs(self, statement_ids):
+        statements = self.env["account.bank.statement"].browse(statement_ids)
+        # Run asynchronous auto reconcile.
+        for statement in statements:
+            statement.with_delay().auto_reconcile()
 
     def import_single_file(self, file_data, result):
         if self.large_file_import and self.maximum_lines:

@@ -59,9 +59,10 @@ class StatementCompletionRule(models.Model):
     def get_partner_from_phone_swish(self, stmt_vals, st_line_vals):
         res = {}
         phone_number = st_line_vals.get("narration")
+        phone_number = int(phone_number) if isinstance(phone_number,float) else phone_number
         sweden = self.env.ref("base.se").id
         if phone_number:
-            phone_strip = int(phone_number.strip("+46").replace(" ", ""))
+            phone_strip = int(str(phone_number).strip("+46").replace(" ", ""))
             self.env.cr.execute(""" 
                 SELECT id FROM res_partner
                 WHERE replace(phone, ' ', '') LIKE '%%%s'
