@@ -40,15 +40,16 @@ class LoadMandateWizard(models.Model):
         "Mandate",
         check_company=True,
     )
+    kid = fields.Char()
     old_mandate_state = fields.Char()
     current_mandate_state = fields.Char(compute="_compute_all", store=True)
 
     @api.depends('mandate_id')
     def _compute_all(self):
         for rec in self:
-            rec.partner_id = rec.mandate_id.partner_id
+            rec.partner_id = rec.mandate_id.partner_id if rec.mandate_id else rec.partner_id
             rec.company_id = rec.mandate_id.company_id
-            rec.current_mandate_state = rec.mandate_id.state
+            rec.current_mandate_state = rec.mandate_id.state if rec.mandate_id else rec.old_mandate_state
 
     def generate_new_mandate(self):
         try:

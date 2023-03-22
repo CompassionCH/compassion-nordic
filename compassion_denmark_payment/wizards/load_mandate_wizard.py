@@ -107,7 +107,8 @@ class LoadMandateWizard(models.Model):
                             else:
                                 mandate_id = valid.id
                         data_dict = {"name_file": wizard.name_file, 'mandate_id': mandate_id,
-                                     'old_mandate_state': old_state, 'is_cancelled': is_cancelled}
+                                     'old_mandate_state': old_state, 'is_cancelled': is_cancelled,
+                                     'partner_id': info.customer_number}
                         if data_dict['mandate_id'] not in data:
                             data.append(data_dict)
             self._log_results(data)

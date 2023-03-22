@@ -37,10 +37,26 @@
                 <field name="company_id"/>
                 <field name="partner_id" widget="many2one"/>
                 <field name="mandate_id" widget="many2one"/>
+                <field name="kid"/>
                 <field name="old_mandate_state"/>
                 <field name="current_mandate_state"/>
                 <field name="create_date"/>
             </tree>
+        </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="view_mandate_import_custom_search" model="ir.ui.view">
+        <field name="name">mandate.import.custom.search</field>
+        <field name="model">load.mandate.wizard</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name_file"/>
+                <field name="partner_id"/>
+                <group expand="0" string="Group By">
+                    <filter string="Files" name="name_file" domain="[]" context="{'group_by':'name_file'}"/>
+                </group>
+            </search>
         </field>
     </record>
 </odoo>
