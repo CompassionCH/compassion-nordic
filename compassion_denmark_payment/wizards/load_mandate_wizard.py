@@ -112,5 +112,6 @@ class LoadMandateWizard(models.Model):
                         if data_dict['mandate_id'] not in data:
                             data.append(data_dict)
             self._log_results(data)
+            self.unlink()
         else:
             super().generate_new_mandate()

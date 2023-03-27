@@ -40,7 +40,7 @@ class LoadMandateWizard(models.Model):
         "Mandate",
         check_company=True,
     )
-    kid = fields.Char()
+    kid = fields.Char(help="kundeidentifikasjon, is the payment reference for a specific partner")
     old_mandate_state = fields.Char()
     current_mandate_state = fields.Char(compute="_compute_all", store=True)
 
