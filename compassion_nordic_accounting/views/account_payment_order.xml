@@ -5,7 +5,7 @@
         <field name="inherit_id" ref="account_payment_order.account_payment_order_form"/>
         <field name="arch" type="xml">
             <field name="description" position="before">
-                <field name="skip_payment_line" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                <field name="skip_payment_line"/>
             </field>
         </field>
     </record>
