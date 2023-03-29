@@ -10,6 +10,7 @@
 from . import account_banking_mandate_compassion
 from . import account_move
 from . import account_payment
+from . import account_payment_mode
 from . import account_payment_order
 from . import bank_statement
 from . import partner_tax_file_res
