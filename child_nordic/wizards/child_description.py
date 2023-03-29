@@ -159,10 +159,11 @@ class ChildDescriptionCH(models.TransientModel):
         descriptions.
         {lang: description_field}
         """
-        return {
-            "en_US": "desc_en",
+        res = super()._supported_languages()
+        res.update({
             "nb_NO": "desc_no",
             "sv_SE": "desc_se",
             "da_DK": "desc_da",
             "fi_FI": "desc_en"
-        }
+        })
+        return res
