@@ -41,6 +41,7 @@ class LoadMandateWizard(models.Model):
                         if not res:
                             is_cancelled = None
                             old_state = "Payment option not found"
+                            partner = self.env['res.partner']
                         elif transaction.registration_type == netsgiro.AvtaleGiroRegistrationType.DELETED_AGREEMENT:
                             # If the mandate is already cancelled we should avoid error
                             if partner.valid_mandate_id.state in ['valid', 'draft']:
@@ -87,7 +88,7 @@ class LoadMandateWizard(models.Model):
                                 mandate_id = valid.id
                         data_dict = {"name_file": wizard.name_file, 'mandate_id': mandate_id,
                                      'old_mandate_state': old_state, 'is_cancelled': is_cancelled,
-                                     'kid': transaction.kid}
+                                     'kid': transaction.kid, 'partner_id': partner.id}
                         if data_dict['mandate_id'] not in data:
                             data.append(data_dict)
             self._log_results(data)
