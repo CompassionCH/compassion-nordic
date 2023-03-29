@@ -44,9 +44,6 @@
         "data/res.lang.compassion.csv",
         "views/compassion_child.xml",
         "views/compassion_project.xml",
-        "views/print_childpack_view.xml",
-        "report/childpack.xml",
-        "security/ir.model.access.csv"
     ],
     "demo": [],
     "installable": True,
