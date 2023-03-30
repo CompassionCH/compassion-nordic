@@ -58,6 +58,9 @@ checkout = git clone 'https://github.com/oca/server-ux' 'server-ux' -b 14.0
 [server-tools]
 checkout = git clone 'https://github.com/oca/server-tools' 'server-tools' -b 14.0
 
+[social]
+checkout = git clone 'https://github.com/oca/social' -b 14.0
+
 [stock-logistics-warehouse]
 checkout = git clone 'https://github.com/oca/stock-logistics-warehouse' 'stock-logistics-warehouse' -b 14.0
 
