@@ -28,7 +28,7 @@
 # pylint: disable=C8101
 {
     "name": "Compassion Child Nordic",
-    "version": "14.0.1.0.0",
+    "version": "14.0.1.0.1",
     "category": "Other",
     "sequence": 150,
     "author": "Compassion CH",
