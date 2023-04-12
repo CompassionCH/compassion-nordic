@@ -53,7 +53,7 @@ class LoadMandateWizard(models.Model):
             if rec.mandate_id:
                 current_state = rec.mandate_id.state
             elif rec.is_cancelled:
-                current_state = "Cancelled"
+                current_state = "cancel"
             else:
                 current_state = rec.old_mandate_state
             rec.current_mandate_state = current_state
