@@ -43,13 +43,14 @@ class LoadMandateWizard(models.Model):
     kid = fields.Char(help="kundeidentifikasjon, is the payment reference for a specific partner")
     old_mandate_state = fields.Char()
     current_mandate_state = fields.Char(compute="_compute_all", store=True)
+    is_cancelled = fields.Boolean(default=False)
 
     @api.depends('mandate_id')
     def _compute_all(self):
         for rec in self:
             rec.partner_id = rec.mandate_id.partner_id if rec.mandate_id else rec.partner_id
             rec.company_id = rec.mandate_id.company_id
-            rec.current_mandate_state = rec.mandate_id.state if rec.mandate_id else rec.old_mandate_state
+            rec.current_mandate_state = rec.mandate_id.state if rec.mandate_id else rec.old_mandate_state if not rec.is_cancelled else "Cancelled"
 
     def generate_new_mandate(self):
         try:
@@ -60,11 +61,10 @@ class LoadMandateWizard(models.Model):
 
     def _log_results(self, vals_list):
         for vals in vals_list:
-            is_cancelled = vals.pop("is_cancelled")
             # Enter a value in the table
-            self.env['load.mandate.wizard'].create(vals)
+            mandate = self.env['load.mandate.wizard'].create(vals)
             # Create a scheduled activity for mandate that has been cancelled
-            if is_cancelled:
+            if mandate.is_cancelled:
                 user_id = self.env["ir.config_parameter"].sudo().get_param(f"compassion_nordic_accounting.mandate_notif_{self.env.company.id}")
                 self.env["account.banking.mandate"].browse(vals.get("mandate_id")).activity_schedule(
                     activity_type_id=self.env['mail.activity.type'].search([('name', '=', 'To Do')],
