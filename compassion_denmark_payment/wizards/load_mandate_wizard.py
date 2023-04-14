@@ -19,7 +19,7 @@ import io
 
 class LoadMandateWizard(models.Model):
     _inherit = "load.mandate.wizard"
-    _description = "Link gifts with letters"
+    _description = "Load mandates for Danish company"
 
     def generate_new_mandate(self):
         # When we aren't on the denmark company we call the parent to try other childrens modules
@@ -60,7 +60,6 @@ class LoadMandateWizard(models.Model):
                                         "Contract Group '%s' does not exists"
                                     )
                                     % info.mandate_number)
-                            partner = res.partner_id
                             mandate = partner.valid_mandate_id
                             mandate.cancel()
                             mandate_id = mandate.id
@@ -108,7 +107,7 @@ class LoadMandateWizard(models.Model):
                                 mandate_id = valid.id
                         data_dict = {"name_file": wizard.name_file, 'mandate_id': mandate_id,
                                      'old_mandate_state': old_state, 'is_cancelled': is_cancelled,
-                                     'partner_id': info.customer_number}
+                                     'partner_id': partner.id}
                         if data_dict['mandate_id'] not in data:
                             data.append(data_dict)
             self._log_results(data)
