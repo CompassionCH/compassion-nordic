@@ -16,7 +16,7 @@ from odoo.exceptions import ValidationError
 
 class LoadMandateWizard(models.Model):
     _inherit = "load.mandate.wizard"
-    _description = "Link gifts with letters"
+    _description = "Load mandates for Norway company"
 
     def generate_new_mandate(self):
         # When we aren't on the norway company we call the parent to try other childrens modules

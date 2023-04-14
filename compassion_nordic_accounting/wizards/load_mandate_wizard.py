@@ -17,7 +17,7 @@ import io
 
 class LoadMandateWizard(models.Model):
     _name = "load.mandate.wizard"
-    _description = "Link gifts with letters"
+    _description = "Load mandates Generic"
     _order = "create_date desc"
 
     data_mandate = fields.Binary("Mandate file")
