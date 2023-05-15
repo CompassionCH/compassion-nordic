@@ -1,12 +1,11 @@
-from odoo import models, fields, api
-
-class MyReport(models.Model):
+from odoo import models, fields
+class DisbursementData(models.Model):
     _name = 'disbursement.data'
-    _description = 'Disbursement data'
+    _description = 'Disbursement Data'
 
-    company_id = fields.Many2one('res.company', string='Company', required=True)
+    company = fields.Char(string='Company', required=True)
     month = fields.Date(string='Month', required=True)
-    account_id = fields.Many2one('account.account', string='Account', required=True)
+    account = fields.Char(string='Account', required=True)
     fund = fields.Char(string='Fund')
     debit = fields.Float(string='Debit')
     credit = fields.Float(string='Credit')

@@ -1,0 +1,10 @@
+<odoo>
+    <data>
+        <record model="ir.rule" id="rule_disbursement_data">
+            <field name="name">Disbursement Data Access</field>
+            <field name="model_id" ref="model_disbursement_data"/>
+            <field name="domain_force">[('company','=',user.company_id.id)]</field>
+            <field name="groups" eval="[(4, ref('billing.group_billing_administrator'))]"/>
+        </record>
+    </data>
+</odoo>
