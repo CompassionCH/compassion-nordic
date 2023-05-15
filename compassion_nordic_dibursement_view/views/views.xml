@@ -1,10 +1,10 @@
 <odoo>
     <data>
-        <record id="disbursement_data_tree_view" model="ir.ui.view">
-            <field name="name">disbursement.data.tree.view</field>
+        <record model="ir.ui.view" id="disbursement_data_tree_view">
+            <field name="name">Disbursement Data Tree View</field>
             <field name="model">disbursement.data</field>
             <field name="arch" type="xml">
-                <tree string="Disbursement data" groups="billing.group_billing_administrator">
+                <tree string="Disbursement Data">
                     <field name="company"/>
                     <field name="month"/>
                     <field name="account"/>
@@ -16,22 +16,36 @@
             </field>
         </record>
 
-        <record id="action_disbursement_data" model="ir.actions.act_window">
-            <field name="name">Disbursement Data</field>
-            <field name="res_model">disbursement.data</field>
-            <field name="view_mode">tree,form</field>
-            <field name="help" type="html">
-                <p class="oe_view_nocontent_create">
-                    Click to create a new record.
-                </p>
+        <record model="ir.ui.view" id="disbursement_data_form_view">
+            <field name="name">Disbursement Data Form View</field>
+            <field name="model">disbursement.data</field>
+            <field name="arch" type="xml">
+                <form string="Disbursement Data">
+                    <sheet>
+                        <group>
+                            <field name="company"/>
+                            <field name="month"/>
+                            <field name="account"/>
+                            <field name="fund"/>
+                            <field name="debit"/>
+                            <field name="credit"/>
+                            <field name="amount"/>
+                        </group>
+                    </sheet>
+                </form>
             </field>
         </record>
 
-        <record id="disbursement_data_menu" model="ir.ui.menu">
+        <record model="ir.actions.act_window" id="disbursement_data_action">
             <field name="name">Disbursement Data</field>
-            <field name="sequence" type="int">20</field>
-            <field name="action" ref="disbursement_data_action"/>
-            <field name="groups" eval="[(4, ref('billing.group_billing_administrator'))]"/>
+            <field name="res_model">disbursement.data</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
         </record>
+
+        <menuitem name="Disbursement Data" id="menu_disbursement_data"
+            action="disbursement_data_action"
+            sequence="20"
+            groups="billing.group_billing_administrator"/>
     </data>
 </odoo>
