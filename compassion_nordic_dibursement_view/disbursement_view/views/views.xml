@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="view_my_report_tree" model="ir.ui.view">
+            <field name="name">Disbursement data</field>
+            <field name="model">disbursement.data</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="company"/>
+                    <field name="month"/>
+                    <field name="account"/>
+                    <field name="fund"/>
+                    <field name="debit"/>
+                    <field name="credit"/>
+                    <field name="amount"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_my_report" model="ir.actions.act_window">
+            <field name="name">Disbursement data</field>
+            <field name="res_model">disbursement.data</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_my_report_tree"/>
+            <field name="search_view_id" ref="view_my_report_tree"/>
+        </record>
+    </data>
+</odoo>
