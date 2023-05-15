@@ -15,21 +15,17 @@
                 </tree>
             </field>
         </record>
-        <act_window name="Disbursement data"
-                    res_model="disbursement.data"
-                    view_mode="tree,form"
-                    domain="[]"
-                    context="{}"
-                    search_view_id="disbursement_data_search_view"
-                    help="Display disbursement data."/>
 
-        <record id="action_my_report" model="ir.actions.act_window">
-            <field name="name">Disbursement data</field>
+        <record id="action_disbursement_data" model="ir.actions.act_window">
+            <field name="name">Disbursement Data</field>
             <field name="res_model">disbursement.data</field>
-            <field name="view_mode">tree</field>
-            <field name="view_id" ref="view_my_report_tree"/>
-            <field name="search_view_id" ref="view_my_report_tree"/>
-        </record>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to create a new record.
+                </p>
+            </field>
+        </record>   
 
         <record id="disbursement_data_menu" model="ir.ui.menu">
             <field name="name">Disbursement Data</field>
