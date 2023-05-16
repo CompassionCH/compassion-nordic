@@ -39,13 +39,11 @@
         <record model="ir.actions.act_window" id="disbursement_data_action">
             <field name="name">Disbursement Data</field>
             <field name="res_model">disbursement.data</field>
-            <field name="view_type">form</field>
+
             <field name="view_mode">tree,form</field>
         </record>
 
         <menuitem name="Disbursement Data" id="menu_disbursement_data"
-            action="disbursement_data_action"
-            sequence="20"
-            groups="billing.group_billing_administrator"/>
+            action="disbursement_data_action" parent="account.menu_finance_entries_accounting_miscellaneous" sequence="20" groups=""/>
     </data>
 </odoo>
