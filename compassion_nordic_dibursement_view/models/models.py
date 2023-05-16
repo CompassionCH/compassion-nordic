@@ -16,8 +16,8 @@ class DisbursementData(models.Model):
     def init(self):
         tools.drop_view_if_exists(self.env.cr, 'disbursement_data')
         self.env.cr.execute("""
-            CREATE OR REPLACE VIEW disbursement_data_view AS (
-            select rc."name" as company, date_trunc('month', am."date")::date as month,
+            CREATE OR REPLACE VIEW disbursement_data AS (
+            select row_number() over() as id, rc."name" as company, date_trunc('month', am."date")::date as month,
                 aa.code as account, pp.default_code as fund, sum(aml.debit) as debit,
                 sum(aml.credit) as credit, sum(aml.debit - aml.credit) as amount
             from account_move_line aml
