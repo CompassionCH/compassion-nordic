@@ -1,11 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
-        <record id="view_my_report_tree" model="ir.ui.view">
-            <field name="name">Disbursement data</field>
+        <record model="ir.ui.view" id="disbursement_data_tree_view">
+            <field name="name">Disbursement Data Tree View</field>
             <field name="model">disbursement.data</field>
             <field name="arch" type="xml">
-                <tree>
+                <tree string="Disbursement Data">
                     <field name="company"/>
                     <field name="month"/>
                     <field name="account"/>
@@ -17,12 +16,15 @@
             </field>
         </record>
 
-        <record id="action_my_report" model="ir.actions.act_window">
-            <field name="name">Disbursement data</field>
+
+        <record model="ir.actions.act_window" id="disbursement_data_action">
+            <field name="name">Disbursement Data</field>
             <field name="res_model">disbursement.data</field>
+
             <field name="view_mode">tree</field>
-            <field name="view_id" ref="view_my_report_tree"/>
-            <field name="search_view_id" ref="view_my_report_tree"/>
         </record>
+
+        <menuitem name="Disbursement Data" id="menu_disbursement_data"
+            action="disbursement_data_action" parent="account.menu_finance_entries_accounting_miscellaneous" sequence="20" groups=""/>
     </data>
 </odoo>

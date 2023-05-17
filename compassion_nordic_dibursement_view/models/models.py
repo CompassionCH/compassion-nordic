@@ -1,21 +1,23 @@
-from odoo import models, fields, api
+from odoo import api, fields, models, tools
 
-class MyReport(models.Model):
+class DisbursementData(models.Model):
     _name = 'disbursement.data'
-    _description = 'Disbursement data'
+    _auto = False
+    _description = 'Disbursement Data'
 
-    company_id = fields.Many2one('res.company', string='Company', required=True)
+    company = fields.Char(string='Company', required=True)
     month = fields.Date(string='Month', required=True)
-    account_id = fields.Many2one('account.account', string='Account', required=True)
+    account = fields.Char(string='Account', required=True)
     fund = fields.Char(string='Fund')
     debit = fields.Float(string='Debit')
     credit = fields.Float(string='Credit')
     amount = fields.Float(string='Amount')
 
-
-    def search(self, args, offset=0, limit=None, order=None, count=False):
+    def init(self):
+        tools.drop_view_if_exists(self.env.cr, 'disbursement_data')
         self.env.cr.execute("""
-            select rc."name" as company, date_trunc('month', am."date")::date as month,
+            CREATE OR REPLACE VIEW disbursement_data AS (
+            select row_number() over() as id, rc."name" as company, date_trunc('month', am."date")::date as month,
                 aa.code as account, pp.default_code as fund, sum(aml.debit) as debit,
                 sum(aml.credit) as credit, sum(aml.debit - aml.credit) as amount
             from account_move_line aml
@@ -30,20 +32,5 @@ class MyReport(models.Model):
                 and (aa.code like '7%' or aa.code like '3%')
             group by rc."name", date_trunc('month', am."date"), aa.code, pp.default_code
             having (sum(aml.debit) > 0 or sum(aml.credit) > 0)
-            order by month
-        """)
-
-        results = self.env.cr.fetchall()
-        records = []
-        for result in results:
-            records.append({
-                'company': result[0],
-                'month': result[1],
-                'account': result[2],
-                'fund': result[3],
-                'debit': result[4],
-                'credit': result[5],
-                'amount': result[6],
-            })
-
-        return records
+            order by month)
+            """)
