@@ -21,7 +21,7 @@
             <field name="name">Disbursement Data</field>
             <field name="res_model">disbursement.data</field>
 
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">tree</field>
         </record>
 
         <menuitem name="Disbursement Data" id="menu_disbursement_data"
