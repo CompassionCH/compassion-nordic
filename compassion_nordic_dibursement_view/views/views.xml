@@ -16,25 +16,6 @@
             </field>
         </record>
 
-        <record model="ir.ui.view" id="disbursement_data_form_view">
-            <field name="name">Disbursement Data Form View</field>
-            <field name="model">disbursement.data</field>
-            <field name="arch" type="xml">
-                <form string="Disbursement Data">
-                    <sheet>
-                        <group>
-                            <field name="company"/>
-                            <field name="month"/>
-                            <field name="account"/>
-                            <field name="fund"/>
-                            <field name="debit"/>
-                            <field name="credit"/>
-                            <field name="amount"/>
-                        </group>
-                    </sheet>
-                </form>
-            </field>
-        </record>
 
         <record model="ir.actions.act_window" id="disbursement_data_action">
             <field name="name">Disbursement Data</field>
