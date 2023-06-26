@@ -90,6 +90,8 @@ class StatementCompletionRule(models.Model):
         row = self.env.cr.fetchone()
         if row:
             res["partner_id"] = row[0]
+            raw_data = st_line_vals.get("raw_data", "")
+            res["raw_data"] = f"Similarity: {row[1]*100}% \n{raw_data}"
         return res
 
     def get_partner_swedbank(self, stmt_vals, st_line_vals):
