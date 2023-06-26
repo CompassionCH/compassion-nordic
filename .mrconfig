@@ -31,6 +31,9 @@ checkout = git clone 'https://github.com/compassionch/compassion-nordic' 'compas
 [connector-telephony]
 checkout = git clone 'https://github.com/oca/connector-telephony' 'connector-telephony' -b 14.0
 
+[crm]
+checkout = git clone 'https://github.com/oca/crm' 'crm' -b 14.0
+
 [mis-builder]
 checkout = git clone 'https://github.com/oca/mis-builder' 'mis-builder' -b 14.0
 

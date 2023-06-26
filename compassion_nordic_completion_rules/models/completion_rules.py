@@ -79,7 +79,7 @@ class StatementCompletionRule(models.Model):
 
     def get_partner_fuzzy(self, stmt_vals, st_line_vals):
         res = {}
-        partner_name = st_line_vals.get("partner_name")
+        partner_name = st_line_vals.get("partner_name") or st_line_vals.get("payment_ref")
         # Use SQL query to allow similarity ordering
         self.env.cr.execute("""
             SELECT id, similarity(name, %s) AS sml FROM res_partner

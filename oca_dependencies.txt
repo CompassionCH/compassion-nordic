@@ -22,6 +22,7 @@ bank-payment
 bank-statement-import
 compassion-accounting https://github.com/CompassionCH/compassion-accounting
 connector-telephony
+crm
 odoo-base https://github.com/vertelab/odoo-base
 mis-builder
 mis-builder-contrib
