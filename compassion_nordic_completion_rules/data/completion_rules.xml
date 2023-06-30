@@ -3,26 +3,26 @@
         <record id="set_suspense_acc" model="account.statement.completion.rule">
             <field name="name">Nordic: set bank lines to suspense account</field>
             <field name="sequence">60</field>
-            <field name="function_to_call">set_suspense_acc</field>
+            <field name="python_completion_rule">set_suspense_acc</field>
             <field name="journal_ids" search="[('code', '=', 'SBSE1')]"/>
         </record>
 
         <record id="get_partner_from_phone_rule" model="account.statement.completion.rule">
             <field name="name">Nordic: find partner from phone for swish statements</field>
             <field name="sequence">10</field>
-            <field name="function_to_call">get_partner_from_phone_swish</field>
+            <field name="python_completion_rule">get_partner_from_phone_swish</field>
             <field name="journal_ids" search="[('code', '=', 'SWI')]"/>
         </record>
         <record id="get_partner_from_name_rule" model="account.statement.completion.rule">
             <field name="name">Nordic: find partner based on fuzzy search on name</field>
             <field name="sequence">99</field>
-            <field name="function_to_call">get_partner_fuzzy</field>
+            <field name="python_completion_rule">get_partner_fuzzy</field>
             <field name="journal_ids" search="[('code', 'in', ['SWI','BG1','SBDK1','SBSE1'])]"/>
         </record>
         <record id="get_partner_swedbank_rule" model="account.statement.completion.rule">
             <field name="name">Nordic: find partner based on child reference in Swedbank statements</field>
             <field name="sequence">10</field>
-            <field name="function_to_call">get_partner_swedbank</field>
+            <field name="python_completion_rule">get_partner_swedbank</field>
             <field name="journal_ids" search="[('code', '=', 'SBSE1')]"/>
         </record>
     </data>
