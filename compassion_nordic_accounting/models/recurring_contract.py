@@ -8,7 +8,7 @@
 #
 ##############################################################################
 
-from odoo import fields, models, _
+from odoo import api, fields, models, _
 
 
 class RecurringContract(models.Model):
@@ -18,6 +18,14 @@ class RecurringContract(models.Model):
         # Show selection of all companies except Norden (id = 1)
         domain="[('id', '!=', 1)]",
     )
+
+    @api.model_create_single
+    def create(self, vals):
+        group = self.env['recurring.contract.group'].browse(vals.get('group_id'))
+        if vals.get('reference', '/') == '/':
+            vals['reference'] = self.env['ir.sequence'].next_by_code('recurring.contract.ref')
+            group.set_reference(vals["reference"])
+        return super().create(vals)
 
     def _filter_open_invoices_to_cancel(self):
         """

@@ -15,6 +15,7 @@ from . import account_payment_order
 from . import bank_statement
 from . import partner_tax_file_res
 from . import recurring_contract
+from . import recurring_contract_group
 from . import partner_bank_compassion
 from . import recurring_contract_line
 from . import res_config_settings
