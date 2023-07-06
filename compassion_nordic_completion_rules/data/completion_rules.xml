@@ -3,26 +3,80 @@
         <record id="set_suspense_acc" model="account.statement.completion.rule">
             <field name="name">Nordic: set bank lines to suspense account</field>
             <field name="sequence">60</field>
-            <field name="python_completion_rule">set_suspense_acc</field>
+            <field name="python_completion_rule">
+journal_id = env['account.journal'].browse(stmts_vals['journal_id'])
+if journal_id.suspense_account_id:
+    suspense_strings = [
+        "Autogiro inbetalning",
+        "Bankgiro inbetalning",
+        "Swish +",
+    ]
+
+    if float(line_amount) >= 0 and any(s in ref for s in suspense_strings):
+        stmt_line["counterpart_account_id"] = journal_id.suspense_account_id.id
+        result = True
+            </field>
             <field name="journal_ids" search="[('code', '=', 'SBSE1')]"/>
         </record>
 
         <record id="get_partner_from_phone_rule" model="account.statement.completion.rule">
             <field name="name">Nordic: find partner from phone for swish statements</field>
             <field name="sequence">10</field>
-            <field name="python_completion_rule">get_partner_from_phone_swish</field>
+            <field name="python_completion_rule">
+phone_number = stmt_line.get("narration")
+phone_number = int(phone_number) if isinstance(phone_number,float) else phone_number
+sweden = env.ref("base.se").id
+if phone_number:
+  phone_strip = int(str(phone_number).strip("+46").replace(" ", ""))
+  env.cr.execute("""
+      SELECT id FROM res_partner
+      WHERE replace(phone, ' ', '') LIKE '%%%s'
+      OR replace(mobile, ' ', '') LIKE '%%%s'
+      AND country_id = %s
+      ORDER BY number_sponsorships DESC;
+  """, [phone_strip, phone_strip, sweden])
+  partner_id = env.cr.fetchone()
+  if partner_id:
+    stmt_line["partner_id"] = partner_id
+    result = True
+            </field>
             <field name="journal_ids" search="[('code', '=', 'SWI')]"/>
         </record>
         <record id="get_partner_from_name_rule" model="account.statement.completion.rule">
             <field name="name">Nordic: find partner based on fuzzy search on name</field>
             <field name="sequence">99</field>
-            <field name="python_completion_rule">get_partner_fuzzy</field>
+            <field name="python_completion_rule">
+partner_name = stmt_line.get("partner_name")
+# Use SQL query to allow similarity ordering
+env.cr.execute("""
+    SELECT id, similarity(name, %s) AS sml FROM res_partner
+    WHERE name %% %s
+    ORDER BY sml DESC
+    LIMIT 1;
+""", [partner_name] * 2)
+row = env.cr.fetchone()
+if row:
+    stmt_line["partner_id"] = row[0]
+    result = True
+            </field>
             <field name="journal_ids" search="[('code', 'in', ['SWI','BG1','SBDK1','SBSE1'])]"/>
         </record>
         <record id="get_partner_swedbank_rule" model="account.statement.completion.rule">
             <field name="name">Nordic: find partner based on child reference in Swedbank statements</field>
             <field name="sequence">10</field>
-            <field name="python_completion_rule">get_partner_swedbank</field>
+            <field name="python_completion_rule">
+transaction_type = stmt_line.get("payment_ref")
+if transaction_type in ("Insättning", "Överföring"):
+    child_ref = ref
+    if child_ref:
+        if len(child_ref) == 9:
+            # Insert 0 to the old ref
+            child_ref = child_ref[:2] + "0" + child_ref[2:5] + "0" + child_ref[5:]
+        child = env["compassion.child"].search([("local_id", "=", child_ref)])
+        if child and child.sponsorship_ids:
+            stmt_line["partner_id"] = child.sponsorship_ids[0].partner_id.id
+            result = True
+            </field>
             <field name="journal_ids" search="[('code', '=', 'SBSE1')]"/>
         </record>
     </data>
