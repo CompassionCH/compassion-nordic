@@ -53,8 +53,7 @@ class AccountPaymentOrder(models.Model):
             data_delivery.sections[0].add_payment(customer_number=f'{pymt_trx.partner_id.ref:15}',
                                                   mandate_number=pymt_trx.payment_line_ids[0].move_line_id.move_id.
                                                   line_ids.mapped('contract_id').group_id.ref,
-                                                  reference=(pymt_trx.date.strftime("%b").capitalize()
-                                                             + ' ' + pymt_trx.payment_line_ids[0].payment_type.capitalize())[:20],
+                                                  reference=f"{self.id}_{pymt_trx.id}_{pymt_trx.ref}_"[:30],
                                                   amount=pymt_trx.amount,
                                                   sign_code=beservice.SignCode.COLLECTION,
                                                   payment_date=pymt_trx.date,

@@ -1,0 +1,4 @@
+id,code,name
+automated_dk_payment_rejected,237,Beservice payment rejected
+automated_dk_payment_cancelled,238,Beservice payment cancelled
+automated_dk_payment_charged_back,239,Beservice payment charged back
