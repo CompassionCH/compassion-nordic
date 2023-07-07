@@ -11,3 +11,4 @@
 ##############################################################################
 
 from . import load_mandate_wizard
+from . import payment_return_import
