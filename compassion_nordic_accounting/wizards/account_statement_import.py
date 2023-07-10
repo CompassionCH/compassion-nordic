@@ -22,7 +22,7 @@ class AccountStatementImport(models.TransientModel):
     large_file_import = fields.Boolean(
         help="Use this for large statement files. The process will run in the background so that you can continue "
              "to work in the meantime.",
-        default=True
+        default=False
     )
     maximum_lines = fields.Integer(
         help="Use this to split large statements into multiple smaller ones. It can be useful for speeding up "
