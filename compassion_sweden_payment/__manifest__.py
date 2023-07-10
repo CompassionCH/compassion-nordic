@@ -34,9 +34,13 @@
     "website": "http://www.compassion.ch",
     "license": "AGPL-3",
     "category": "Banking addons",
-    "depends": ["compassion_nordic_accounting"],
+    "depends": [
+        "compassion_nordic_accounting",
+        "account_payment_return_import"  # OCA/account-payment
+    ],
     "data": [
         "data/account_payment_method.xml",
+        "data/payment.return.reason.csv",
         "data/statement_import_sheet_mapping.xml",
     ],
     "installable": True,

@@ -25,13 +25,13 @@ class AccountPaymentOrder(models.Model):
         payment_initiation = bggiro.PaymentInitiation(date_written=self.create_date,
                                                       bankgiro_number=self.company_partner_bank_id.acc_number,
                                                       customer_number=self.payment_mode_id.initiating_party_identifier)
-        for payment_line in self.payment_line_ids:
+        for payment in self.payment_ids:
             payment_initiation.add_payment(
                 transaction_type=bggiro.TransactionType.INCOMING_PAYMENT,
-                payment_date=payment_line.date,
+                payment_date=payment.date,
                 period_code=bggiro.PeriodCode.ONCE,
                 number_recurring_payments=0,
-                payer_number=int(payment_line.move_line_id.move_id.line_ids.mapped('contract_id').group_id.ref),
-                amount=int(payment_line.amount_currency),
-                reference=payment_line.communication[:16])
+                payer_number=int(payment.move_id.line_ids.mapped('contract_id').group_id.ref),
+                amount=int(payment.amount),
+                reference=payment.id[:16])
         return payment_initiation.to_ocr().encode('iso-8859-1'), "{}.txt".format(self.name)
