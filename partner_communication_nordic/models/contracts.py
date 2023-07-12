@@ -30,6 +30,7 @@ class RecurringContract(models.Model):
     )
 
     def contract_waiting(self):
+        self = self.with_context(async_mode=False) # Disable asynchronous to prevent serialization errors
         res = super().contract_waiting()
         self.filtered(lambda c: "S" in c.type and not c.is_active).with_context({})._new_dossier()
         return res
