@@ -23,11 +23,6 @@ class PartnerCommunication(models.Model):
         # We always fall back to Sweden
         return self.env["res.company"].browse(2)
 
-    def get_photo_by_post_attachment(self):
-        self.ensure_one()
-        attachments = self.get_child_picture_attachment()
-        return attachments
-
     def get_childpack_attachment(self):
         self.ensure_one()
         lang = self.partner_id.lang
