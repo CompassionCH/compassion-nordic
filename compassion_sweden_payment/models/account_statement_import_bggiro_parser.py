@@ -52,7 +52,7 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
     @api.model
     def _convert_line_to_transactions(self, line: bggiro.Payment):
         pay_opt = self.env['recurring.contract.group'].search([('ref', '=', line.payer_number)], limit=1)
-        payment = self.env["account.payment"].browse(int(line.reference))
+        payment = self.env["account.payment"].search([("ref", "=", line.reference)], limit=1)
         return {
             "partner_id": pay_opt.partner_id.id,
             "amount": str(line.amount),
