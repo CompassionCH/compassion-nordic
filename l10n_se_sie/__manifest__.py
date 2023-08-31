@@ -21,7 +21,7 @@
 
 {
     'name': 'l10n_se: SIE-import',
-    'version': '14.0.0.0.1',
+    'version': '14.0.0.0.2',
     'summary': 'Module for importing SIE-files',
     'category': 'Accounting',
     'description': """
@@ -34,7 +34,7 @@
     'contributor': '',
     'maintainer': 'Vertel AB',
     'repository': 'https://github.com/vertelab/odoo-l10n_se',
-    'depends': ['l10n_se'],
+    'depends': ['l10n_se', 'account_fiscal_year'],
     'data': [
 		'data/l10n_se_sie_view.xml',
                 'views/account_view.xml',

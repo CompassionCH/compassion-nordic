@@ -61,9 +61,7 @@ class account_sie(models.TransientModel):
     serie_to_journal_ids = fields.One2many('account.sie.serie.to.journal', 'sie_export', string='Series to Journal')
     date_start = fields.Date(string="Date interval")
     date_stop = fields.Date(string="Stop Date")
-    period_ids = fields.Many2many(comodel_name="account.period",
-                                  string="Periods", )  # domain="[('company_id','=',self.env.ref('base.main_company').id)]"
-    fiscalyear_ids = fields.Many2one(comodel_name="account.fiscalyear", string="Fiscal Year",
+    fiscalyear_ids = fields.Many2one(comodel_name="account.fiscal.year", string="Fiscal Year",
                                      help="Moves in this fiscal years", )
     journal_ids = fields.Many2many(comodel_name="account.journal", string="Journal",
                                    help="Moves with this type of journals", )
@@ -100,7 +98,7 @@ class account_sie(models.TransientModel):
     def _get_rar_code(self, fy):
         self.ensure_one()
         i = 0
-        for year in self.fiscalyear_ids.sorted(lambda r: r.date_start, reverse=False):
+        for year in self.fiscalyear_ids.sorted(lambda r: r.date_from, reverse=False):
             if fy == year:
                 return i
             i += 1
@@ -298,13 +296,13 @@ class account_sie(models.TransientModel):
             search = []
             if self.date_start:
                 search.append(('date', '>=', self.date_start))
+            if self.date_stop:
                 search.append(('date', '<=', self.date_stop))
-            if self.fiscalyear_ids:
-                search.append(('period_id', 'in', [p.id for p in self.fiscalyear_ids.period_ids]))
-            if self.period_ids:
-                search.append(('period_id', 'in', [p.id for p in self.period_ids]))
             if self.journal_ids:
                 search.append(('journal_id', 'in', [j.id for j in self.journal_ids]))
+            if self.fiscalyear_ids:
+                search.append(('date', '>=', self.fiscalyear_ids.date_from))
+                search.append(('date', '<=', self.fiscalyear_ids.date_to))
             if self.partner_ids:
                 search.append(('partner_id', 'in', [p.id for p in self.partner_ids]))
             move_ids = self.env['account.move'].search(search)
@@ -328,10 +326,7 @@ class account_sie(models.TransientModel):
 
     def make_sie(self, ver_ids):
         def get_fiscalyears(ver_ids):
-            year_list = set()
-            for ver in ver_ids:
-                year_list.add(ver.period_id.fiscalyear_id)
-            return year_list
+            return self.env['account.fiscal.year'].search([('date_from','<=',ver_ids.search([],order="date desc",limit=1).date),('date_to','>=',ver_ids.search([],order="date asc",limit=1).date)])
 
         def get_accounts(ver_ids):
             return list(set(ver_ids.mapped('line_ids.account_id')))
@@ -341,7 +336,6 @@ class account_sie(models.TransientModel):
         if len(ver_ids) == 0:
             raise Warning('There are no entries for this selection, please do antoher')
         company = ver_ids[0].company_id
-        fiscalyear = ver_ids[0].period_id.fiscalyear_id
         user = self.env['res.users'].browse(self._context['uid'])
         # if not company.company_registry:
         #    raise Warning("Please configure company registry!")
@@ -354,8 +348,8 @@ class account_sie(models.TransientModel):
         str += '#SIETYP 4\n'
         for fiscalyear in get_fiscalyears(ver_ids):
             # ~ str += '#RAR %s %s %s\n' %(self._get_rar_code(fiscalyear), fiscalyear.date_start.replace('-',''), fiscalyear.date_stop.replace('-',''))
-            str += '#RAR %s %s %s\n' % (self._get_rar_code(fiscalyear), fiscalyear.date_start.strftime("%Y%m%d"),
-                                        fiscalyear.date_stop.strftime("%Y%m%d"))
+            str += '#RAR %s %s %s\n' % (self._get_rar_code(fiscalyear), fiscalyear.date_from.strftime("%Y%m%d"),
+                                        fiscalyear.date_to.strftime("%Y%m%d"))
         str += '#FNAMN "%s"\n' % company.name
         str += '#ORGNR %s\n' % company.company_registry
         str += '#ADRESS "%s" "%s" "%s %s" "%s"\n' % (
@@ -374,7 +368,7 @@ class account_sie(models.TransientModel):
         ub_accounts = []
         for ver in ver_ids:
             # ~ _logger.warning(f"{ver=}")
-            if ver.period_id.special == False:
+            if ver.state == 'posted':
                 str += '#VER %s "%s" %s "%s" %s %s\n{\n' % (self.escape_sie_string(ver.journal_id.type), ver.id,
                                                             self.escape_sie_string(ver.date.strftime("%Y%m%d")),
                                                             self.escape_sie_string(self.fix_empty(ver.narration))[:20],
@@ -396,13 +390,6 @@ class account_sie(models.TransientModel):
                         ub[trans.account_id.code] = 0.0
                     ub[trans.account_id.code] += trans.debit - trans.credit
                 str += '}\n'
-            else:  # IB
-                for trans in ver.line_ids:
-                    # _logger.warning(f"{trans=}")
-                    str += '#IB %s %s %s\n' % (
-                    self._get_rar_code(fiscalyear), self.escape_sie_string(trans.account_id.code),
-                    trans.debit - trans.credit)
-                    ub_accounts.append(trans.account_id.code)
         for account in ub:
             if account in ub_accounts:
                 str += '#UB %s %s %s\n' % (
