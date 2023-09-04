@@ -363,9 +363,15 @@ class account_sie(models.TransientModel):
         # TRANS  kontonr {objektlista} belopp  transdat transtext  kvantitet   sign
         # VER    serie vernr verdatum vertext regdatum sign
         # We seem to not add a regdatum which some parser don't agree with since we add the sign field
-        # ~ _logger.warning("BEFORE GOING TROUGH ALL VER")
+        # ~ _logger.warning("BEFORE GOING TROUGH ALL VER")yy
         ub = {}
         ub_accounts = []
+        account_obj = self.env['account.account']
+        init_tb = self.env['account.move.line'].read_group(domain = [('date','<',fiscalyear.date_from), ('account_id.user_type_id.internal_group','in',('assets', 'liability')),('company_id','=',company.id)],fields=["account_id", "balance"],groupby=["account_id"],)
+        for i in init_tb:
+                acc = account_obj.browse(i['account_id'][0]).code
+                str += '#IB %s %s %s\n' % (self._get_rar_code(fiscalyear), self.escape_sie_string(acc), i['balance'])
+                ub_accounts.append(acc)
         for ver in ver_ids:
             # ~ _logger.warning(f"{ver=}")
             if ver.state == 'posted':
