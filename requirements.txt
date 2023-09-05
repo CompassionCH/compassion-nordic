@@ -3,6 +3,7 @@ iso639-lang
 jwt
 langdetect
 netsgiro
+pdf2image
 phonenumbers
 pycups
 pytesseract

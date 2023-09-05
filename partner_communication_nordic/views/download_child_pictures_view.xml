@@ -1,0 +1,18 @@
+<odoo>
+    <record id="child_pictures_download_wizard_form" model="ir.ui.view">
+        <field name="name">child.pictures.download.wizard.form</field>
+        <field name="model">child.pictures.download.wizard</field>
+        <field name="inherit_id" ref="sponsorship_compassion.child_pictures_download_wizard_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group/group[2]" position="attributes">
+                <attribute name="attrs">{'invisible': [('type', '=', 'biennial')]}</attribute>
+            </xpath>
+            <field name="include_child_name" position="attributes">
+                <attribute name="attrs">{'invisible': [('type', '=', 'biennial')]}</attribute>
+            </field>
+            <field name="include_child_ref" position="attributes">
+                <attribute name="attrs">{'invisible': [('type', '=', 'biennial')]}</attribute>
+            </field>
+        </field>
+    </record>
+</odoo>

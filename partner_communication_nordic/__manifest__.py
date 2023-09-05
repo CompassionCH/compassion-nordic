@@ -28,8 +28,8 @@
 
 # pylint: disable=C8101
 {
-    "name": "Compassion CH Partner Communications",
-    "version": "12.0.1.2.0",
+    "name": "Compassion Nordic Communications",
+    "version": "12.0.1.3.0",
     "category": "Other",
     "author": "Compassion CH",
     "license": "AGPL-3",
@@ -39,13 +39,14 @@
         "survey",
         "partner_communication_compassion",
     ],
-    "external_dependencies": {"python": []},
+    "external_dependencies": {"python": ["pdf2image"]},
     "data": [
         "report/onboarding_photo_by_post.xml",
         "data/onboarding_process.xml",
         "data/onboarding_survey.xml",
         "views/contract_view.xml",
         "views/field_office_view.xml",
+        "views/download_child_pictures_view.xml",
     ],
     "demo": [],
     "installable": True,
