@@ -304,8 +304,8 @@ class account_sie(models.TransientModel):
                 search.append(('partner_id', 'in', [p.id for p in self.partner_ids]))
             move_ids = self.env['account.move'].search(search)
             self.fiscalyear_ids =  self.env['account.fiscal.year'].search([
-                ('date_from','<=',ver_ids.sorted('date',reverse=True)[0].date),
-                ('date_to','>=',ver_ids.sorted('date',reverse=False)[0].date)]).sorted('date_from',reverse=False)
+                ('date_from','<=',move_ids.sorted('date',reverse=True)[0].date),
+                ('date_to','>=',move_ids.sorted('date',reverse=False)[0].date)]).sorted('date_from',reverse=False)
             if self.account_ids:
                 accounts = [l.move_id.id for l in self.env['account.move.line'].search(
                     [('account_id', 'in', [a.id for a in self.account_ids])])]
