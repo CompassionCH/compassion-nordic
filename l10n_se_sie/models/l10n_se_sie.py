@@ -61,7 +61,7 @@ class account_sie(models.TransientModel):
     serie_to_journal_ids = fields.One2many('account.sie.serie.to.journal', 'sie_export', string='Series to Journal')
     date_start = fields.Date(string="Date interval")
     date_stop = fields.Date(string="Stop Date")
-    fiscalyear_ids = fields.Many2one(comodel_name="account.fiscal.year", string="Fiscal Year",
+    fiscalyear_ids = fields.Many2many(comodel_name="account.fiscal.year", string="Fiscal Year",
                                      help="Moves in this fiscal years", )
     journal_ids = fields.Many2many(comodel_name="account.journal", string="Journal",
                                    help="Moves with this type of journals", )
@@ -300,9 +300,6 @@ class account_sie(models.TransientModel):
                 search.append(('date', '<=', self.date_stop))
             if self.journal_ids:
                 search.append(('journal_id', 'in', [j.id for j in self.journal_ids]))
-            if self.fiscalyear_ids:
-                search.append(('date', '>=', self.fiscalyear_ids.date_from))
-                search.append(('date', '<=', self.fiscalyear_ids.date_to))
             if self.partner_ids:
                 search.append(('partner_id', 'in', [p.id for p in self.partner_ids]))
             move_ids = self.env['account.move'].search(search)
@@ -326,7 +323,7 @@ class account_sie(models.TransientModel):
 
     def make_sie(self, ver_ids):
         def get_fiscalyears(ver_ids):
-            return self.env['account.fiscal.year'].search([('date_from','<=',ver_ids.search([],order="date desc",limit=1).date),('date_to','>=',ver_ids.search([],order="date asc",limit=1).date)])
+            return self.env['account.fiscal.year'].search([('date_from','<=',ver_ids.sorted('date',reverse=True)[0].date),('date_to','>=',ver_ids.sorted('date',reverse=False)[0].date)]).sorted('date_from',reverse=False)
 
         def get_accounts(ver_ids):
             return list(set(ver_ids.mapped('line_ids.account_id')))
@@ -367,8 +364,9 @@ class account_sie(models.TransientModel):
         ub = {}
         ub_accounts = []
         account_obj = self.env['account.account']
-        init_tb = self.env['account.move.line'].read_group(domain = [('date','<',fiscalyear.date_from), ('account_id.user_type_id.internal_group','in',('assets', 'liability')),('company_id','=',company.id)],fields=["account_id", "balance"],groupby=["account_id"],)
-        for i in init_tb:
+        for fiscalyear in get_fiscalyears(ver_ids):
+            init_tb = self.env['account.move.line'].read_group(domain = [('date','<',fiscalyear.date_from), ('account_id.user_type_id.internal_group','in',('assets', 'liability')),('company_id','=',company.id)],fields=["account_id", "balance"],groupby=["account_id"],)
+            for i in init_tb:
                 acc = account_obj.browse(i['account_id'][0]).code
                 str += '#IB %s %s %s\n' % (self._get_rar_code(fiscalyear), self.escape_sie_string(acc), i['balance'])
                 ub_accounts.append(acc)
@@ -397,15 +395,16 @@ class account_sie(models.TransientModel):
                     ub[trans.account_id.code] += trans.debit - trans.credit
                 str += '}\n'
         for account in ub:
-            if account in ub_accounts:
-                str += '#UB %s %s %s\n' % (
-                self._get_rar_code(fiscalyear), self.escape_sie_string(account), ub.get(account, 0.0))
-            else:
+            for fiscalyear in get_fiscalyears(ver_ids):
+                if account in ub_accounts:
+                    str += '#UB %s %s %s\n' % (
+                    self._get_rar_code(fiscalyear), self.escape_sie_string(account), ub.get(account, 0.0))
+                else:
                 # TODO: account.code can contain whitespace and should be handled as such here and elsewhere.
                 # account.user_type.report_type in ('income', 'expense') => resultatkonto
                 # account.user_type.report_type in ('assets', 'liability') => balanskonto
-                str += '#RES %s %s %s\n' % (
-                self._get_rar_code(fiscalyear), self.escape_sie_string(account), ub.get(account, 0.0))
+                    str += '#RES %s %s %s\n' % (
+                    self._get_rar_code(fiscalyear), self.escape_sie_string(account), ub.get(account, 0.0))
 
         return str.encode('cp437', 'xmlcharrefreplace')  # ignore
 
