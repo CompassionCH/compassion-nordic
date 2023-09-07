@@ -303,6 +303,7 @@ class account_sie(models.TransientModel):
             if self.partner_ids:
                 search.append(('partner_id', 'in', [p.id for p in self.partner_ids]))
             move_ids = self.env['account.move'].search(search)
+           self.fiscalyear_ids =  self.env['account.fiscal.year'].search([('date_from','<=',ver_ids.sorted('date',reverse=True)[0].date),('date_to','>=',ver_ids.sorted('date',reverse=False)[0].date)]).sorted('date_from',reverse=False)
             if self.account_ids:
                 accounts = [l.move_id.id for l in self.env['account.move.line'].search(
                     [('account_id', 'in', [a.id for a in self.account_ids])])]
@@ -322,12 +323,8 @@ class account_sie(models.TransientModel):
         }
 
     def make_sie(self, ver_ids):
-        def get_fiscalyears(ver_ids):
-            return self.env['account.fiscal.year'].search([('date_from','<=',ver_ids.sorted('date',reverse=True)[0].date),('date_to','>=',ver_ids.sorted('date',reverse=False)[0].date)]).sorted('date_from',reverse=False)
-
         def get_accounts(ver_ids):
             return list(set(ver_ids.mapped('line_ids.account_id')))
-
         if len(self) > 0:
             sie_form = self[0]
         if len(ver_ids) == 0:
@@ -343,7 +340,7 @@ class account_sie(models.TransientModel):
         # ~ str += '#GEN %s\n'% fields.Date.today().replace('-','')
         str += '#GEN %s\n' % fields.Date.today().strftime("%Y%m%d")
         str += '#SIETYP 4\n'
-        for fiscalyear in get_fiscalyears(ver_ids):
+        for fiscalyear in self.fiscalyear_ids:
             # ~ str += '#RAR %s %s %s\n' %(self._get_rar_code(fiscalyear), fiscalyear.date_start.replace('-',''), fiscalyear.date_stop.replace('-',''))
             str += '#RAR %s %s %s\n' % (self._get_rar_code(fiscalyear), fiscalyear.date_from.strftime("%Y%m%d"),
                                         fiscalyear.date_to.strftime("%Y%m%d"))
@@ -364,7 +361,7 @@ class account_sie(models.TransientModel):
         ub = {}
         ub_accounts = []
         account_obj = self.env['account.account']
-        for fiscalyear in get_fiscalyears(ver_ids):
+        for fiscalyear in self.fiscalyear_ids:
             init_tb = self.env['account.move.line'].read_group(domain = [('date','<',fiscalyear.date_from), ('account_id.user_type_id.internal_group','in',('assets', 'liability')),('company_id','=',company.id)],fields=["account_id", "balance"],groupby=["account_id"],)
             for i in init_tb:
                 acc = account_obj.browse(i['account_id'][0]).code
@@ -395,7 +392,7 @@ class account_sie(models.TransientModel):
                     ub[trans.account_id.code] += trans.debit - trans.credit
                 str += '}\n'
         for account in ub:
-            for fiscalyear in get_fiscalyears(ver_ids):
+            for fiscalyear in self.fiscalyear_ids:
                 if account in ub_accounts:
                     str += '#UB %s %s %s\n' % (
                     self._get_rar_code(fiscalyear), self.escape_sie_string(account), ub.get(account, 0.0))
