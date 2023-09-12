@@ -27,7 +27,10 @@ class MandateStaffNotifSettings(models.TransientModel):
     @api.model
     def get_values(self):
         res = super().get_values()
-        res["mandate_notif_id"] = int(self.get_param_multi_company("compassion_nordic_accounting.mandate_notif"))
+        mandate_notif_id = self.get_param_multi_company(
+            "compassion_nordic_accounting.mandate_notif")
+        if mandate_notif_id and mandate_notif_id.isdigit():
+            res["mandate_notif_id"] = int(mandate_notif_id)
         return res
 
     def set_values(self):
