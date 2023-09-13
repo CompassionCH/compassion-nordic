@@ -4,6 +4,7 @@ from odoo.exceptions import Warning, RedirectWarning, UserError
 from odoo import http
 import base64
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import odoo
 
 import logging
@@ -98,10 +99,10 @@ class account_sie(models.TransientModel):
     def _get_rar_code(self, fy):
         self.ensure_one()
         i = 0
-        for year in self.fiscalyear_ids.sorted(lambda r: r.date_from, reverse=False):
+        for year in self.fiscalyear_ids.sorted(lambda r: r.date_from, reverse=True):
             if fy == year:
                 return i
-            i += 1
+            i -= 1
         return i
         # raise Warning("Couldn't get RAR code.")
 
@@ -346,6 +347,9 @@ class account_sie(models.TransientModel):
             # ~ str += '#RAR %s %s %s\n' %(self._get_rar_code(fiscalyear), fiscalyear.date_start.replace('-',''), fiscalyear.date_stop.replace('-',''))
             str += '#RAR %s %s %s\n' % (self._get_rar_code(fiscalyear), fiscalyear.date_from.strftime("%Y%m%d"),
                                         fiscalyear.date_to.strftime("%Y%m%d"))
+            if len(self.fiscalyear_ids)==1:
+                str += '#RAR %s %s %s\n' % (-1, (fiscalyear.date_from - relativedelta(years=1)).strftime("%Y%m%d"),1
+                                        (fiscalyear.date_to - relativedelta(years=1)).strftime("%Y%m%d"))
         str += '#FNAMN "%s"\n' % company.name
         str += '#ORGNR %s\n' % company.company_registry
         str += '#ADRESS "%s" "%s" "%s %s" "%s"\n' % (
@@ -368,43 +372,57 @@ class account_sie(models.TransientModel):
             for i in init_tb:
                 acc = account_obj.browse(i['account_id'][0]).code
                 str += '#IB %s %s %s\n' % (self._get_rar_code(fiscalyear), self.escape_sie_string(acc), i['balance'])
+                if len(self.fiscalyear_ids)==1:
+                    str += '#UB %s %s %s\n' % (-1, self.escape_sie_string(acc), i['balance'])
                 ub_accounts.append(acc)
-        for ver in ver_ids:
+        old_rar = False
+        for ver in ver_ids.sorted(lambda r: r.date, reverse=False):
             # ~ _logger.warning(f"{ver=}")
-            if ver.state == 'posted':
-                str += '#VER %s "%s" %s "%s" %s %s\n{\n' % (self.escape_sie_string(ver.journal_id.type), ver.id,
-                                                            self.escape_sie_string(ver.date.strftime("%Y%m%d")),
-                                                            self.escape_sie_string(self.fix_empty(ver.narration))[:20],
-                                                            self.escape_sie_string(ver.create_date.strftime("%Y%m%d")),
-                                                            self.escape_sie_string(ver.create_uid.login))
-                # ~ str += '#VER %s "%s" %s "%s" %s\n{\n' % (self.escape_sie_string(ver.journal_id.type), ver.id, self.escape_sie_string(ver.date.strftime("%Y%m%d")), self.escape_sie_string(self.fix_empty(ver.narration))[:20], self.escape_sie_string(ver.create_uid.login))
-                # ~ str += '#VER %s "%s" %s "%s" %s\n{\n' % (self.escape_sie_string(ver.journal_id.type), self.escape_sie_string('' if ver.name == '/' else ver.name), self.escape_sie_string(ver.date.replace('-','')), self.escape_sie_string(self.fix_empty(ver.narration)), self.escape_sie_string(ver.create_uid.login))
-                # ~ str += '#VER "" %s %s "%s" %s %s\n{\n' % (ver.name, ver.date, ver.narration, ver.create_date, ver.create_uid.login)
-                for trans in ver.line_ids:
-                    # ~ _logger.warning(f"jakmar: {trans.display_type}")
-                    if trans.display_type == "line_note" or trans.display_type == 'line_section':
-                        continue
-                    str += '#TRANS %s {} %s %s "%s" %s %s\n' % (
-                    self.escape_sie_string(trans.account_id.code), trans.debit - trans.credit,
-                    self.escape_sie_string(trans.date.strftime("%Y%m%d")),
-                    self.escape_sie_string(self.fix_empty(trans.name)), trans.quantity,
-                    self.escape_sie_string(trans.create_uid.login))
-                    if trans.account_id.code not in ub:
-                        ub[trans.account_id.code] = 0.0
-                    ub[trans.account_id.code] += trans.debit - trans.credit
-                str += '}\n'
+            rar = 0 if len(self.fiscalyear_ids)==1 else self._get_rar_code(self.fiscalyear_ids.filtered(lambda x: x.date_from < ver.date and x.date_to > ver.date))
+            if old_rar =! False and old_rar < rar:
+                for account in ub:
+                    if account in ub_accounts:
+                        str += '#UB %s %s %s\n' % (
+                        old_rar, self.escape_sie_string(account), ub.get(account, 0.0))
+                    else:
+                    # TODO: account.code can contain whitespace and should be handled as such here and elsewhere.
+                    # account.user_type.report_type in ('income', 'expense') => resultatkonto
+                    # account.user_type.report_type in ('assets', 'liability') => balanskonto
+                        str += '#RES %s %s %s\n' % (
+                        old_rar, self.escape_sie_string(account), ub.get(account, 0.0))
+                        ub[account] = 0                  
+            str += '#VER %s "%s" %s "%s" %s %s\n{\n' % (self.escape_sie_string(ver.journal_id.type), ver.id,
+                                                        self.escape_sie_string(ver.date.strftime("%Y%m%d")),
+                                                        self.escape_sie_string(self.fix_empty(ver.narration))[:20],
+                                                        self.escape_sie_string(ver.create_date.strftime("%Y%m%d")),
+                                                        self.escape_sie_string(ver.create_uid.login))
+            # ~ str += '#VER %s "%s" %s "%s" %s\n{\n' % (self.escape_sie_string(ver.journal_id.type), ver.id, self.escape_sie_string(ver.date.strftime("%Y%m%d")), self.escape_sie_string(self.fix_empty(ver.narration))[:20], self.escape_sie_string(ver.create_uid.login))
+            # ~ str += '#VER %s "%s" %s "%s" %s\n{\n' % (self.escape_sie_string(ver.journal_id.type), self.escape_sie_string('' if ver.name == '/' else ver.name), self.escape_sie_string(ver.date.replace('-','')), self.escape_sie_string(self.fix_empty(ver.narration)), self.escape_sie_string(ver.create_uid.login))
+            # ~ str += '#VER "" %s %s "%s" %s %s\n{\n' % (ver.name, ver.date, ver.narration, ver.create_date, ver.create_uid.login)
+            for trans in ver.line_ids:
+                # ~ _logger.warning(f"jakmar: {trans.display_type}")
+                if trans.display_type == "line_note" or trans.display_type == 'line_section':
+                    continue
+                str += '#TRANS %s {} %s %s "%s" %s %s\n' % (
+                self.escape_sie_string(trans.account_id.code), trans.debit - trans.credit,
+                self.escape_sie_string(trans.date.strftime("%Y%m%d")),
+                self.escape_sie_string(self.fix_empty(trans.name)), trans.quantity,
+                self.escape_sie_string(trans.create_uid.login))
+                if trans.account_id.code not in ub:
+                    ub[trans.account_id.code] = 0.0
+                ub[trans.account_id.code] += trans.debit - trans.credit
+            str += '}\n'
         for account in ub:
-            for fiscalyear in self.fiscalyear_ids:
-                if account in ub_accounts:
-                    str += '#UB %s %s %s\n' % (
-                    self._get_rar_code(fiscalyear), self.escape_sie_string(account), ub.get(account, 0.0))
-                else:
-                # TODO: account.code can contain whitespace and should be handled as such here and elsewhere.
-                # account.user_type.report_type in ('income', 'expense') => resultatkonto
-                # account.user_type.report_type in ('assets', 'liability') => balanskonto
-                    str += '#RES %s %s %s\n' % (
-                    self._get_rar_code(fiscalyear), self.escape_sie_string(account), ub.get(account, 0.0))
-
+            if account in ub_accounts:
+                str += '#UB %s %s %s\n' % (
+                rar, self.escape_sie_string(account), ub.get(account, 0.0))
+            else:
+            # TODO: account.code can contain whitespace and should be handled as such here and elsewhere.
+            # account.user_type.report_type in ('income', 'expense') => resultatkonto
+            # account.user_type.report_type in ('assets', 'liability') => balanskonto
+                str += '#RES %s %s %s\n' % (
+                rar, self.escape_sie_string(account), ub.get(account, 0.0))
+        
         return str.encode('cp437', 'xmlcharrefreplace')  # ignore
 
     @api.model
