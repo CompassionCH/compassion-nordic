@@ -29,7 +29,7 @@
 # pylint: disable=C8101
 {
     "name": "Compassion Nordic Communications",
-    "version": "12.0.1.3.0",
+    "version": "12.0.1.3.1",
     "category": "Other",
     "author": "Compassion CH",
     "license": "AGPL-3",
@@ -47,6 +47,7 @@
         "views/contract_view.xml",
         "views/field_office_view.xml",
         "views/download_child_pictures_view.xml",
+        "views/communication_job_view.xml",
     ],
     "demo": [],
     "installable": True,

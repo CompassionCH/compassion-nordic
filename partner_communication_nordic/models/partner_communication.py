@@ -11,7 +11,7 @@ import logging
 from datetime import datetime
 
 
-from odoo import api, models, _
+from odoo import api, models, fields, _
 
 _logger = logging.getLogger(__name__)
 
@@ -19,6 +19,24 @@ _logger = logging.getLogger(__name__)
 class PartnerCommunication(models.Model):
     _inherit = "partner.communication.job"
 
+    child_ids = fields.Char(
+        compute="_compute_child_ids",
+        store=True
+    )
+
+    @api.depends("object_ids")
+    def _compute_child_ids(self):
+        for job in self:
+            objects = job.get_objects().exists()
+            if objects._name == "compassion.child":
+                job.child_ids = ",".join(objects.mapped("local_id"))
+            elif hasattr(objects, "child_id"):
+                job.child_ids = ",".join(objects.mapped("child_id.local_id"))
+            else:
+                job.child_ids = False
+
+    def _search_child_id(self, operator, value):
+        return [("object_id", operator, value)]
     def _fallback_company(self):
         # We always fall back to Sweden
         return self.env["res.company"].browse(2)
