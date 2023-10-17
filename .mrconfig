@@ -10,6 +10,9 @@ checkout = git clone 'https://github.com/oca/account-financial-reporting' 'accou
 [account-invoicing]
 checkout = git clone 'https://github.com/oca/account-invoicing' 'account-invoicing' -b 14.0
 
+[account-payment]
+checkout = git clone 'https://github.com/oca/account-payment' 'account-payment' -b 14.0
+
 [account-reconcile]
 checkout = git clone 'https://github.com/oca/account-reconcile' 'account-reconcile' -b 14.0
 
@@ -33,6 +36,9 @@ checkout = git clone 'https://github.com/oca/connector-telephony' 'connector-tel
 
 [crm]
 checkout = git clone 'https://github.com/oca/crm' 'crm' -b 14.0
+
+[currency]
+checkout = git clone 'https://github.com/oca/currency' 'currency' -b 14.0
 
 [mis-builder]
 checkout = git clone 'https://github.com/oca/mis-builder' 'mis-builder' -b 14.0
