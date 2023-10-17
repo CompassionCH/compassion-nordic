@@ -3,14 +3,11 @@
     <record id="view_partner_form" model="ir.ui.view">
         <field name="name">res.partner.skill</field>
         <field name="model">res.partner</field>
-        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="inherit_id" ref="partner_personal_info.view_partner_form_compassion_personal"/>
         <field name="arch" type="xml">
-            <field name="category_id" position="before">
+            <field name="uuid" position="before">
                 <field name="social_sec_nr" />
             </field>
         </field>
     </record>
-
-
-
 </odoo>
