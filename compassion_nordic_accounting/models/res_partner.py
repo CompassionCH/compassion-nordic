@@ -92,6 +92,17 @@ class ResPartner(models.Model):
         """
         return del_from_lib(SSN_CONTRY_FMT_LIST, [veronumero])
 
+    def forget_me(self):
+        super().forget_me()
+
+        # Anonymize and delete partner data
+        self.with_context(no_upsert=True, tracking_disable=True).write(
+            {
+                "social_sec_nr": False,
+            }
+        )
+        return True
+
 def del_from_lib(orig_lib_list, lib_list):
     """ @return a new list of stdnum object library """
     return [fmt for fmt in orig_lib_list if fmt not in lib_list]
