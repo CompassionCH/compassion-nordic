@@ -1,35 +1,37 @@
 <odoo>
-    <record id="swish_statement_mapping" model="account.statement.import.sheet.mapping">
-        <field name="name">Swish (SE)</field>
-        <field name="timestamp_column">Transaktionsdatum</field>
-        <field name="timestamp_format">%Y-%m-%d</field>
-        <field name="amount_column">Belopp</field>
-        <field name="description_column">Meddelande</field>
-        <field name="notes_column">Avsändarnummer</field>
-        <field name="reference_column">Orderreferens</field>
-        <field name="partner_name_column">Avsändarnamn</field>
-    </record>
+    <data noupdate="1">
+        <record id="swish_statement_mapping" model="account.statement.import.sheet.mapping">
+            <field name="name">Swish (SE)</field>
+            <field name="timestamp_column">Transaktionsdatum</field>
+            <field name="timestamp_format">%Y-%m-%d</field>
+            <field name="amount_column">Belopp</field>
+            <field name="description_column">Meddelande</field>
+            <field name="notes_column">Avsändarnummer</field>
+            <field name="reference_column">Orderreferens</field>
+            <field name="partner_name_column">Avsändarnamn</field>
+        </record>
 
-    <record id="swedbank_statement_mapping" model="account.statement.import.sheet.mapping">
-        <field name="name">Swedbank report (SE)</field>
-        <field name="timestamp_column">Valutadatum</field>
-        <field name="timestamp_format">%Y-%m-%d</field>
-        <field name="amount_column">Belopp</field>
-        <field name="description_column">Transaktionstyp</field>
-        <field name="reference_column">Referens</field>
-        <field name="balance_column">Bokfört saldo</field>
-    </record>
+        <record id="swedbank_statement_mapping" model="account.statement.import.sheet.mapping">
+            <field name="name">Swedbank report (SE)</field>
+            <field name="timestamp_column">Valutadatum</field>
+            <field name="timestamp_format">%Y-%m-%d</field>
+            <field name="amount_column">Belopp</field>
+            <field name="description_column">Transaktionstyp</field>
+            <field name="reference_column">Referens</field>
+            <field name="balance_column">Bokfört saldo</field>
+        </record>
 
-    <record id="bg105_statement_mapping" model="account.statement.import.sheet.mapping">
-        <field name="name">Bank Giro (SE)</field>
-        <field name="timestamp_column">Valutadatum</field>
-        <field name="timestamp_format">%Y-%m-%d</field>
-        <field name="amount_column">Belopp</field>
-        <field name="description_column">Betalningsreferens</field>
-        <field name="reference_column">Meddelande</field>
-        <field name="partner_name_column">Avsändare</field>
-        <field name="bank_account_column">Bankgironummer/
-Avinummer</field>
-        <field name="notes_column">Adress</field>
-    </record>
+        <record id="bg105_statement_mapping" model="account.statement.import.sheet.mapping">
+            <field name="name">Bank Giro (SE)</field>
+            <field name="timestamp_column">Valutadatum</field>
+            <field name="timestamp_format">%Y-%m-%d</field>
+            <field name="amount_column">Belopp</field>
+            <field name="description_column">Betalningsreferens</field>
+            <field name="reference_column">Meddelande</field>
+            <field name="partner_name_column">Avsändare</field>
+            <field name="bank_account_column">Bankgironummer/
+                Avinummer</field>
+            <field name="notes_column">Adress</field>
+        </record>
+    </data>
 </odoo>
