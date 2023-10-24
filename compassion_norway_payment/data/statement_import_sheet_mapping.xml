@@ -1,11 +1,13 @@
 <odoo>
-    <record id="vipps_statement_mapping" model="account.statement.import.sheet.mapping">
-        <field name="name">Vipps (NO)</field>
-        <field name="timestamp_column">Rentedato</field>
-        <field name="timestamp_format">%d.%m.%Y</field>
-        <field name="amount_column">Inn på konto</field>
-        <field name="description_column">Beskrivelse</field>
-        <field name="reference_column">Ref.</field>
-        <field name="transaction_id_column">Num.Ref.</field>
-    </record>
+    <data noupdate="1">
+        <record id="vipps_statement_mapping" model="account.statement.import.sheet.mapping">
+            <field name="name">Vipps (NO)</field>
+            <field name="timestamp_column">Rentedato</field>
+            <field name="timestamp_format">%d.%m.%Y</field>
+            <field name="amount_column">Inn på konto</field>
+            <field name="description_column">Beskrivelse</field>
+            <field name="reference_column">Ref.</field>
+            <field name="transaction_id_column">Num.Ref.</field>
+        </record>
+    </data>
 </odoo>
