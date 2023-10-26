@@ -34,7 +34,7 @@ class ResPartner(models.Model):
 
     @api.depends("social_sec_nr")
     def _compute_sec_nr(self):
-        """ Fill the value of the age, gender and birth_day if we're able to calculate it from SSN """
+        """Fill the value of the age, gender and birth_day if we're able to calculate it from SSN"""
         for partner in self:
             if partner.social_sec_nr:
                 # If a social security number has been filled in we check the format
@@ -43,24 +43,31 @@ class ResPartner(models.Model):
                 is_valid, valid_fmt = self._validate_ssn()
                 if is_valid:
                     if valid_fmt in self._list_has_bday():
-                        if valid_fmt in del_from_lib(SSN_CONTRY_FMT_LIST, [veronumero, cpr]):
+                        if valid_fmt in del_from_lib(
+                            SSN_CONTRY_FMT_LIST, [veronumero, cpr]
+                        ):
                             partner.gender = valid_fmt.get_gender(self.social_sec_nr)
-                        partner.birthdate_date = valid_fmt.get_birth_date(self.social_sec_nr)
+                        partner.birthdate_date = valid_fmt.get_birth_date(
+                            self.social_sec_nr
+                        )
                         partner._compute_age()
 
     @api.constrains("social_sec_nr")
     def _constrains_ssn(self):
-        """ Validate that the SSN format is the good one. If it's not the case raise an exception to the user.
-        """
+        """Validate that the SSN format is the good one. If it's not the case raise an exception to the user."""
         for partner in self:
             if partner.social_sec_nr:
                 if not self._validate_ssn():
-                    raise UserError(ERROR_MESSAGE.format(err_msg="Not a valid social security number."))
+                    raise UserError(
+                        ERROR_MESSAGE.format(
+                            err_msg="Not a valid social security number."
+                        )
+                    )
 
     def _validate_ssn(self):
         """Function to validate that the SSN format is one accepted by our system
 
-           @return is_valid Boolean, a stdnum object that define the good SSN fmt
+        @return is_valid Boolean, a stdnum object that define the good SSN fmt
         """
         self.ensure_one()
         # Loop on the format we accept
@@ -72,9 +79,9 @@ class ResPartner(models.Model):
 
     def _validate_vat(self):
         """Function to validate that the VAT format is one accepted by our system.
-           in some case it actually isn't VAT but it's organisation number.
+        in some case it actually isn't VAT but it's organisation number.
 
-           @return is_valid Boolean, a stdnum object that define the good VAT fmt
+        @return is_valid Boolean, a stdnum object that define the good VAT fmt
         """
         self.ensure_one()
         # Loop on the format we accept
@@ -86,23 +93,32 @@ class ResPartner(models.Model):
 
     @staticmethod
     def _list_has_bday():
-        """ Function that return the library objects that have the get_birth_date() function
+        """Function that return the library objects that have the get_birth_date() function
 
-            @return list of stdnum library object
+        @return list of stdnum library object
         """
         return del_from_lib(SSN_CONTRY_FMT_LIST, [veronumero])
 
     def forget_me(self):
-        super().forget_me()
-
-        # Anonymize and delete partner data
+        mandates = self.env["account.banking.mandate"].search(
+            [("partner_id", "=", self.id)]
+        )
+        account_moves = self.env["account.move"].search(
+            [
+                ("mandate_id", "in", mandates.ids),
+            ]
+        )
+        account_moves.write({"mandate_id": False})
+        # Delete records from account_banking_mandate
+        mandates.with_context(tracking_disable=True).unlink()
         self.with_context(no_upsert=True, tracking_disable=True).write(
             {
                 "social_sec_nr": False,
             }
         )
-        return True
+        return super().forget_me()
+
 
 def del_from_lib(orig_lib_list, lib_list):
-    """ @return a new list of stdnum object library """
+    """@return a new list of stdnum object library"""
     return [fmt for fmt in orig_lib_list if fmt not in lib_list]
