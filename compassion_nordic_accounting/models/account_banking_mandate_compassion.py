@@ -89,9 +89,8 @@ class AccountBankingMandate(models.Model):
         """
         Override function to notify removal in a message on partner feed
         """
-
-        for mandate in self:
-            mandate._update_mandate_status_partner("delete")
-
+        if not self.env.context.get('tracking_disable'):
+            for mandate in self:
+                mandate._update_mandate_status_partner("delete")
         result = super().unlink()
         return result

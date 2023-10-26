@@ -40,9 +40,10 @@ class ResPartnerBank(models.Model):
         return result
 
     def unlink(self):
-        """Override function to notify delte in a message
+        """Override function to notify delete in a message
         """
-        for acc in self:
-            self._account_notify_partner(acc, 'deleted')
+        if not self.env.context.get('tracking_disable'):
+            for acc in self:
+                self._account_notify_partner(acc, 'deleted')
         result = super().unlink()
         return result
