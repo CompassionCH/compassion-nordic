@@ -99,7 +99,7 @@ class ResPartner(models.Model):
         """
         return del_from_lib(SSN_CONTRY_FMT_LIST, [veronumero])
 
-    def forget_me(self):
+    def anonymize(self, vals=None):
         mandates = self.env["account.banking.mandate"].search(
             [("partner_id", "=", self.id)]
         )
@@ -116,7 +116,7 @@ class ResPartner(models.Model):
                 "social_sec_nr": False,
             }
         )
-        return super().forget_me()
+        return super().anonymize(vals)
 
 
 def del_from_lib(orig_lib_list, lib_list):
