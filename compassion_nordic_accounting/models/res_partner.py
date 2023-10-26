@@ -114,6 +114,7 @@ class ResPartner(models.Model):
         self.with_context(no_upsert=True, tracking_disable=True).write(
             {
                 "social_sec_nr": False,
+                "birthdate_date": False,
             }
         )
         return super().anonymize(vals)
