@@ -29,6 +29,7 @@
         <field name="arch" type="xml">
             <tree decoration-danger="current_mandate_state == 'cancel'"
                   decoration-success="current_mandate_state == 'valid'"
+                  decoration-warning="current_mandate_state == 'error'"
                   create="false"
                   edit="false"
                   delete="true"
