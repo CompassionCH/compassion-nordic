@@ -381,7 +381,6 @@ class account_sie(models.TransientModel):
                 if len(self.fiscalyear_ids) == 1:
                     str += '#UB %s %s %s\n' % (-1, self.escape_sie_string(acc), i['balance'])
                 ub[acc] = i['balance']
-        # set ub dict for ub_account with a 0 transaction balance
         old_rar = False
         for ver in ver_ids.sorted(lambda r: r.date, reverse=False):
             # ~ _logger.warning(f"{ver=}")
