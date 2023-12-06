@@ -297,7 +297,7 @@ class account_sie(models.TransientModel):
             action['res_ids'] = ver_ids
             return action
         else:
-            search = []
+            search = [('state','=','posted')]
             if self.date_start:
                 search.append(('date', '>=', self.date_start))
             if self.date_stop:
@@ -316,7 +316,7 @@ class account_sie(models.TransientModel):
                 move_ids = move_ids.filtered(lambda r: r.id in accounts)
 
             self.write(
-                {'state': 'get', 'data': base64.encodestring(self.make_sie(move_ids)), 'filename': 'filename.se'})
+                {'state': 'get', 'data': base64.encodebytes(self.make_sie(move_ids)), 'filename': 'filename.se'})
 
         return {
             'type': 'ir.actions.act_window',
@@ -368,12 +368,11 @@ class account_sie(models.TransientModel):
         # VER    serie vernr verdatum vertext regdatum sign
         # We seem to not add a regdatum which some parser don't agree with since we add the sign field
         # ~ _logger.warning("BEFORE GOING TROUGH ALL VER")yy
-        ub = {}
-        ub_accounts = []
+        ub = {} # dict of account with the yearly transctions
         account_obj = self.env['account.account']
         for fiscalyear in self.fiscalyear_ids:
             init_tb = self.env['account.move.line'].read_group(domain=[('date', '<', fiscalyear.date_from), (
-            'account_id.user_type_id.internal_group', 'in', ('assets', 'liability')), ('company_id', '=', company.id)],
+            'account_id.user_type_id.include_initial_balance', '=', True), ('company_id', '=', company.id)],
                                                                fields=["account_id", "balance"],
                                                                groupby=["account_id"], )
             for i in init_tb:
@@ -381,7 +380,7 @@ class account_sie(models.TransientModel):
                 str += '#IB %s %s %s\n' % (self._get_rar_code(fiscalyear), self.escape_sie_string(acc), i['balance'])
                 if len(self.fiscalyear_ids) == 1:
                     str += '#UB %s %s %s\n' % (-1, self.escape_sie_string(acc), i['balance'])
-                ub_accounts.append(acc)
+                ub[acc] = i['balance']
         old_rar = False
         for ver in ver_ids.sorted(lambda r: r.date, reverse=False):
             # ~ _logger.warning(f"{ver=}")
@@ -389,7 +388,8 @@ class account_sie(models.TransientModel):
                 self.fiscalyear_ids.filtered(lambda x: x.date_from <= ver.date and x.date_to >= ver.date))
             if old_rar != False and old_rar != rar:
                 for account in ub:
-                    if account in ub_accounts:
+                    bsacc = account_obj.search([('code','=',account),('user_type_id.include_initial_balance', '=', True),('company_id', '=', company.id)])
+                    if bsacc:
                         str += '#UB %s %s %s\n' % (
                             old_rar, self.escape_sie_string(account), ub.get(account, 0.0))
                     else:
@@ -422,7 +422,9 @@ class account_sie(models.TransientModel):
                 ub[trans.account_id.code] += trans.debit - trans.credit
             str += '}\n'
         for account in ub:
-            if account in ub_accounts:
+            bsacc = account_obj.search([('code', '=', account), ('user_type_id.include_initial_balance', '=', True),
+                                        ('company_id', '=', company.id)])
+            if bsacc:
                 str += '#UB %s %s %s\n' % (
                     rar, self.escape_sie_string(account), ub.get(account, 0.0))
             else:
