@@ -9,7 +9,7 @@
 ##############################################################################
 import logging
 
-from odoo import models
+from odoo import api, models
 
 _logger = logging.getLogger(__name__)
 
@@ -38,3 +38,21 @@ class ResPartner(models.Model):
     def _get_salutation_da_DK(self):
         self.ensure_one()
         return self._get_salutation_sv_SE()
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        # Blacklist partners by default
+        partners = super().create(vals_list)
+        for partner in partners.filtered("email"):
+            self.env["mail.blacklist"].create({
+                "email": partner.email
+            })
+        return partners
+
+    def write(self, vals):
+        new_email = vals.get("email")
+        if new_email:
+            self.env["mail.blacklist"].create({
+                "email": new_email
+            })
+        return super().write(vals)

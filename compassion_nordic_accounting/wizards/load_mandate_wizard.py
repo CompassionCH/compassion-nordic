@@ -49,7 +49,7 @@ class LoadMandateWizard(models.Model):
     def _compute_all(self):
         for rec in self:
             rec.partner_id = rec.mandate_id.partner_id if rec.mandate_id else rec.partner_id
-            rec.company_id = rec.mandate_id.company_id
+            rec.company_id = rec.mandate_id.company_id if rec.mandate_id else rec.company_id
             if rec.mandate_id:
                 current_state = rec.mandate_id.state
             elif rec.is_cancelled:
