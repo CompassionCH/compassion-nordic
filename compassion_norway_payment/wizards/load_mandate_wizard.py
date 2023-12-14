@@ -43,15 +43,19 @@ class LoadMandateWizard(models.Model):
                             old_state = "Payment option not found"
                             partner = self.env['res.partner']
                         elif transaction.registration_type == netsgiro.AvtaleGiroRegistrationType.DELETED_AGREEMENT:
-                            # If the mandate is already cancelled we should avoid error
-                            if partner.valid_mandate_id.state in ['valid', 'draft']:
-                                partner.valid_mandate_id.cancel()
+                            # we cancel mandates related to the bank account that is related to the kid
+                            bank_account = partner.bank_ids.filtered(lambda b: b.acc_number == transaction.kid)
+                            mandates = bank_account.mandate_ids
+                            for m in mandates.filtered(lambda l: l.state in ['valid', 'draft']):
+                                m.cancel()
+                                m.partner_bank_id.write({"active": False})
                                 is_cancelled = True
-                                payment_mode_id = self.env['account.payment.mode'].search([
+                            # we update the contract group with a manual payment
+                            payment_mode_id = self.env['account.payment.mode'].search([
                                     ('payment_method_id.code', '=', 'manual'),
                                     ('company_id', '=', self.env.company.id)], limit=1).id
-                                res.update({'payment_mode_id': payment_mode_id})
-                            else:
+                            res.update({'payment_mode_id': payment_mode_id})
+                            if not is_cancelled:
                                 old_state = "Mandate might already been deleted"
                         elif transaction.registration_type in (netsgiro.AvtaleGiroRegistrationType.ACTIVE_AGREEMENT,
                                                                netsgiro.AvtaleGiroRegistrationType.NEW_OR_UPDATED_AGREEMENT):
