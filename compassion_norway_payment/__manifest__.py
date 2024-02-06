@@ -37,7 +37,6 @@
     "data": [
         "data/account_payment_method.xml",
         "data/statement_import_sheet_mapping.xml",
-        "views/view_group_contract_form.xml"
     ],
     "installable": True,
 }

@@ -57,7 +57,6 @@
         "views/account_payment_mode.xml",
         "views/account_payment_order.xml",
         "views/load_mandate_wizard_view.xml",
-        "views/contract_group_view.xml",
         "views/partner_tax_file_res.xml",
         "views/menu_finance_receivables.xml",
         "views/generate_tax_wizard_view.xml",
