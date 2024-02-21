@@ -68,7 +68,7 @@ class LoadMandateWizard(models.Model):
                                 # We have to set the payment mode to bank transfer again
                                 active_dd_contract = partner.sponsorship_ids.filtered(
                                     lambda a: a.state not in ('terminated', 'cancelled')
-                                              and a.group_id.ref == info.mandate_number)
+                                              and a.group_id.ref == str(info.mandate_number))
                                 payment_mode_id = self.env['account.payment.mode'].search([
                                     ('payment_method_id.code', '=', 'manual'),
                                     ('company_id', '=', self.env.company.id)], limit=1).id
