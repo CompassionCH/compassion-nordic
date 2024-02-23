@@ -61,7 +61,8 @@ class LoadMandateWizard(models.Model):
                                                                netsgiro.AvtaleGiroRegistrationType.NEW_OR_UPDATED_AGREEMENT):
                             old_state = "None"
                             company_id = self.env.company.id
-                            bank_account = partner.bank_ids.filtered(lambda b: b.acc_number == transaction.kid)
+                            #bank_account = partner.bank_ids.filtered(lambda b: b.acc_number == transaction.kid)
+                            bank_account = self.env['res.partner.bank'].with_context(active_test=False).search([('acc_number','=',transaction.kid)])
                             # We have to update payment option
                             payment_mode_id = self.env['account.payment.mode'].search([
                                 ('payment_method_id.code', '=', 'norway_direct_debit')], limit=1).id
@@ -74,6 +75,13 @@ class LoadMandateWizard(models.Model):
                                         "company_id": company_id
                                     }
                                 )
+                            else:
+                                if 'cancel' in bank_account.mandate_ids.mapped('state'):
+                                    old_state = 'cancelled'
+                                if 'active' in bank_account.mandate_ids.mapped('state'):
+                                    old_state = 'active'
+                                if not bank_account.active:
+                                    bank_account.active = True
                             valid = bank_account.mandate_ids.filtered(lambda m: m.state == "valid")
 
                             if not valid:
@@ -90,6 +98,7 @@ class LoadMandateWizard(models.Model):
                                 mandate_id = mandate.id
                             else:
                                 mandate_id = valid.id
+                                old_state = 'valid'
                         data_dict = {"name_file": wizard.name_file, 'mandate_id': mandate_id,
                                      'old_mandate_state': old_state, 'is_cancelled': is_cancelled,
                                      'kid': transaction.kid, 'partner_id': partner.id}
