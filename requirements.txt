@@ -1,18 +1,2 @@
-beautifulsoup4
-iso639-lang
-jwt
-langdetect
-netsgiro
+# generated from manifests external_dependencies
 pdf2image
-phonenumbers
-pycups
-pytesseract
-python-magic
-python-stdnum==1.18
-pytz
-pyquery
-pyzbar
-regex
-timezonefinder
-unidecode
-wand

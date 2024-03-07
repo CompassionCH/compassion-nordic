@@ -1,0 +1,1 @@
+Adds customizations for Nordic communications

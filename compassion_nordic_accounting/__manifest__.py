@@ -29,8 +29,9 @@
 {
     "name": "Compassion Nordic Accounting",
     "summary": "Add Features for nordic Accounting",
-    "author": "Compassion CH",
-    "website": "http://www.compassion.ch",
+    "author": "Compassion Switzerland",
+    "website": "https://github.com/CompassionCH/compassion-nordic",
+    "version": "14.0.1.0.0",
     "license": "AGPL-3",
     "category": "Banking addons",
     "depends": [
@@ -49,7 +50,7 @@
         "account_statement_import_file_reconciliation_widget",
         "account_statement_import_txt_xlsx",
         # OCA/web
-        "web_notify"
+        "web_notify",
     ],
     "data": [
         "data/ir_cron.xml",
@@ -64,7 +65,7 @@
         "views/account_statement_import_view.xml",
         "views/mandate_staff_notif_settings_view.xml",
         "views/contracts_view.xml",
-        'security/ir.model.access.csv'
+        "security/ir.model.access.csv",
     ],
     "installable": True,
 }

@@ -43,12 +43,12 @@ Credits
 =======
 
 Authors
-~~~~~~~
+-------
 
-* Compassion CH
+* Compassion Switzerland
 
 Maintainers
-~~~~~~~~~~~
+-----------
 
 This module is part of the `CompassionCH/compassion-nordic <https://github.com/CompassionCH/compassion-nordic/tree/14.0/partner_communication_nordic>`_ project on GitHub.
 

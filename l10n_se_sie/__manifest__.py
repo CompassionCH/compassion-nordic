@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    Odoo SA, Open Source Management Solution, third party addon
@@ -20,31 +19,26 @@
 ##############################################################################
 
 {
-    'name': 'l10n_se: SIE-import',
-    'version': '14.0.0.0.2',
-    'summary': 'Module for importing SIE-files',
-    'category': 'Accounting',
-    'description': """
-        The module adds support for importing and reading SIE-files (.se-files)
-    """,
-	'author': 'Vertel AB',
-	'website': 'https://vertel.se/apps/odoo-l10n_se/l10n_se_sie',
-    'images': ['static/description/banner.png'],
-    'license': 'AGPL-3',
-    'contributor': '',
-    'maintainer': 'Vertel AB',
-    'repository': 'https://github.com/vertelab/odoo-l10n_se',
-    'depends': ['l10n_se', 'account_fiscal_year'],
-    'data': [
-		'data/l10n_se_sie_view.xml',
-                'views/account_view.xml',
-                'data/l10n_se_sie_data.xml',
-                'data/fix_account_type_skf.xml',
-                'security/ir.model.access.csv',
+    "name": "l10n_se: SIE-import",
+    "version": "14.0.0.0.2",
+    "summary": "Module for importing SIE-files",
+    "category": "Accounting",
+    "author": "Vertel AB, Compassion Switzerland",
+    "website": "https://github.com/CompassionCH/compassion-nordic",
+    "images": ["static/description/banner.png"],
+    "license": "AGPL-3",
+    "contributor": "",
+    "maintainer": "Vertel AB",
+    "repository": "https://github.com/vertelab/odoo-l10n_se",
+    "depends": ["l10n_se", "account_fiscal_year"],
+    "data": [
+        "data/l10n_se_sie_view.xml",
+        "views/account_view.xml",
+        "data/l10n_se_sie_data.xml",
+        "data/fix_account_type_skf.xml",
+        "security/ir.model.access.csv",
     ],
-  
     # 'demo': ['l10n_se_sie_demo.xml'],
-
-    'installable': 'True',
-    'application': 'False',
+    "installable": "True",
+    "application": "False",
 }

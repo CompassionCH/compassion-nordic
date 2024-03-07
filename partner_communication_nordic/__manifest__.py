@@ -29,11 +29,11 @@
 # pylint: disable=C8101
 {
     "name": "Compassion Nordic Communications",
-    "version": "12.0.1.3.1",
+    "version": "14.0.1.3.1",
     "category": "Other",
-    "author": "Compassion CH",
+    "author": "Compassion Switzerland",
     "license": "AGPL-3",
-    "website": "http://www.compassion.ch",
+    "website": "https://github.com/CompassionCH/compassion-nordic",
     "depends": [
         "base_automation",
         "survey",
