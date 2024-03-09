@@ -35,9 +35,13 @@
     "version": "14.0.1.3.3",
     "license": "AGPL-3",
     "category": "Banking addons",
-    "depends": ["compassion_nordic_accounting"],
+    "depends": [
+        "compassion_nordic_accounting",
+        "account_payment_return_import"  #OCA/account-payment
+    ],
     "data": [
         "data/account_payment_method.xml",
+        "data/payment.return.reason.csv"
     ],
     "installable": True,
 }

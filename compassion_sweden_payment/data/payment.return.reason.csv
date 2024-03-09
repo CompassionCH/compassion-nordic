@@ -1,0 +1,4 @@
+id,code,name
+automated_se_payment_insufficient_fund,1,Autogiro payment refused for insufficient fund
+automated_se_payment_no_connection,2,Autogiro payment refused for no connection
+automated_se_payment_renewed_funds,9,Autogiro payment refused for renewed funds
