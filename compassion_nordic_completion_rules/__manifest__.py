@@ -7,9 +7,8 @@
     # see https://odoo-community.org/page/development-status
     "development_status": "Beta",
     "category": "Accounting",
-    "website": "https://github.com/CompassionCH/compassion_nordic",
-    "author": "Compassion CH",
-    # see https://odoo-community.org/page/maintainer-role for a description of the maintainer role and responsibilities
+    "website": "https://github.com/CompassionCH/compassion-nordic",
+    "author": "Compassion Switzerland",
     "maintainers": ["ecino"],
     "license": "AGPL-3",
     "application": False,
@@ -27,8 +26,4 @@
         "data/completion_rules.xml",
         "data/trigram_index.xml",
     ],
-    "demo": [
-    ],
-    "qweb": [
-    ]
 }

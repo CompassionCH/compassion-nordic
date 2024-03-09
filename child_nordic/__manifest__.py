@@ -33,11 +33,11 @@
     "sequence": 150,
     "author": "Compassion CH",
     "license": "AGPL-3",
-    "website": "http://www.compassion.ch",
-    "development_status": "Stable",
+    "website": "https://github.com/CompassionCH/compassion-nordic",
+    "development_status": "Production/Stable",
     "depends": [
         "child_compassion",
-        "report_wkhtmltopdf_param"  # OCA/reporting-engine
+        "report_wkhtmltopdf_param",  # OCA/reporting-engine
     ],
     "data": [
         "data/ir.advanced.translation.csv",
