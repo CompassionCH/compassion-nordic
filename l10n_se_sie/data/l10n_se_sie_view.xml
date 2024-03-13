@@ -43,6 +43,7 @@
               <group>
                 <field name="journal_ids" widget="many2many_tags" />
                 <field name="partner_ids" widget="many2many_tags" />
+                <field name="company_id"  widget="many2one" />
                 <field name="account_ids" widget="many2many_tags" />
               </group>
             </page>

@@ -19,17 +19,17 @@
 ##############################################################################
 
 {
-    "name": "l10n_se: SIE-import",
+    "name": "l10n_se: SIE-export",
     "version": "14.0.0.0.2",
-    "summary": "Module for importing SIE-files",
+    "summary": "Module for exporting SIE-files",
     "category": "Accounting",
     "author": "Vertel AB, Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
     "images": ["static/description/banner.png"],
     "license": "AGPL-3",
     "contributor": "",
-    "maintainer": "Vertel AB",
-    "repository": "https://github.com/vertelab/odoo-l10n_se",
+    "maintainer": "Compassion Switzerland",
+    "repository": "https://github.com/CompassionCH/compassion-nordic",
     "depends": ["l10n_se", "account_fiscal_year"],
     "data": [
         "data/l10n_se_sie_view.xml",

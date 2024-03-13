@@ -76,7 +76,7 @@ class account_sie(models.TransientModel):
     show_account_lines = fields.Boolean(string='Show Account Lines')
     move_journal_id = fields.Many2one(comodel_name="account.journal", string="Journal",
                                       help="All imported account.moves will get this journal", )
-    company_id = fields.Many2one(related='move_journal_id.company_id')
+    company_id = fields.Many2one(comodel_name='res.company', required=True)
 
     accounts_type = fields.Selection(selection=[
         ('view', 'View'),
@@ -302,12 +302,14 @@ class account_sie(models.TransientModel):
                 search.append(('date', '>=', self.date_start))
             if self.date_stop:
                 search.append(('date', '<=', self.date_stop))
+            if self.company_id:
+                search.append(('company_id', '=', self.company_id.id))
             if self.journal_ids:
                 search.append(('journal_id', 'in', [j.id for j in self.journal_ids]))
             if self.partner_ids:
                 search.append(('partner_id', 'in', [p.id for p in self.partner_ids]))
             move_ids = self.env['account.move'].search(search)
-            self.fiscalyear_ids = self.env['account.fiscal.year'].search([
+            self.fiscalyear_ids = self.env['account.fiscal.year'].search([('company_id','=',self.company_id.id),
                 ('date_from', '<=', move_ids.sorted('date', reverse=True)[0].date),
                 ('date_to', '>=', move_ids.sorted('date', reverse=False)[0].date)]).sorted('date_from', reverse=False)
             if self.account_ids:
@@ -368,7 +370,7 @@ class account_sie(models.TransientModel):
         # VER    serie vernr verdatum vertext regdatum sign
         # We seem to not add a regdatum which some parser don't agree with since we add the sign field
         # ~ _logger.warning("BEFORE GOING TROUGH ALL VER")yy
-        ub = {} # dict of account with the yearly transctions
+        ub = {} # dict of account with the yearly transactions
         account_obj = self.env['account.account']
         for fiscalyear in self.fiscalyear_ids:
             init_tb = self.env['account.move.line'].read_group(domain=[('date', '<', fiscalyear.date_from), (
@@ -377,10 +379,10 @@ class account_sie(models.TransientModel):
                                                                groupby=["account_id"], )
             for i in init_tb:
                 acc = account_obj.browse(i['account_id'][0]).code
-                str += '#IB %s %s %s\n' % (self._get_rar_code(fiscalyear), self.escape_sie_string(acc), i['balance'])
+                str += '#IB %s %s %s\n' % (self._get_rar_code(fiscalyear), self.escape_sie_string(acc), round(i['balance'],2))
                 if len(self.fiscalyear_ids) == 1:
-                    str += '#UB %s %s %s\n' % (-1, self.escape_sie_string(acc), i['balance'])
-                ub[acc] = i['balance']
+                    str += '#UB %s %s %s\n' % (-1, self.escape_sie_string(acc), round(i['balance'],2))
+                ub[acc] = round(i['balance'],2)
         old_rar = False
         for ver in ver_ids.sorted(lambda r: r.date, reverse=False):
             # ~ _logger.warning(f"{ver=}")
@@ -426,19 +428,22 @@ class account_sie(models.TransientModel):
                                         ('company_id', '=', company.id)])
             if bsacc:
                 str += '#UB %s %s %s\n' % (
-                    rar, self.escape_sie_string(account), ub.get(account, 0.0))
+                    rar, self.escape_sie_string(account), round(ub.get(account, 0.0),2))
             else:
                 # TODO: account.code can contain whitespace and should be handled as such here and elsewhere.
                 # account.user_type.report_type in ('income', 'expense') => resultatkonto
                 # account.user_type.report_type in ('assets', 'liability') => balanskonto
                 str += '#RES %s %s %s\n' % (
-                    rar, self.escape_sie_string(account), ub.get(account, 0.0))
+                    rar, self.escape_sie_string(account), round(ub.get(account, 0.0),2))
 
         return str.encode('cp437', 'xmlcharrefreplace')  # ignore
 
     @api.model
     def escape_sie_string(self, s):
-        return s.replace('\n', ' ').replace('\\', '\\\\').replace('"', '\\"')
+        if s:
+            return s.replace('\n', ' ').replace('\\', '\\\\').replace('"', '\\"')
+        else:
+            return ''
 
     @api.model
     def export_sie(self, ver_ids):
@@ -469,7 +474,7 @@ class account_sie(models.TransientModel):
 
     # if narration is null, return empty string instead of parsing to False
     def fix_empty(self, narration):
-        if (narration):
+        if narration:
             return narration
         else:
             return ''
