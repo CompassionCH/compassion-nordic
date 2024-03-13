@@ -1,6 +1,6 @@
 import logging
 from odoo import api, models, fields
-
+from dateutil.relativedelta import relativedelta
 _logger = logging.getLogger(__name__)
 
 
@@ -19,6 +19,7 @@ class AccountMove(models.Model):
     amount_tax_signed = fields.Monetary(compute='_compute_amount_custom')
     amount_total_signed = fields.Monetary(compute='_compute_amount_custom')
     amount_residual_signed = fields.Monetary(compute='_compute_amount_custom')
+    is_late_payment = fields.Boolean(compute='_compute_is_late_payment', store=True)
 
     # Reduce the depends list of original source code which was producing the compute
     # of a lot of unrelated move lines when reconciling two items.
@@ -39,6 +40,11 @@ class AccountMove(models.Model):
         'line_ids.full_reconcile_id')
     def _compute_amount_custom(self):
         self._compute_amount()
+    def _compute_is_late_payment(self):
+        for record in self:
+            if record.last_payment:
+                one_month_from_date = record.date + relativedelta(months=1)
+                record.is_late_payment = one_month_from_date.replace(day=1) <= record.last_payment
 
     def _prepare_rate_change(self, rate_change_date="2023-05-01"):
         balance_product = self.env.ref("recurring_contract.product_balance_migr")
