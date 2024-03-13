@@ -338,7 +338,7 @@ class account_sie(models.TransientModel):
             sie_form = self[0]
         if len(ver_ids) == 0:
             raise Warning('There are no entries for this selection, please do antoher')
-        company = ver_ids[0].company_id
+        company = self.company_id
         user = self.env['res.users'].browse(self._context['uid'])
         # if not company.company_registry:
         #    raise Warning("Please configure company registry!")
@@ -373,7 +373,7 @@ class account_sie(models.TransientModel):
         ub = {} # dict of account with the yearly transactions
         account_obj = self.env['account.account']
         for fiscalyear in self.fiscalyear_ids:
-            init_tb = self.env['account.move.line'].read_group(domain=[('date', '<', fiscalyear.date_from), (
+            init_tb = self.env['account.move.line'].read_group(domain=[('move_id.state','=','posted'),('date', '<', fiscalyear.date_from), (
             'account_id.user_type_id.include_initial_balance', '=', True), ('company_id', '=', company.id)],
                                                                fields=["account_id", "balance"],
                                                                groupby=["account_id"], )
