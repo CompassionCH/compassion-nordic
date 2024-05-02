@@ -14,9 +14,9 @@ class ChildDescription(models.TransientModel):
     _inherit = "compassion.project.description"
 
     NORDIC_DESCRIPTIONS = {
-        "sv_SE": "desc_se",
-        "nb_NO": "desc_no",
-        "da_DK": "desc_da",
+        "sv_SE": "description_se",
+        "nb_NO": "description_no",
+        "da_DK": "description_da",
         "fi_FI": "description_en",
     }
 

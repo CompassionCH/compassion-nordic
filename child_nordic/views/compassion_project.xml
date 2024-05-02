@@ -5,9 +5,9 @@
         <field name="inherit_id" ref="child_compassion.view_compassion_project_form"/>
         <field name="arch" type="xml">
             <field name="description_en" position="after">
-                <field name="desc_se"/>
-                <field name="desc_no"/>
-                <field name="desc_da"/>
+                <field name="description_se"/>
+                <field name="description_no"/>
+                <field name="description_da"/>
             </field>
         </field>
     </record>

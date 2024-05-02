@@ -161,9 +161,9 @@ class ChildDescriptionCH(models.TransientModel):
         """
         res = super()._supported_languages()
         res.update({
-            "nb_NO": "desc_no",
-            "sv_SE": "desc_se",
-            "da_DK": "desc_da",
-            "fi_FI": "desc_en"
+            "nb_NO": "description_no",
+            "sv_SE": "description_se",
+            "da_DK": "description_da",
+            "fi_FI": "description_en"
         })
         return res
