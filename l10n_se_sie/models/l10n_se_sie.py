@@ -377,12 +377,24 @@ class account_sie(models.TransientModel):
             'account_id.user_type_id.include_initial_balance', '=', True), ('company_id', '=', company.id)],
                                                                fields=["account_id", "balance"],
                                                                groupby=["account_id"], )
+            # create initial balance #IB (and #UB for the previous fiscalyear if only one FY is produced)
             for i in init_tb:
                 acc = account_obj.browse(i['account_id'][0]).code
-                str += '#IB %s %s %s\n' % (self._get_rar_code(fiscalyear), self.escape_sie_string(acc), round(i['balance'],2))
+                bal = round(i['balance'],2)
+                str += '#IB %s %s %s\n' % (self._get_rar_code(fiscalyear), self.escape_sie_string(acc), bal)
                 if len(self.fiscalyear_ids) == 1:
-                    str += '#UB %s %s %s\n' % (-1, self.escape_sie_string(acc), round(i['balance'],2))
-                ub[acc] = round(i['balance'],2)
+                    str += '#UB %s %s %s\n' % (-1, self.escape_sie_string(acc), bal)
+                ub[acc] = bal
+        # create P&L #RES for the previous fiscalyear if only one FY is produced
+        if len(self.fiscalyear_ids) == 1:
+            pl_res = self.env['account.move.line'].read_group(domain=[
+                ('move_id.state', '=', 'posted'),('date', '<', self.fiscalyear_ids[0].date_from),
+                ('date', '>=', self.fiscalyear_ids[0].date_from - relativedelta(years=1)),
+                ('account_id.user_type_id.include_initial_balance', '=', False),
+                ('company_id', '=', company.id)],fields=["account_id", "balance"], groupby=["account_id"], )
+            for i in pl_res:
+                acc = account_obj.browse(i['account_id'][0]).code
+                str += '#RES %s %s %s\n' % (-1, self.escape_sie_string(acc), round(i['balance'], 2))
         old_rar = False
         for ver in ver_ids.sorted(lambda r: r.date, reverse=False):
             # ~ _logger.warning(f"{ver=}")
