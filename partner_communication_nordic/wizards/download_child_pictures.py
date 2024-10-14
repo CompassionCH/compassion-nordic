@@ -39,7 +39,7 @@ class DownloadChildPictures(models.TransientModel):
         if self.type == "biennial":
             zip_buffer = BytesIO()
             biennial_report = self.env.ref(
-                "partner_communication_compassion.report_child_picture")
+                "child_compassion.report_child_picture")
             with ZipFile(zip_buffer, "w") as zip_data:
                 children = self.child_ids.filtered("portrait")
                 found = len(children)
@@ -71,7 +71,7 @@ class DownloadChildPictures(models.TransientModel):
             child = self.child_ids.filtered("portrait")[:1]
             if child:
                 biennial_report = self.env.ref(
-                    "partner_communication_compassion.report_child_picture")
+                    "child_compassion.report_child_picture")
                 image = convert_from_bytes(
                     biennial_report._render_qweb_pdf(child.ids)[0])[0]
                 image = image.resize((image.width // 2, image.height // 2))
