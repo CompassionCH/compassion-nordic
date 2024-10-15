@@ -29,7 +29,7 @@
 # pylint: disable=C8101
 {
     "name": "Compassion Nordic Communications",
-    "version": "16.0.1.0.0",
+    "version": "17.0.1.0.0",
     "category": "Other",
     "author": "Compassion Switzerland",
     "license": "AGPL-3",
