@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+     <record id="view_job_child_id" model="ir.ui.view">
+        <field name="name">communication.job.child</field>
+        <field name="model">partner.communication.job</field>
+        <field
+      name="inherit_id"
+      ref="partner_communication.communication_job_tree"
+    />
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="child_ids" />
+            </field>
+        </field>
+     </record>
+</odoo>
