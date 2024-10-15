@@ -37,13 +37,14 @@ class DownloadChildPictures(models.TransientModel):
         """Create the zip archive from the selected letters."""
         if self.type == "biennial":
             zip_buffer = BytesIO()
-            biennial_report = self.env.ref("child_compassion.report_child_picture")
             with ZipFile(zip_buffer, "w") as zip_data:
                 children = self.child_ids.filtered("portrait")
                 found = len(children)
                 for i, image in enumerate(
                     convert_from_bytes(
-                        biennial_report._render_qweb_pdf(children.ids)[0]
+                        self.env["ir.actions.report"]._render_qweb_pdf(
+                            "child_compassion.report_child_picture", children.ids
+                        )[0]
                     )
                 ):
                     buffer = BytesIO()
@@ -69,9 +70,10 @@ class DownloadChildPictures(models.TransientModel):
         if self.type == "biennial":
             child = self.child_ids.filtered("portrait")[:1]
             if child:
-                biennial_report = self.env.ref("child_compassion.report_child_picture")
                 image = convert_from_bytes(
-                    biennial_report._render_qweb_pdf(child.ids)[0]
+                    self.env["ir.actions.report"]._render_qweb_pdf(
+                        "child_compassion.report_child_picture", child.ids
+                    )[0]
                 )[0]
                 image = image.resize((image.width // 2, image.height // 2))
                 buffer = BytesIO()
