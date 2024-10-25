@@ -11,17 +11,10 @@ from odoo import api, models
 
 from odoo.addons.child_compassion.wizards.child_description import ChildDescription
 
-
 ChildDescription.his_lang.update(
     {
-        "sv_SE": {
-            "M": [["sin"] * 3, ["sina"] * 3],
-            "F": [["sin"] * 3, ["sina"] * 3]
-        },
-        "nb_NO": {
-            "M": [["sin"] * 3, ["sine"] * 3],
-            "F": [["sin"] * 3, ["sine"] * 3]
-        },
+        "sv_SE": {"M": [["sin"] * 3, ["sina"] * 3], "F": [["sin"] * 3, ["sina"] * 3]},
+        "nb_NO": {"M": [["sin"] * 3, ["sine"] * 3], "F": [["sin"] * 3, ["sine"] * 3]},
         "da_DK": {
             "M": [["sin"] * 3, ["sine"] * 3],
             "F": [["sin"] * 3, ["sine"] * 3],
@@ -31,14 +24,8 @@ ChildDescription.his_lang.update(
 
 ChildDescription.he_lang.update(
     {
-        "sv_SE": {
-            "M": [["han"] * 3, ["de"] * 3],
-            "F": [["hon"] * 3, ["dom"] * 3]
-        },
-        "nb_NO": {
-            "M": [["han"] * 3, ["de"] * 3],
-            "F": [["hun"] * 3, ["de"] * 3]
-        },
+        "sv_SE": {"M": [["han"] * 3, ["de"] * 3], "F": [["hon"] * 3, ["dom"] * 3]},
+        "nb_NO": {"M": [["han"] * 3, ["de"] * 3], "F": [["hun"] * 3, ["de"] * 3]},
         "da_DK": {
             "M": [["han"] * 3, ["de"] * 3],
             "F": [["hun"] * 3, ["de"] * 3],
@@ -50,15 +37,15 @@ ChildDescription.home_based_lang.update(
     {
         "sv_SE": {
             "M": "{preferred_name} deltar i det hembaserade programmet för de yngsta barnen.",
-            "F": "{preferred_name} deltar i det hembaserade programmet för de yngsta barnen."
+            "F": "{preferred_name} deltar i det hembaserade programmet för de yngsta barnen.",
         },
         "nb_NO": {
             "M": "{preferred_name} deltar i det hjemmebaserte programmet for de minste barna.",
-            "F": "{preferred_name} deltar i det hjemmebaserte programmet for de minste barna."
+            "F": "{preferred_name} deltar i det hjemmebaserte programmet for de minste barna.",
         },
         "da_DK": {
             "M": "{preferred_name} deltager i det hjemmebaserede program for de mindste børn.",
-            "F": "{preferred_name} deltager i det hjemmebaserede program for de mindste børn."
+            "F": "{preferred_name} deltager i det hjemmebaserede program for de mindste børn.",
         },
     }
 )
@@ -160,10 +147,12 @@ class ChildDescriptionCH(models.TransientModel):
         {lang: description_field}
         """
         res = super()._supported_languages()
-        res.update({
-            "nb_NO": "description_no",
-            "sv_SE": "description_se",
-            "da_DK": "description_da",
-            "fi_FI": "description_en"
-        })
+        res.update(
+            {
+                "nb_NO": "description_no",
+                "sv_SE": "description_se",
+                "da_DK": "description_da",
+                "fi_FI": "description_en",
+            }
+        )
         return res
