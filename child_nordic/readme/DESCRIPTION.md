@@ -1,0 +1,1 @@
+The Child nordic module is designed to add langugage related fields to existing models. Support Swedish, Norwegian and Danish
