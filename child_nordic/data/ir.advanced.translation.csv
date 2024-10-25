@@ -1,0 +1,4 @@
+id,src,lang,group,male_singular,male_plural,female_singular,female_plural
+date_short_se,date_short,sv_SE,Date format,d.M.yyyy,,,
+date_short_no,date_short,nb_NO,Date format,d.M.yyyy,,,
+date_short_da,date_short,da_DK,Date format,d.M.yyyy,,,
