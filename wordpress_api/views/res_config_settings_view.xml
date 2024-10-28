@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2022 Compassion (http://www.compassion.ch)
+    @author Emanuel Cino <ecino@compassion.ch>
+    The licence is in the file __manifest__.py
+-->
+<odoo>
+    <!-- Configuration View -->
+    <record id="view_settings" model="ir.ui.view">
+        <field name="name">wordpress_api.settings</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="message_center_compassion.compassion_settings"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='compassion_settings']">
+                <h2>Wordpress API</h2>
+                <div class="row mt16 o_settings_container" name="wordpress_settings">
+                    <div class="col-xs-12 col-md-6 o_setting_box">
+                        <div name="left_group" class="o_setting_right_pane">
+                            <div name="api_key">
+                                <div class="row">
+                                    <label for="wordpress_api_key" class="col-md-5 o_light_label"/>
+                                    <field name="wordpress_api_key"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-md-6 o_setting_box">
+                        <div name="right_group" class="o_setting_right_pane"/>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

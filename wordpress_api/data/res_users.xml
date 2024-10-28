@@ -1,0 +1,15 @@
+<odoo>
+    <record model="res.partner" id="partner_wordpress">
+        <field name="name">Wordpress API</field>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="email">wordpress@compassion.se</field>
+        <field name="image_1920" type="base64" file="base/static/img/avatar_grey.png"/>
+    </record>
+    <record id="user_wordpress" model="res.users">
+        <field name="login">wordpress</field>
+        <field name="password">wordpress</field>
+        <field name="partner_id" ref="partner_wordpress"/>
+        <field name="groups_id" eval="[(6, 0, [ref('child_compassion.group_sponsorship'), ref('base.group_user'), ref('message_center_compassion.group_gmc_user')])]"/>
+        <field name="company_ids" search="[]"/>
+    </record>
+</odoo>
