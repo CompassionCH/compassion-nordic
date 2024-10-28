@@ -12,8 +12,7 @@ from . import controllers
 from . import wizards
 from . import models
 
-from odoo.addons.message_center_compassion.tools.load_mappings import \
-    load_mapping_files
+from odoo.addons.message_center_compassion.tools.load_mappings import load_mapping_files
 
 
 def load_mappings(cr, registry):

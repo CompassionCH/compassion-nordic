@@ -8,15 +8,15 @@
     },
     "name": {
       "field": "name",
-      "to_json_conversion":  "odoo_value or None"
+      "to_json_conversion": "odoo_value or None"
     },
     "personalName": {
       "field": "preferred_name",
-      "to_json_conversion":  "odoo_value or None"
+      "to_json_conversion": "odoo_value or None"
     },
     "age": {
       "field": "age",
-      "to_json_conversion":  "odoo_value or None"
+      "to_json_conversion": "odoo_value or None"
     },
     "dateOfBirth": {
       "field": "birthdate",
