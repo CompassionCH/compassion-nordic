@@ -1,7 +1,7 @@
-from werkzeug.exceptions import NotFound, BadRequest, Unauthorized
+from werkzeug.exceptions import BadRequest, NotFound, Unauthorized
 
 from odoo import fields
-from odoo.http import request, route, Controller
+from odoo.http import Controller, request, route
 
 from odoo.addons.child_compassion.models.compassion_hold import HoldType
 from odoo.addons.sbc_compassion.models.correspondence_page import PAGE_SEPARATOR
@@ -13,12 +13,11 @@ LANG_MAPPING = {
     "Swedish": "sv_SE",
     "NOR": "nb_NO",
     "Norwegian": "nb_NO",
-    "DAK": "da_DK"
+    "DAK": "da_DK",
 }
 
 
 class ApiController(Controller):
-
     @route("/wapi/consignment", auth="public", methods=["GET"], type="json")
     def get_consigned_children(self, **params):
         api_key = params.get("api_key")
@@ -27,21 +26,47 @@ class ApiController(Controller):
         lang = LANG_MAPPING.get(params.get("LanguageCode", "ENG"))
         limit = int(params.get("limit", 0))
         offset = int(params.get("offset", 0))
-        count = request.env["compassion.child"].sudo().search_count([
-            ("state", "=", "N"), ("hold_channel", "=", "web"), ("hold_type", "=", HoldType.E_COMMERCE_HOLD.value),
-            ("hold_expiration", ">=", fields.Datetime.now())
-        ])
-        children = request.env["compassion.child"].sudo().with_context(lang=lang).search([
-            ("state", "=", "N"), ("hold_channel", "=", "web"), ("hold_type", "=", HoldType.E_COMMERCE_HOLD.value),
-            ("hold_expiration", ">=", fields.Datetime.now())
-        ], limit=limit, offset=offset)
+        count = (
+            request.env["compassion.child"]
+            .sudo()
+            .search_count(
+                [
+                    ("state", "=", "N"),
+                    ("hold_channel", "=", "web"),
+                    ("hold_type", "=", HoldType.E_COMMERCE_HOLD.value),
+                    ("hold_expiration", ">=", fields.Datetime.now()),
+                ]
+            )
+        )
+        children = (
+            request.env["compassion.child"]
+            .sudo()
+            .with_context(lang=lang)
+            .search(
+                [
+                    ("state", "=", "N"),
+                    ("hold_channel", "=", "web"),
+                    ("hold_type", "=", HoldType.E_COMMERCE_HOLD.value),
+                    ("hold_expiration", ">=", fields.Datetime.now()),
+                ],
+                limit=limit,
+                offset=offset,
+            )
+        )
         data = children.data_to_json("Wordpress Consignment Child")
         for child_vals in data:
             try:
-                child_vals["localSociatySituated"] = child_vals["localSociatySituated"] + ", " + child_vals.pop(
-                    "country_name")
+                child_vals["localSociatySituated"] = (
+                    child_vals["localSociatySituated"]
+                    + ", "
+                    + child_vals.pop("country_name")
+                )
                 member_ids = child_vals["householdMember"]
-                caregivers = children.env["compassion.household.member"].browse(member_ids).filtered("is_caregiver")
+                caregivers = (
+                    children.env["compassion.household.member"]
+                    .browse(member_ids)
+                    .filtered("is_caregiver")
+                )
                 child_vals["householdMember"] = caregivers.get_list("role")
             except (KeyError, TypeError):
                 continue
@@ -49,23 +74,36 @@ class ApiController(Controller):
             "ChildList": {
                 "count": count,
                 "range": f"{offset}-{offset + (limit-1)}" if limit else "ALL",
-                "children": data
+                "children": data,
             }
         }
 
-    @route("/wapi/consignment/<string:global_id>/sponsor", auth="public", methods=["GET"], type="json")
+    @route(
+        "/wapi/consignment/<string:global_id>/sponsor",
+        auth="public",
+        methods=["GET"],
+        type="json",
+    )
     def sponsor_child(self, global_id, **params):
         api_key = params.get("api_key")
         if api_key != request.env["res.config.settings"].get_param("wordpress_api_key"):
             raise Unauthorized()
         wordpress_user = request.env.ref("wordpress_api.user_wordpress")
-        child = request.env["compassion.child"].with_user(wordpress_user).search([("global_id", "=", global_id)])
+        child = (
+            request.env["compassion.child"]
+            .with_user(wordpress_user)
+            .search([("global_id", "=", global_id)])
+        )
         if not child:
             raise NotFound
-        child.hold_id.write({
-            "type": HoldType.NO_MONEY_HOLD.value,
-            "expiration_date": child.hold_id.get_default_hold_expiration(HoldType.NO_MONEY_HOLD)
-        })
+        child.hold_id.write(
+            {
+                "type": HoldType.NO_MONEY_HOLD.value,
+                "expiration_date": child.hold_id.get_default_hold_expiration(
+                    HoldType.NO_MONEY_HOLD
+                ),
+            }
+        )
         return f"Child {global_id} is sponsored"
 
     @route("/wapi/letters/write", auth="public", methods=["POST"], type="json")
@@ -76,42 +114,72 @@ class ApiController(Controller):
         try:
             letter_data = request.jsonrequest
             child_global_id = letter_data["Beneficiary"]["GlobalBeneficiaryId"]
-            sponsor_global_id = letter_data["Supporter"].get("GlobalSupporterId", "not_set")
+            sponsor_global_id = letter_data["Supporter"].get(
+                "GlobalSupporterId", "not_set"
+            )
             sponsor_ref = letter_data["Supporter"]["CompassConstituentId"]
             original_text = PAGE_SEPARATOR.join(letter_data["Pages"])
-            original_language = LANG_MAPPING.get(letter_data["OriginalLanguage"], "sv_SE")
+            original_language = LANG_MAPPING.get(
+                letter_data["OriginalLanguage"], "sv_SE"
+            )
             letter_image = letter_data["PDFBase64"]
         except (TypeError, ValueError, KeyError):
             raise BadRequest("Input data not valid.")
 
         wordpress_user = request.env.ref("wordpress_api.user_wordpress")
-        sponsorship = request.env["recurring.contract"].with_user(wordpress_user).search([
-            "|", ("correspondent_id.global_id", "=", sponsor_global_id),
-            ("correspondent_id.ref", "=", sponsor_ref),
-            ("child_id.global_id", "=", child_global_id),
-            ("state", "not in", ["terminated", "cancelled"])
-        ])
+        sponsorship = (
+            request.env["recurring.contract"]
+            .with_user(wordpress_user)
+            .search(
+                [
+                    "|",
+                    ("correspondent_id.global_id", "=", sponsor_global_id),
+                    ("correspondent_id.ref", "=", sponsor_ref),
+                    ("child_id.global_id", "=", child_global_id),
+                    ("state", "not in", ["terminated", "cancelled"]),
+                ]
+            )
+        )
         if not sponsorship or len(sponsorship) > 1:
-            raise BadRequest("No valid sponsorship found for given Supporter and Beneficiary.")
-        language = sponsorship.env["res.lang.compassion"].search([
-            ("lang_id.code", "=", original_language)
-        ], limit=1)
-        new_letter = request.env["correspondence"].with_user(wordpress_user).create([{
-            "original_text": original_text,
-            "original_language_id": language.id,
-            "letter_image": letter_image,
-            "sponsorship_id": sponsorship.id,
-            "direction": "Supporter To Beneficiary",
-            "template_id": sponsorship.env.ref("wordpress_api.webletter_template").id
-        }])
+            raise BadRequest(
+                "No valid sponsorship found for given Supporter and Beneficiary."
+            )
+        language = sponsorship.env["res.lang.compassion"].search(
+            [("lang_id.code", "=", original_language)], limit=1
+        )
+        new_letter = (
+            request.env["correspondence"]
+            .with_user(wordpress_user)
+            .create(
+                [
+                    {
+                        "original_text": original_text,
+                        "original_language_id": language.id,
+                        "letter_image": letter_image,
+                        "sponsorship_id": sponsorship.id,
+                        "direction": "Supporter To Beneficiary",
+                        "template_id": sponsorship.env.ref(
+                            "wordpress_api.webletter_template"
+                        ).id,
+                    }
+                ]
+            )
+        )
         return f"New letter created with id {new_letter.id}"
 
-    @route("/wapi/supporter/<string:global_id>", auth="public", methods=["GET"], type="json")
+    @route(
+        "/wapi/supporter/<string:global_id>",
+        auth="public",
+        methods=["GET"],
+        type="json",
+    )
     def get_sponsor_info(self, global_id, **params):
         api_key = params.get("api_key")
         if api_key != request.env["res.config.settings"].get_param("wordpress_api_key"):
             raise Unauthorized()
-        sponsor = request.env["res.partner"].sudo().search([("global_id", "=", global_id)])
+        sponsor = (
+            request.env["res.partner"].sudo().search([("global_id", "=", global_id)])
+        )
         children = sponsor.sponsored_child_ids
         if not sponsor or not children:
             raise NotFound("Not a valid sponsor.")
@@ -120,7 +188,7 @@ class ApiController(Controller):
                 "GlobalSupporterId": sponsor.global_id,
                 "CompassConstituentId": sponsor.ref,
                 "FirstName": sponsor.firstname,
-                "PreferredName": sponsor.preferred_name or sponsor.firstname
+                "PreferredName": sponsor.preferred_name or sponsor.firstname,
             },
             "Beneficiaries": [
                 {
@@ -128,8 +196,8 @@ class ApiController(Controller):
                     "LocalBeneficiaryId": child.local_id,
                     "FirstName": child.firstname or "",
                     "PreferredName": child.preferred_name or "",
-                    "RelationshipType": "Sponsor"
+                    "RelationshipType": "Sponsor",
                 }
                 for child in children
-            ]
+            ],
         }
