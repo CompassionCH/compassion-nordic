@@ -122,7 +122,7 @@ class ApiController(Controller):
             original_language = LANG_MAPPING.get(
                 letter_data["OriginalLanguage"], "sv_SE"
             )
-            letter_image = letter_data["PDFBase64"]
+            sponsor_letter_scan = letter_data["PDFBase64"]
         except (TypeError, ValueError, KeyError):
             raise BadRequest("Input data not valid.")
 
@@ -155,7 +155,7 @@ class ApiController(Controller):
                     {
                         "original_text": original_text,
                         "original_language_id": language.id,
-                        "letter_image": letter_image,
+                        "sponsor_letter_scan": sponsor_letter_scan,
                         "sponsorship_id": sponsorship.id,
                         "direction": "Supporter To Beneficiary",
                         "template_id": sponsorship.env.ref(

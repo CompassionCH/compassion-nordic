@@ -15,7 +15,7 @@ from . import models
 from odoo.addons.message_center_compassion.tools.load_mappings import load_mapping_files
 
 
-def load_mappings(cr, registry):
+def load_mappings(env):
     path = "wordpress_api/static/mappings/"
     files = ["child.json"]
-    load_mapping_files(cr, path, files)
+    load_mapping_files(env, path, files)
