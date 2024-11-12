@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record forcecreate="True" id="rate_change_fix_next_invoices" model="ir.cron">
+            <field name="name">Rate change: remove balance for future invoices.</field>
+            <field name="model_id" ref="model_account_move"/>
+            <field name="state">code</field>
+            <field name="code">model._prepare_rate_change(rate_change_date='2023-05-01')</field>
+            <field eval="True" name="active" />
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number" eval="False"/>
+            <field name="interval_type" eval="False"/>
+            <field name="nextcall">2023-04-01 05:00:00</field>
+            <field name="numbercall">1</field>
+        </record>
+        <record forcecreate="True" id="rate_change_fix_contracts" model="ir.cron">
+            <field name="name">Rate change: remove balance in contracts.</field>
+            <field name="model_id" ref="model_recurring_contract_line"/>
+            <field name="state">code</field>
+            <field name="code">model._remove_balance()</field>
+            <field eval="True" name="active" />
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number" eval="False"/>
+            <field name="interval_type" eval="False"/>
+            <field name="nextcall">2023-05-01 05:00:00</field>
+            <field name="numbercall">1</field>
+        </record>
+    </data>
+</odoo>

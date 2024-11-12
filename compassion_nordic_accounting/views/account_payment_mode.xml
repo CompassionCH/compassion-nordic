@@ -1,0 +1,12 @@
+<odoo>
+    <record id="account_payment_mode_spl_nordic" model="ir.ui.view">
+        <field name="name">account.payment.mode.spl.nordic.id</field>
+        <field name="model">account.payment.mode</field>
+        <field name="inherit_id" ref="account_payment_order.account_payment_mode_form"/>
+        <field name="arch" type="xml">
+            <field name="payment_order_ok" position="after">
+                <field name="skip_payment_line" attrs="{'invisible': [('payment_order_ok', '=', False)]}"/>
+            </field>
+        </field>
+    </record>
+</odoo>
