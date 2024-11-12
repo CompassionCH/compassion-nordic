@@ -8,7 +8,7 @@
 #
 ##############################################################################
 
-from odoo import api, models, _
+from odoo import api, models
 
 
 class RecurringContractGroup(models.Model):

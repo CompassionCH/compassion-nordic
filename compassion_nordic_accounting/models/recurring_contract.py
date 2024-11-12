@@ -8,7 +8,7 @@
 #
 ##############################################################################
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 
 
 class RecurringContract(models.Model):
@@ -21,9 +21,11 @@ class RecurringContract(models.Model):
 
     @api.model_create_single
     def create(self, vals):
-        group = self.env['recurring.contract.group'].browse(vals.get('group_id'))
-        if vals.get('reference', '/') == '/':
-            vals['reference'] = self.env['ir.sequence'].next_by_code('recurring.contract.ref')
+        group = self.env["recurring.contract.group"].browse(vals.get("group_id"))
+        if vals.get("reference", "/") == "/":
+            vals["reference"] = self.env["ir.sequence"].next_by_code(
+                "recurring.contract.ref"
+            )
             group.set_reference(vals["reference"])
         return super().create(vals)
 
@@ -35,11 +37,19 @@ class RecurringContract(models.Model):
         invoice_lines = super()._filter_open_invoices_to_cancel()
         modified_orders = self.env["account.payment.order"]
         for move_line in invoice_lines:
-            payment_line = self.env["account.payment.line"].sudo().search([
-                ("move_line_id.move_id", "=", move_line.move_id.id),
-                ("amount_currency", ">=", -move_line.amount_currency),
-                ("state", "!=", "cancel")
-            ], order="amount_currency ASC", limit=1)
+            payment_line = (
+                self.env["account.payment.line"]
+                .sudo()
+                .search(
+                    [
+                        ("move_line_id.move_id", "=", move_line.move_id.id),
+                        ("amount_currency", ">=", -move_line.amount_currency),
+                        ("state", "!=", "cancel"),
+                    ],
+                    order="amount_currency ASC",
+                    limit=1,
+                )
+            )
             if payment_line.state == "draft":
                 # As the order is not yet validated, we can simply cancel the payment
                 modified_orders |= payment_line.order_id
@@ -53,6 +63,7 @@ class RecurringContract(models.Model):
             for contract in self:
                 order.message_post(
                     body=f"Contract "
-                         f"<a href='{contract._notify_get_action_link('view')}'>{contract.name}</a> was terminated. "
-                         f"Payment lines were adapted.")
+                    f"<a href='{contract._notify_get_action_link('view')}'>{contract.name}</a> was terminated. "
+                    f"Payment lines were adapted."
+                )
         return invoice_lines

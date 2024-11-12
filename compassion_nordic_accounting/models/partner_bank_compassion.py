@@ -8,14 +8,14 @@
 #
 ##############################################################################
 
-from odoo import api, models, _
+from odoo import _, api, models
+
 # TODO code retriven from v12 swiss -> when we migrate swiss into v14 that code should disappear
 
 
 # pylint: disable=C8107
 class ResPartnerBank(models.Model):
-    """ This class upgrade the partners.bank to match Compassion needs.
-    """
+    """This class upgrade the partners.bank to match Compassion needs."""
 
     _inherit = "res.partner.bank"
 
@@ -31,19 +31,17 @@ class ResPartnerBank(models.Model):
 
     @api.model
     def create(self, data):
-        """Override function to notify creation in a message
-        """
+        """Override function to notify creation in a message"""
         result = super().create(data)
         if result.partner_id:
-            self._account_notify_partner(result, 'created')
+            self._account_notify_partner(result, "created")
 
         return result
 
     def unlink(self):
-        """Override function to notify delete in a message
-        """
-        if not self.env.context.get('tracking_disable'):
+        """Override function to notify delete in a message"""
+        if not self.env.context.get("tracking_disable"):
             for acc in self:
-                self._account_notify_partner(acc, 'deleted')
+                self._account_notify_partner(acc, "deleted")
         result = super().unlink()
         return result
