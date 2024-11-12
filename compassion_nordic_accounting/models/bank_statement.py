@@ -8,7 +8,8 @@ class BankStatement(models.Model):
     def create(self, values):
         if self.env.context.get("from_large_import"):
             return self.with_context(from_large_import=False).create_and_post(
-                values, self.env.context.get("auto_post"))
+                values, self.env.context.get("auto_post")
+            )
         else:
             return super().create(values)
 

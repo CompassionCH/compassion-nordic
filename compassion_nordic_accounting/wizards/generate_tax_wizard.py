@@ -9,7 +9,7 @@
 ##############################################################################
 from datetime import datetime
 
-from odoo import api, models, fields
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -17,18 +17,23 @@ class GenerateTaxWizard(models.TransientModel):
     _name = "generate.tax.wizard"
     _description = "Generate Tax files"
 
-    tax_year = fields.Selection("_year_selection",
-                                "Calendar Year",
-                                default=str(datetime.today().year - 1),
-                                required=True
-                                )
+    tax_year = fields.Selection(
+        "_year_selection",
+        "Calendar Year",
+        default=str(datetime.today().year - 1),
+        required=True,
+    )
     xml_version = fields.Float("XML version", default=8)
-    is_sweden = fields.Boolean(default=lambda s: s.env.company.country_id == s.env.ref("base.se"))
+    is_sweden = fields.Boolean(
+        default=lambda s: s.env.company.country_id == s.env.ref("base.se")
+    )
 
     _sql_constraints = [
-        ("tax_year_not_in_the_future",
-         "CHECK(tax_year < EXTRACT(year FROM CURRENT_DATE))",
-         "Year of taxation can't be in the future"),
+        (
+            "tax_year_not_in_the_future",
+            "CHECK(tax_year < EXTRACT(year FROM CURRENT_DATE))",
+            "Year of taxation can't be in the future",
+        ),
     ]
 
     @api.model
@@ -48,10 +53,10 @@ class GenerateTaxWizard(models.TransientModel):
             raise UserError("The company that you are on doesn't support this feature.")
 
     def _validate_vat_company(self, partner, amount):
-        """ Log the company in the model used for result of tax generation
-            Some company may have a bad VAT number format or an empty one we log the detail
+        """Log the company in the model used for result of tax generation
+        Some company may have a bad VAT number format or an empty one we log the detail
 
-            @return we return a boolean that define if a company is eligible or not
+        @return we return a boolean that define if a company is eligible or not
         """
         state = "valid"
         is_valid, valid_fmt = partner._validate_vat()
@@ -60,23 +65,25 @@ class GenerateTaxWizard(models.TransientModel):
         elif not is_valid:
             state = "invalid_vat"
         # Log the entry in the model made for this
-        self.env["res.partner.tax.file.result"].create({
-            "partner_id": partner.id,
-            "tax_company_id": self.env.company.id,
-            "tax_year": self.tax_year,
-            "yearly_amount": amount,
-            "state": state
-        })
+        self.env["res.partner.tax.file.result"].create(
+            {
+                "partner_id": partner.id,
+                "tax_company_id": self.env.company.id,
+                "tax_year": self.tax_year,
+                "yearly_amount": amount,
+                "state": state,
+            }
+        )
 
         if state in ["empty_vat", "invalid_vat"]:
             return False
         return True
 
     def _validate_partner_tax_eligibility(self, partner, amount):
-        """ Log the partner in the model used for result of tax generation
-            Some partner may have a bad SSN format or an empty one we log the detail
+        """Log the partner in the model used for result of tax generation
+        Some partner may have a bad SSN format or an empty one we log the detail
 
-            @return we return a boolean that define if a partner is eligible or not
+        @return we return a boolean that define if a partner is eligible or not
         """
         state = "valid"
         is_valid, valid_fmt = partner._validate_ssn()
@@ -85,21 +92,30 @@ class GenerateTaxWizard(models.TransientModel):
         elif not is_valid:
             state = "invalid_ssn"
         elif valid_fmt in partner._list_has_bday():
-            if 0 < datetime.strptime(f"{self.tax_year}-12-31", "%Y-%m-%d").year - valid_fmt.get_birth_date(partner.social_sec_nr).year < 18:
+            if (
+                0
+                < datetime.strptime(f"{self.tax_year}-12-31", "%Y-%m-%d").year
+                - valid_fmt.get_birth_date(partner.social_sec_nr).year
+                < 18
+            ):
                 state = "under_18"
         # Log the entry in the model made for this
-        self.env["res.partner.tax.file.result"].create({
-            "partner_id": partner.id,
-            "tax_company_id": self.env.company.id,
-            "tax_year": self.tax_year,
-            "yearly_amount": amount,
-            "state": state
-        })
+        self.env["res.partner.tax.file.result"].create(
+            {
+                "partner_id": partner.id,
+                "tax_company_id": self.env.company.id,
+                "tax_year": self.tax_year,
+                "yearly_amount": amount,
+                "state": state,
+            }
+        )
 
         if state in ["invalid_ssn", "under_18", "empty_ssn"]:
             return False
         return True
 
     def _del_old_entry(self):
-        to_del = self.env["res.partner.tax.file.result"].search([("tax_company_id", "=", self.env.company.id)])
+        to_del = self.env["res.partner.tax.file.result"].search(
+            [("tax_company_id", "=", self.env.company.id)]
+        )
         to_del.sudo().unlink()

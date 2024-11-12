@@ -8,8 +8,7 @@
 #
 ##############################################################################
 
-from odoo import api, models, _
-
+from odoo import _, api, models
 
 MANDATE_STATE = {
     "create": "created",
@@ -23,8 +22,7 @@ MANDATE_STATE = {
 
 # pylint: disable=C8107
 class AccountBankingMandate(models.Model):
-    """ This class upgrade the partners.bank to match Compassion needs.
-    """
+    """This class upgrade the partners.bank to match Compassion needs."""
 
     _inherit = "account.banking.mandate"
 
@@ -37,15 +35,16 @@ class AccountBankingMandate(models.Model):
 
         if action in MANDATE_STATE:
             self.partner_id.message_post(
-                body=_(f"Mandate {MANDATE_STATE[action]} for account: {self.partner_bank_id.acc_number or ''}"),
+                body=_(
+                    f"Mandate {MANDATE_STATE[action]} for account: {self.partner_bank_id.acc_number or ''}"
+                ),
                 subject=_(f"Mandate {MANDATE_STATE[action]}"),
                 type="comment",
             )
 
     @api.model
     def create(self, data):
-        """Override function to notify creation in a message on partner feed
-        """
+        """Override function to notify creation in a message on partner feed"""
         result = super().create(data)
         result._update_mandate_status_partner("create")
 
@@ -89,7 +88,7 @@ class AccountBankingMandate(models.Model):
         """
         Override function to notify removal in a message on partner feed
         """
-        if not self.env.context.get('tracking_disable'):
+        if not self.env.context.get("tracking_disable"):
             for mandate in self:
                 mandate._update_mandate_status_partner("delete")
         result = super().unlink()
