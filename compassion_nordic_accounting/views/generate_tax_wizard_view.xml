@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <record id="generate_tax_wizard" model="ir.ui.view">
         <field name="name">Generate Tax File</field>
@@ -7,17 +7,21 @@
             <form string="File uploading">
                 <sheet>
                     <group>
-                        <field name="tax_year"/>
-                        <field name="xml_version" attrs="{'invisible': [('is_sweden', '!=', True)]}"/>
-                        <field name="is_sweden" invisible="1"/>
+                        <field name="tax_year" />
+                        <field
+              name="xml_version"
+              attrs="{'invisible': [('is_sweden', '!=', True)]}"
+            />
+                        <field name="is_sweden" invisible="1" />
                     </group>
                 </sheet>
                 <footer>
-                    <button type="object"
-                            name="generate_tax"
-                            string="Generate Tax file"
-                            class="btn-primary"
-                    />
+                    <button
+            type="object"
+            name="generate_tax"
+            string="Generate Tax file"
+            class="btn-primary"
+          />
                 </footer>
             </form>
         </field>

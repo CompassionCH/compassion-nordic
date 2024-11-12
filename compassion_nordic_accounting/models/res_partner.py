@@ -10,12 +10,14 @@
 
 import logging
 
-from stdnum.se import personnummer, orgnr as se_org
-from stdnum.no import fodselsnummer, orgnr as no_org
 from stdnum.dk import cpr, cvr
-from stdnum.fi import veronumero, alv
+from stdnum.fi import alv, veronumero
+from stdnum.no import fodselsnummer
+from stdnum.no import orgnr as no_org
+from stdnum.se import orgnr as se_org
+from stdnum.se import personnummer
 
-from odoo import models, api, fields
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)

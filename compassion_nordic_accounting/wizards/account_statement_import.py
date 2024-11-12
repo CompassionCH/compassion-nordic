@@ -9,9 +9,10 @@
 #
 ##############################################################################
 import logging
+
 import numpy
 
-from odoo import models, fields, _
+from odoo import _, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -21,25 +22,30 @@ class AccountStatementImport(models.TransientModel):
 
     large_file_import = fields.Boolean(
         help="Use this for large statement files. The process will run in the background so that you can continue "
-             "to work in the meantime.",
-        default=False
+        "to work in the meantime.",
+        default=False,
     )
     maximum_lines = fields.Integer(
         help="Use this to split large statements into multiple smaller ones. It can be useful for speeding up "
-             "the reconcile process afterwards. (use 0 for keeping it all together)",
-        default=500
+        "the reconcile process afterwards. (use 0 for keeping it all together)",
+        default=500,
     )
     auto_post = fields.Boolean(
-        help="Post automatically the statement after import",
-        default=True)
+        help="Post automatically the statement after import", default=True
+    )
 
     def import_file_button(self):
         if self.large_file_import:
             journal_id = self.env.context.get("journal_id")
             # Import in background and return a message.
-            self.with_company(self.env["account.journal"].browse(journal_id).company_id.id).with_delay()._import_file_with_journal(journal_id)
-            self.env.user.notify_success(message=_(
-                "Import job launched. Come back in a few minutes to check your statements."))
+            self.with_company(
+                self.env["account.journal"].browse(journal_id).company_id.id
+            ).with_delay()._import_file_with_journal(journal_id)
+            self.env.user.notify_success(
+                message=_(
+                    "Import job launched. Come back in a few minutes to check your statements."
+                )
+            )
         else:
             return_action = super().import_file_button()
             # Lauch a job for bank statements auto reconciliations
@@ -48,7 +54,8 @@ class AccountStatementImport(models.TransientModel):
 
     def _import_file_with_journal(self, journal_id):
         result = self.with_context(
-            journal_id=journal_id, from_large_import=True, auto_post=self.auto_post)._import_file()
+            journal_id=journal_id, from_large_import=True, auto_post=self.auto_post
+        )._import_file()
         # Lauch a job for bank statements auto reconciliations
         self._run_auto_reconcile_on_bs(result["statement_ids"])
         return result
@@ -61,7 +68,9 @@ class AccountStatementImport(models.TransientModel):
 
     def import_single_file(self, file_data, result):
         if self.large_file_import and self.maximum_lines:
-            parsing_data = self.with_context(active_id=self.ids[0])._parse_file(file_data)
+            parsing_data = self.with_context(active_id=self.ids[0])._parse_file(
+                file_data
+            )
             if not isinstance(parsing_data, list):  # for backward compatibility
                 parsing_data = [parsing_data]
 
