@@ -12,11 +12,11 @@
                     <field name="large_file_import" />
                     <field
             name="maximum_lines"
-            attrs="{'invisible': [('large_file_import', '=', False)]}"
+            invisible="large_file_import == False"
           />
                     <field
             name="auto_post"
-            attrs="{'invisible': [('large_file_import', '=', False)]}"
+            invisible="large_file_import == False"
           />
                 </group>
             </field>
@@ -24,14 +24,14 @@
         name="import_file_and_reconcile_button"
         position="attributes"
       >
-                <attribute
-          name="attrs"
-        >{'invisible': [('large_file_import', '=', True)]}</attribute>
+                <attribute name="invisible">
+                    large_file_import == True
+                </attribute>
             </button>
             <button name="import_file_button" position="attributes">
-                <attribute
-          name="attrs"
-        >{'invisible': [('large_file_import', '=', True)]}</attribute>
+                <attribute name="invisible">
+                    large_file_import == True
+                </attribute>
             </button>
             <button name="import_file_button" position="after">
                 <button
@@ -39,7 +39,7 @@
           string="Import in background"
           type="object"
           class="btn-primary"
-          attrs="{'invisible': [('large_file_import', '=', False)]}"
+          invisible="large_file_import == False"
         />
             </button>
         </field>

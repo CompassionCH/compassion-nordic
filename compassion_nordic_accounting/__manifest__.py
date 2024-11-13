@@ -31,12 +31,14 @@
     "summary": "Add Features for nordic Accounting",
     "author": "Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
-    "version": "16.0.1.0.0",
+    "version": "17.0.1.0.0",
     "license": "AGPL-3",
     "category": "Banking addons",
     "depends": [
         # compassion-modules
-        "account_reconcile_compassion",
+        # "account_reconcile_compassion",
+        "partner_personal_info",  # temporary added for the migration
+        "recurring_contract",  # temporary added for the migration
         # OCA/bank-payment
         "account_banking_pain_base",
         "account_banking_mandate",
@@ -46,9 +48,9 @@
         # OCA/account-invoicing
         "account_invoice_pricelist",
         # OCA/bank-statement-import
-        "account_statement_import_camt",
-        "account_statement_import_file_reconciliation_widget",
-        "account_statement_import_txt_xlsx",
+        # "account_statement_import_camt", # temporary removed for the migration
+        # "account_statement_import_file_reconciliation_widget", # temporary removed for the migration
+        # "account_statement_import_txt_xlsx", # temporary removed for the migration
         # OCA/web
         "web_notify",
     ],
@@ -59,10 +61,10 @@
         "views/account_payment_order.xml",
         "views/load_mandate_wizard_view.xml",
         "views/partner_tax_file_res.xml",
-        "views/menu_finance_receivables.xml",
+        # "views/menu_finance_receivables.xml", # temporary removed for the migration
         "views/generate_tax_wizard_view.xml",
         "views/res_partner_view.xml",
-        "views/account_statement_import_view.xml",
+        # "views/account_statement_import_view.xml",# temporary removed for the migration
         "views/mandate_staff_notif_settings_view.xml",
         "views/contracts_view.xml",
         "security/ir.model.access.csv",
