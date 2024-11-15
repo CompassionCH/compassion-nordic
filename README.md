@@ -17,6 +17,14 @@ sponsorships of its country.
 <!-- prettier-ignore-start -->
 
 [//]: # (addons)
+
+Available addons
+----------------
+addon | version | maintainers | summary
+--- | --- | --- | ---
+[compassion_nordic_accounting](compassion_nordic_accounting/) | 17.0.1.0.0 |  | Add Features for nordic Accounting
+[partner_communication_nordic](partner_communication_nordic/) | 17.0.1.0.0 |  | Compassion Nordic Communications
+
 [//]: # (end addons)
 
 <!-- prettier-ignore-end -->

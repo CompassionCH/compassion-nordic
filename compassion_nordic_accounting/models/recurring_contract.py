@@ -19,19 +19,21 @@ class RecurringContract(models.Model):
         domain="[('id', '!=', 1)]",
     )
 
-    @api.model_create_single
-    def create(self, vals):
-        group = self.env["recurring.contract.group"].browse(vals.get("group_id"))
-        if vals.get("reference", "/") == "/":
-            vals["reference"] = self.env["ir.sequence"].next_by_code(
-                "recurring.contract.ref"
-            )
-            group.set_reference(vals["reference"])
-        return super().create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            group = self.env["recurring.contract.group"].browse(vals.get("group_id"))
+            if vals.get("reference", "/") == "/":
+                vals["reference"] = self.env["ir.sequence"].next_by_code(
+                    "recurring.contract.ref"
+                )
+                group.set_reference(vals["reference"])
+        return super().create(vals_list)
 
     def _filter_open_invoices_to_cancel(self):
         """
-        Exclude Direct Debit Order invoices, to avoid cancelling invoices that are being paid.
+        Exclude Direct Debit Order invoices,
+        to avoid cancelling invoices that are being paid.
         :return: <account.move.line> recordset
         """
         invoice_lines = super()._filter_open_invoices_to_cancel()
@@ -63,7 +65,8 @@ class RecurringContract(models.Model):
             for contract in self:
                 order.message_post(
                     body=f"Contract "
-                    f"<a href='{contract._notify_get_action_link('view')}'>{contract.name}</a> was terminated. "
+                    f"<a href='{contract._notify_get_action_link('view')}'>"
+                    f"{contract.name}</a> was terminated. "
                     f"Payment lines were adapted."
                 )
         return invoice_lines
