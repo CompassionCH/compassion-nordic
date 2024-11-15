@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <act_window
-    id="action_load_wizard"
-    name="Upload Mandate File"
-    res_model="load.mandate.wizard"
-    view_mode="form"
-    target="new"
-  />
+    <record model="ir.actions.act_window" id="action_load_wizard">
+        <field name="name">Upload Mandate File</field>
+        <field name="res_model">load.mandate.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
     <menuitem
     action="action_load_wizard"
     id="menu_load_mandate"
@@ -28,13 +27,12 @@
     name="Loaded mandates"
     sequence="9"
   />
-    <act_window
-    id="action_generate_wizard"
-    name="Generate Tax Files"
-    res_model="generate.tax.wizard"
-    view_mode="form"
-    target="new"
-  />
+    <record model="ir.actions.act_window" id="action_generate_wizard">
+        <field name="name">Generate Tax Files</field>
+        <field name="res_model">generate.tax.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
     <menuitem
     action="action_generate_wizard"
     id="menu_generate_tax"

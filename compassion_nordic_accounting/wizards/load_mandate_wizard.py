@@ -63,10 +63,10 @@ class LoadMandateWizard(models.Model):
         try:
             raise NotImplementedError()
 
-        except NotImplementedError:
+        except NotImplementedError as err:
             raise UserError(
                 _("The company that you are on doesn't support this feature.")
-            )
+            ) from err
 
     def _log_results(self, vals_list):
         for vals in vals_list:
@@ -91,5 +91,6 @@ class LoadMandateWizard(models.Model):
                     user_id=int(user_id),
                     date_deadline=datetime.today() + timedelta(days=7),
                     summary=_("Mandate Cancelled"),
-                    note=f"Contact sponsor, mandate was cancelled on {datetime.today().date()}",
+                    note=f"Contact sponsor, mandate was cancelled on "
+                    f"{datetime.today().date()}",
                 )

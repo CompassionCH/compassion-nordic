@@ -3,7 +3,7 @@ from odoo import fields, models
 
 class PartnerTaxFileRes(models.Model):
     _name = "res.partner.tax.file.result"
-    _description = "Partner that has been exported or not for a taxation file are stored in this model"
+    _description = "Partner taxation file"
 
     tax_company_id = fields.Many2one("res.company", "Company tax")
     tax_year = fields.Char("Taxation year")

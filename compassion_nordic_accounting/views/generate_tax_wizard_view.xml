@@ -10,7 +10,7 @@
                         <field name="tax_year" />
                         <field
               name="xml_version"
-              attrs="{'invisible': [('is_sweden', '!=', True)]}"
+              invisible="is_sweden != True"
             />
                         <field name="is_sweden" invisible="1" />
                     </group>

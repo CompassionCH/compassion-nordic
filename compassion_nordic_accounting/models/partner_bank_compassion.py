@@ -10,8 +10,6 @@
 
 from odoo import _, api, models
 
-# TODO code retriven from v12 swiss -> when we migrate swiss into v14 that code should disappear
-
 
 # pylint: disable=C8107
 class ResPartnerBank(models.Model):
