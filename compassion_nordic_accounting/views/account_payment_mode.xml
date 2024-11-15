@@ -10,7 +10,8 @@
             <field name="payment_order_ok" position="after">
                 <field
           name="skip_payment_line"
-          attrs="{'invisible': [('payment_order_ok', '=', False)]}"
+          invisible="payment_order_ok == False"
+          readonly="1"
         />
             </field>
         </field>

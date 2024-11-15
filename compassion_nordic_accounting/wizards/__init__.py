@@ -11,4 +11,4 @@
 
 from . import load_mandate_wizard
 from . import generate_tax_wizard
-from . import account_statement_import
+# from . import account_statement_import # temporary removed for the migration

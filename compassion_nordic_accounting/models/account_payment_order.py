@@ -8,7 +8,6 @@ class AccountPaymentOrder(models.Model):
         string="Skip payment lines",
         help="This field is retrieved from the payment mode associated with this payment order.",
         related="payment_mode_id.skip_payment_line",
-        readonly=True,
     )
 
     def draft2open(self):
