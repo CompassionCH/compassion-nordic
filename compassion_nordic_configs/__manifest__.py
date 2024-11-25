@@ -15,6 +15,5 @@
     ],
     "data": [
         "data/norden_product.xml",
-        "data/res.users.csv",
     ],
 }
