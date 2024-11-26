@@ -37,7 +37,6 @@
     "development_status": "Production/Stable",
     "depends": [
         "child_compassion",
-        "report_wkhtmltopdf_param",  # OCA/reporting-engine
     ],
     "data": [
         "data/ir.advanced.translation.csv",

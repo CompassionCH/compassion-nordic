@@ -123,8 +123,8 @@ class ApiController(Controller):
                 letter_data["OriginalLanguage"], "sv_SE"
             )
             sponsor_letter_scan = letter_data["PDFBase64"]
-        except (TypeError, ValueError, KeyError):
-            raise BadRequest("Input data not valid.")
+        except (TypeError, ValueError, KeyError) as error:
+            raise BadRequest("Input data not valid.") from error
 
         wordpress_user = request.env.ref("wordpress_api.user_wordpress")
         sponsorship = (

@@ -36,16 +36,22 @@ ChildDescription.he_lang.update(
 ChildDescription.home_based_lang.update(
     {
         "sv_SE": {
-            "M": "{preferred_name} deltar i det hembaserade programmet för de yngsta barnen.",
-            "F": "{preferred_name} deltar i det hembaserade programmet för de yngsta barnen.",
+            "M": "{preferred_name} deltar i det hembaserade programmet "
+            "för de yngsta barnen.",
+            "F": "{preferred_name} deltar i det hembaserade programmet "
+            "för de yngsta barnen.",
         },
         "nb_NO": {
-            "M": "{preferred_name} deltar i det hjemmebaserte programmet for de minste barna.",
-            "F": "{preferred_name} deltar i det hjemmebaserte programmet for de minste barna.",
+            "M": "{preferred_name} deltar i det hjemmebaserte programmet "
+            "for de minste barna.",
+            "F": "{preferred_name} deltar i det hjemmebaserte programmet "
+            "for de minste barna.",
         },
         "da_DK": {
-            "M": "{preferred_name} deltager i det hjemmebaserede program for de mindste børn.",
-            "F": "{preferred_name} deltager i det hjemmebaserede program for de mindste børn.",
+            "M": "{preferred_name} deltager i det hjemmebaserede program "
+            "for de mindste børn.",
+            "F": "{preferred_name} deltager i det hjemmebaserede program "
+            "for de mindste børn.",
         },
     }
 )
