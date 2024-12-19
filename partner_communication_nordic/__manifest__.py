@@ -38,6 +38,8 @@
         "base_automation",
         "survey",
         "partner_communication_compassion",
+        # OCA/social
+        "mass_mailing_partner",
     ],
     "external_dependencies": {"python": ["pdf2image"]},
     "data": [
