@@ -28,7 +28,7 @@
 {
     "name": "Compassion Norway Payment",
     "summary": "Create Norway Direct Debit",
-    "version": "14.0.1.3.3",
+    "version": "16.0.1.0.0",
     "author": "Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
     "license": "AGPL-3",
