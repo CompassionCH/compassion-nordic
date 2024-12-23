@@ -32,7 +32,7 @@
     "summary": "Create Denmark Direct Debit",
     "author": "Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
-    "version": "14.0.1.3.3",
+    "version": "16.0.1.0.0",
     "license": "AGPL-3",
     "category": "Banking addons",
     "depends": ["compassion_nordic_accounting"],
