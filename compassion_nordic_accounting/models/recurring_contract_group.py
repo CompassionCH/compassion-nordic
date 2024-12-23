@@ -8,23 +8,16 @@
 #
 ##############################################################################
 
-from odoo import api, models
+from odoo import api, fields, models
 
 
 class RecurringContractGroup(models.Model):
     _inherit = "recurring.contract.group"
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        groups = super().create(vals_list)
-        active_contract = self.env.context.get("contract_id")
-        if active_contract:
-            contract = self.env["recurring.contract"].browse(active_contract)
-            for group in groups:
-                group.set_reference(contract.reference)
-        return groups
+    ref = fields.Char(compute="_compute_ref", store=True, readonly=False)
 
-    def set_reference(self, reference):
+    @api.depends("partner_id", "contract_ids")
+    def _compute_ref(self):
         """
         Implement custom rules for setting a contract group reference
         @param reference: reference of a contract related to the group.

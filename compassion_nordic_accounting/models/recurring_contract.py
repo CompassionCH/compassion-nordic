@@ -22,12 +22,10 @@ class RecurringContract(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            group = self.env["recurring.contract.group"].browse(vals.get("group_id"))
             if vals.get("reference", "/") == "/":
                 vals["reference"] = self.env["ir.sequence"].next_by_code(
                     "recurring.contract.ref"
                 )
-                group.set_reference(vals["reference"])
         return super().create(vals_list)
 
     def _filter_open_invoices_to_cancel(self):
