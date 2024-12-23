@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from xml.dom import minidom
 
-from odoo import models
+from odoo import _, models
 from odoo.exceptions import ValidationError
 
 
@@ -25,7 +25,7 @@ class GenerateTaxWizard(models.TransientModel):
         if company.country_id.name != "Sweden":
             return super().generate_tax()
         if not company.company_registry:
-            raise ValidationError("The Company should have a Tax ID")
+            raise ValidationError(_("The Company should have a Tax ID"))
         ret = self.env["account.move"].read_group(
             [
                 ("payment_state", "=", "paid"),

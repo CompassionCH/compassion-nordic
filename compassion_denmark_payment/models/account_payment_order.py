@@ -10,7 +10,7 @@
 
 from odoo import models
 
-from .. import beservice
+from . import beservice
 
 
 class AccountPaymentOrder(models.Model):
@@ -43,6 +43,9 @@ class AccountPaymentOrder(models.Model):
                 for invoice_line in line.move_line_id.move_id.invoice_line_ids:
                     child = invoice_line.contract_id.child_id
                     str_child = ""
+                    product_name = invoice_line.product_id.with_context(
+                        {"lang": invoice_line.partner_id.lang}
+                    ).name
                     if child:
                         # Build a string that looks like (BF Maria-Louisa)
                         str_child = (
@@ -52,8 +55,7 @@ class AccountPaymentOrder(models.Model):
                     text_lines.append(
                         (
                             invoice_line.product_id.id,
-                            f"{int(invoice_line.credit)} {invoice_line.product_id.with_context({'lang': invoice_line.partner_id.lang}).name} "
-                            + str_child,
+                            f"{int(invoice_line.credit)} {product_name} " + str_child,
                         )
                     )
             text_lines.sort(key=lambda a: a[0])

@@ -8,7 +8,6 @@
 #    The licence is in the file __manifest__.py
 #
 ##############################################################################
-from ..bggiro import *
+from ..static.lib import bggiro
 from . import account_payment_order
 from . import contract_group
-from . import account_statement_import_bggiro_parser

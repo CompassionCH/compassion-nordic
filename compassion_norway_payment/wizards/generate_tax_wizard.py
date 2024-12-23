@@ -59,7 +59,8 @@ class GenerateTaxWizard(models.TransientModel):
         melding.attrib = {
             "xmlns": "urn:ske:fastsetting:innsamling:gavefrivilligorganisasjon:v2",
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-            " xsi:schemaLocation": "urn:ske:fastsetting:innsamling:gavefrivilligorganisasjon:v2 "
+            " xsi:schemaLocation": "urn:ske:fastsetting:innsamling:"
+            "gavefrivilligorganisasjon:v2 "
             "gavefrivilligorganisasjon_v2_0.xsd ",
         }
 
@@ -87,7 +88,8 @@ class GenerateTaxWizard(models.TransientModel):
             leveranse,
             {
                 "inntektsaar": str(self.tax_year),
-                "oppgavegiversLeveranseReferanse": f"REF{self.tax_year}{datetime.now():%d%m%Y}",
+                "oppgavegiversLeveranseReferanse": f"REF{self.tax_year}"
+                f"{datetime.now():%d%m%Y}",
                 "leveransetype": "ordinaer",
             },
         )

@@ -22,8 +22,13 @@ Available addons
 ----------------
 addon | version | maintainers | summary
 --- | --- | --- | ---
+[child_nordic](child_nordic/) | 17.0.1.0.0 |  | Compassion Child Nordic
+[compassion_denmark_payment](compassion_denmark_payment/) | 17.0.1.0.0 |  | Create Denmark Direct Debit
 [compassion_nordic_accounting](compassion_nordic_accounting/) | 17.0.1.0.0 |  | Add Features for nordic Accounting
+[compassion_norway_payment](compassion_norway_payment/) | 17.0.1.0.0 |  | Create Norway Direct Debit
+[compassion_sweden_payment](compassion_sweden_payment/) | 17.0.1.0.0 |  | Create Sweden Direct Debit
 [partner_communication_nordic](partner_communication_nordic/) | 17.0.1.0.0 |  | Compassion Nordic Communications
+[wordpress_api](wordpress_api/) | 17.0.1.0.0 |  | Compassion Nordic Wordpress API
 
 [//]: # (end addons)
 
