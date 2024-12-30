@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="norway_direct_debit" model="account.payment.method">
+        <field name="name">Norway Direct Debit for customers</field>
+        <field name="code">norway_direct_debit</field>
+        <field name="payment_type">inbound</field>
+        <field name="bank_account_required" eval="False" />
+        <field name="mandate_required" eval="True" />
+    </record>
+</odoo>

@@ -17,7 +17,6 @@ MANDATE_STATE = {
     "back2draft": "back to draft",
     "delete": "deleted",
 }
-# TODO code retriven from v12 swiss -> when we migrate swiss into v14 that code should disappear
 
 
 # pylint: disable=C8107
@@ -36,7 +35,8 @@ class AccountBankingMandate(models.Model):
         if action in MANDATE_STATE:
             self.partner_id.message_post(
                 body=_(
-                    f"Mandate {MANDATE_STATE[action]} for account: {self.partner_bank_id.acc_number or ''}"
+                    f"Mandate {MANDATE_STATE[action]} for account: "
+                    f"{self.partner_bank_id.acc_number or ''}"
                 ),
                 subject=_(f"Mandate {MANDATE_STATE[action]}"),
                 type="comment",

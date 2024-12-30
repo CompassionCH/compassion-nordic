@@ -36,12 +36,13 @@ class ResPartner(models.Model):
 
     @api.depends("social_sec_nr")
     def _compute_sec_nr(self):
-        """Fill the value of the age, gender and birth_day if we're able to calculate it from SSN"""
+        """Fill the value with the age, gender and birth_day
+        if we're able to calculate it from SSN"""
         for partner in self:
             if partner.social_sec_nr:
                 # If a social security number has been filled in we check the format
-                # Then we extract informations from it if it's possible
-                # (certain formats have no informations)
+                # Then we extract information from it if it's possible
+                # (certain formats have no information)
                 is_valid, valid_fmt = self._validate_ssn()
                 if is_valid:
                     if valid_fmt in self._list_has_bday():
@@ -56,7 +57,8 @@ class ResPartner(models.Model):
 
     @api.constrains("social_sec_nr")
     def _constrains_ssn(self):
-        """Validate that the SSN format is the good one. If it's not the case raise an exception to the user."""
+        """Validate that the SSN format is the good one.
+        If it's not the case raise an exception to the user."""
         for partner in self:
             if partner.social_sec_nr:
                 if not self._validate_ssn():
@@ -95,8 +97,7 @@ class ResPartner(models.Model):
 
     @staticmethod
     def _list_has_bday():
-        """Function that return the library objects that have the get_birth_date() function
-
+        """Function that return the library objects that have the get_birth_date()
         @return list of stdnum library object
         """
         return del_from_lib(SSN_CONTRY_FMT_LIST, [veronumero])

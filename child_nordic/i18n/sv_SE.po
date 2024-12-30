@@ -1,0 +1,59 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: Compassion Odoo\n"
+"Language: sv\n"
+
+#. module: child_nordic
+#: model_terms:ir.ui.view,arch_db:child_nordic.childpack_document
+msgid "<span>About the child development center</span>"
+msgstr "<span>Compassion-centret</span>"
+
+#. module: child_compassion
+#: code:addons/child_compassion/wizards/child_description.py:0
+msgid "{preferred_name} participates in the homebased program for the youngest children."
+msgstr "{preferred_name} deltar i det hembaserade programmet för de yngsta barnen."
+
+#. module: child_compassion
+#: code:addons/child_compassion/wizards/child_description.py:0
+msgid "{preferred_name} does not go to school."
+msgstr "{preferred_name} går inte i skolan."
+
+#. module: child_compassion
+#: code:addons/child_compassion/wizards/child_description.py:0
+msgid "At home, he helps with the following tasks:"
+msgstr "Hemma hjälper han till med följande sysslor:"
+
+#. module: child_compassion
+#: code:addons/child_compassion/wizards/child_description.py:0
+msgid "At home, she helps with the following tasks:"
+msgstr "Hemma hjälper hon till med följande sysslor:"
+
+#. module: child_compassion
+#: code:addons/child_compassion/wizards/child_description.py:0
+msgid "At church, he participates in the following activities:"
+msgstr "I kyrkan deltar han i följande aktiviteter:"
+
+#. module: child_compassion
+#: code:addons/child_compassion/wizards/child_description.py:0
+msgid "At church, she participates in the following activities:"
+msgstr "I kyrkan deltar hon i följande aktiviteter:"
+
+#. module: child_compassion
+#: code:addons/child_compassion/wizards/child_description.py:0
+msgid "His favorite activities are:"
+msgstr "Hans favoritaktiviteter är:"
+
+#. module: child_compassion
+#: code:addons/child_compassion/wizards/child_description.py:0
+msgid "Her favorite activities are:"
+msgstr "Hennes favoritaktiviteter är:"
+
+#. module: child_compassion
+#: code:addons/child_compassion/wizards/child_description.py:0
+msgid "{preferred_name} suffers from:"
+msgstr "{preferred_name} lider av:"
+

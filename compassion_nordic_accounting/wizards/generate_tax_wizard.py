@@ -9,7 +9,7 @@
 ##############################################################################
 from datetime import datetime
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -40,7 +40,8 @@ class GenerateTaxWizard(models.TransientModel):
     def _year_selection(self):
         curr_year = datetime.today().year
         year_list = []
-        # We give 8 year because the legislation ask for 7 years archive in the nordics countries
+        # We give 8 year because the legislation
+        # ask for 7 years archive in the nordics countries
         while curr_year >= datetime.today().year - 8:
             year_list.append((str(curr_year), str(curr_year)))
             curr_year -= 1
@@ -49,8 +50,10 @@ class GenerateTaxWizard(models.TransientModel):
     def generate_tax(self):
         try:
             raise NotImplementedError()
-        except NotImplementedError:
-            raise UserError("The company that you are on doesn't support this feature.")
+        except NotImplementedError as err:
+            raise UserError(
+                _("The company that you are on doesn't support this feature.")
+            ) from err
 
     def _validate_vat_company(self, partner, amount):
         """Log the company in the model used for result of tax generation

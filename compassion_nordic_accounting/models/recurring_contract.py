@@ -31,7 +31,8 @@ class RecurringContract(models.Model):
 
     def _filter_open_invoices_to_cancel(self):
         """
-        Exclude Direct Debit Order invoices, to avoid cancelling invoices that are being paid.
+        Exclude Direct Debit Order invoices,
+        to avoid cancelling invoices that are being paid.
         :return: <account.move.line> recordset
         """
         invoice_lines = super()._filter_open_invoices_to_cancel()
@@ -63,7 +64,8 @@ class RecurringContract(models.Model):
             for contract in self:
                 order.message_post(
                     body=f"Contract "
-                    f"<a href='{contract._notify_get_action_link('view')}'>{contract.name}</a> was terminated. "
+                    f"<a href='{contract._notify_get_action_link('view')}'>"
+                    f"{contract.name}</a> was terminated. "
                     f"Payment lines were adapted."
                 )
         return invoice_lines
