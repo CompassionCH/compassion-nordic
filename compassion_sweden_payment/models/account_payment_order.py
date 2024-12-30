@@ -23,16 +23,16 @@ class AccountPaymentOrder(models.Model):
         self.ensure_one()
         if self.payment_method_id.code != "sweden_direct_debit":
             return super().generate_payment_file()
-        payment_initiation = bggiro.PaymentInitiation(
+        payment_initiation = bggiro.objects.PaymentInitiation(
             date_written=self.create_date,
             bankgiro_number=self.company_partner_bank_id.acc_number,
             customer_number=self.payment_mode_id.initiating_party_identifier,
         )
         for payment_line in self.payment_line_ids:
             payment_initiation.add_payment(
-                transaction_type=bggiro.TransactionType.INCOMING_PAYMENT,
+                transaction_type=bggiro.objects.TransactionType.INCOMING_PAYMENT,
                 payment_date=payment_line.date,
-                period_code=bggiro.PeriodCode.ONCE,
+                period_code=bggiro.objects.PeriodCode.ONCE,
                 number_recurring_payments=0,
                 payer_number=int(
                     payment_line.move_line_id.move_id.line_ids.mapped(

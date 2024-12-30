@@ -35,7 +35,9 @@
     "version": "17.0.1.0.0",
     "license": "AGPL-3",
     "category": "Banking addons",
-    "depends": ["compassion_nordic_accounting"],
+    "depends": [
+        "compassion_nordic_accounting",
+    ],
     "data": [
         "data/account_payment_method.xml",
     ],
