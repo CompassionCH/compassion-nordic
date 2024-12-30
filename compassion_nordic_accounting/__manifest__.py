@@ -36,6 +36,7 @@
     "category": "Banking addons",
     "depends": [
         # compassion-modules
+        "sponsorship_compassion",
         # "account_reconcile_compassion", # temporary removed for the migration
         "partner_personal_info",  # temporary added for the migration
         "recurring_contract",  # temporary added for the migration
@@ -48,9 +49,11 @@
         # OCA/account-invoicing
         "account_invoice_pricelist",
         # OCA/bank-statement-import
-        # "account_statement_import_camt", # temporary removed for the migration
-        # "account_statement_import_file_reconciliation_widget", # temporary removed for the migration
-        # "account_statement_import_txt_xlsx", # temporary removed for the migration
+        "account_statement_import_file",
+        "account_statement_import_camt",
+        "account_statement_import_base",
+        "account_statement_import_file_reconcile_oca",
+        "account_statement_import_sheet_file",
         # OCA/web
         "web_notify",
     ],
@@ -64,7 +67,7 @@
         "views/menu_finance_receivables.xml",
         "views/generate_tax_wizard_view.xml",
         "views/res_partner_view.xml",
-        # "views/account_statement_import_view.xml",# temporary removed for the migration
+        "views/account_statement_import_view.xml",
         "views/mandate_staff_notif_settings_view.xml",
         "views/contracts_view.xml",
         "security/ir.model.access.csv",

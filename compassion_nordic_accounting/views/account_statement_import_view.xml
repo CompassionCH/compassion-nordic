@@ -4,7 +4,7 @@
         <field name="model">account.statement.import</field>
         <field
       name="inherit_id"
-      ref="account_statement_import_file_reconciliation_widget.account_statement_import_form"
+      ref="account_statement_import_file.account_statement_import_form"
     />
         <field name="arch" type="xml">
             <field name="statement_file" position="after">
