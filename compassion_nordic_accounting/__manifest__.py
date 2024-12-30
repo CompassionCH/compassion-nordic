@@ -45,6 +45,12 @@
         "partner_contact_birthdate",
         # OCA/account-invoicing
         "account_invoice_pricelist",
+        # OCA/bank-statement-import
+        "account_statement_import_file",
+        "account_statement_import_camt",
+        "account_statement_import_base",
+        "account_statement_import_file_reconcile_oca",
+        "account_statement_import_sheet_file",
     ],
     "data": [
         "views/account_move_view.xml",
@@ -53,6 +59,7 @@
         "views/menu_finance_receivables.xml",
         "views/generate_tax_wizard_view.xml",
         "views/res_partner_view.xml",
+        "views/account_statement_import_view.xml",
         "views/mandate_staff_notif_settings_view.xml",
         "views/contracts_view.xml",
         "security/ir.model.access.csv",
