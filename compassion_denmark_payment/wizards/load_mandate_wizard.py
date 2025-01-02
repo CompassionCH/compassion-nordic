@@ -13,15 +13,15 @@ from datetime import date
 from odoo import _, models
 from odoo.exceptions import ValidationError
 
-from . import beservice
+from .. import beservice
 
 
 class LoadMandateWizard(models.Model):
     _inherit = "load.mandate.wizard"
+    _description = "Load mandates for Danish company"
 
     def generate_new_mandate(self):
-        # When we aren't on the denmark company we call the parent
-        # to try other childrens modules
+        # When we aren't on the denmark company we call the parent to try other childrens modules
         if self.env.company.country_id == self.env.ref("base.dk"):
             data = list()
             for wizard in self:
@@ -31,7 +31,7 @@ class LoadMandateWizard(models.Model):
                 try:
                     parsed_file = beservice.parse(mandate_file)
                 except Exception as e:
-                    raise ValidationError(_("Incorrect File Format")) from e
+                    raise ValidationError(_("Incorrect File Format %s") % e)
                 if (
                     parsed_file.delivery_type
                     != beservice.DeliveryType.MANDATE_INFORMATION
@@ -68,9 +68,8 @@ class LoadMandateWizard(models.Model):
                                 mandate_id = mandate.id
                                 # We have to set the payment mode to bank transfer again
                                 active_dd_contract = partner.sponsorship_ids.filtered(
-                                    lambda a, i=info: a.state
-                                    not in ("terminated", "cancelled")
-                                    and a.group_id.ref == str(i.mandate_number)
+                                    lambda a: a.state not in ("terminated", "cancelled")
+                                    and a.group_id.ref == str(info.mandate_number)
                                 )
                                 payment_mode_id = (
                                     self.env["account.payment.mode"]
@@ -91,8 +90,7 @@ class LoadMandateWizard(models.Model):
                                 == beservice.TransactionCode.MANDATE_REGISTERED
                             ):
                                 old_state = "None"
-                                # we need to update all contract that the sponsor
-                                # pays with the new mandate number received.
+                                # we need to update all contract that the sponsor pays with the new mandate number received.
                                 active_dd_contract = partner.sponsorship_ids.filtered(
                                     lambda a: a.state not in ("terminated", "cancelled")
                                 )
@@ -118,7 +116,7 @@ class LoadMandateWizard(models.Model):
                                 )
                                 company_id = self.env.company.id
                                 bank_account = partner.bank_ids.filtered(
-                                    lambda b, i=info: b.acc_number == i.customer_number
+                                    lambda b: b.acc_number == info.customer_number
                                 )
                                 if not bank_account:
                                     bank_account = self.env["res.partner.bank"].create(

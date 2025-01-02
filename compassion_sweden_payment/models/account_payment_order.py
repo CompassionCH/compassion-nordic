@@ -10,7 +10,7 @@
 ##############################################################################
 from odoo import models
 
-from . import bggiro
+from .. import bggiro
 
 
 class AccountPaymentOrder(models.Model):

@@ -9,5 +9,4 @@
 #
 ##############################################################################
 
-from ..static.lib import beservice
 from . import load_mandate_wizard
