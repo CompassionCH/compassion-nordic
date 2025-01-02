@@ -1,9 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
   <data>
-      
-    <menuitem id="menu_sie" name="SIE" parent="account.menu_finance_configuration" sequence="50" />
-      
+
+    <menuitem
+      id="menu_sie"
+      name="SIE"
+      parent="account.menu_finance_configuration"
+      sequence="50"
+    />
+
     <!--account move-->
     <record model="ir.actions.server" id="dropdown_export_move">
       <field name="name">Export SIE</field>
@@ -43,7 +48,7 @@
               <group>
                 <field name="journal_ids" widget="many2many_tags" />
                 <field name="partner_ids" widget="many2many_tags" />
-                <field name="company_id"  widget="many2one" />
+                <field name="company_id" widget="many2one" />
                 <field name="account_ids" widget="many2many_tags" />
               </group>
             </page>
@@ -52,37 +57,52 @@
                 <field name="data" />
               </group>
               <group string="Choose a journal">
-                    <field name="move_journal_id"/>
-                    <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                    <field name="move_journal_id" />
+                    <field
+                  name="company_id"
+                  options="{'no_create': True}"
+                  groups="base.group_multi_company"
+                />
                 </group>
                 <group string="Configure Serie To Journal">
                     <field name="serie_to_journal_ids">
                         <tree editable="bottom">
-                            <field name="name"/>
-                            <field name="journal_id"/>
+                            <field name="name" />
+                            <field name="journal_id" />
                         </tree>
                     </field>
                 </group>
-              <field name="show_account_lines" invisible="1"/>
+              <field name="show_account_lines" invisible="1" />
               <div>
                 <group string="Import Accounts">
-                  <field name="accounts_type"/>
-                  <field name="accounts_user_type"/>
-                  <field name="accounts_parent_id"/>
+                  <field name="accounts_type" />
+                  <field name="accounts_user_type" />
+                  <field name="accounts_parent_id" />
                 </group>
                 <field name="account_line_ids">
                   <tree editable="bottom">
-                    <field name="checked"/>
-                    <field name="code"/>
-                    <field name="name"/>
-                    <field name="type"/>
-                    <field name="reconcile"/>
-                    <field name="user_type"/>
-                    <field name="parent_id"/>
+                    <field name="checked" />
+                    <field name="code" />
+                    <field name="name" />
+                    <field name="type" />
+                    <field name="reconcile" />
+                    <field name="user_type" />
+                    <field name="parent_id" />
                   </tree>
                 </field>
-                <button string="Create Accounts" name="create_accounts" type="object" class="oe_highlight"/>
-                <button string="Get Missing Accounts" name="get_missing_accounts" type="object" class="oe_highlight" style="margin-left:10px;"/>
+                <button
+                  string="Create Accounts"
+                  name="create_accounts"
+                  type="object"
+                  class="oe_highlight"
+                />
+                <button
+                  string="Get Missing Accounts"
+                  name="get_missing_accounts"
+                  type="object"
+                  class="oe_highlight"
+                  style="margin-left:10px;"
+                />
               </div>
             </page>
           </notebook>
@@ -91,11 +111,16 @@
             <p>
               Here is the exported sie-file:
               <field name="sie_file" readonly="1" filename="filename" />
-               <field name="filename" readonly="1" invisible="1"/>
+               <field name="filename" readonly="1" invisible="1" />
             </p>
           </div>
           <footer states="choose">
-            <button string="Send" name="send_form" type="object" class="oe_highlight" />
+            <button
+              string="Send"
+              name="send_form"
+              type="object"
+              class="oe_highlight"
+            />
             or
             <button string="Cancel" special="cancel" class="oe_link" />
           </footer>
@@ -112,6 +137,10 @@
       <field name="view_mode">form</field>
       <field name="target">inline</field>
     </record>
-    <menuitem action="action_wizard_account_sie" id="menu_wizard_account_sie" parent="l10n_se_sie.menu_sie" />
+    <menuitem
+      action="action_wizard_account_sie"
+      id="menu_wizard_account_sie"
+      parent="l10n_se_sie.menu_sie"
+    />
   </data>
 </odoo>
