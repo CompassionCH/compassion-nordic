@@ -20,7 +20,7 @@
 
 {
     "name": "l10n_se: SIE-export",
-    "version": "14.0.0.0.2",
+    "version": "16.0.1.0.0",
     "summary": "Module for exporting SIE-files",
     "category": "Accounting",
     "author": "Vertel AB, Compassion Switzerland",
