@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 
 import odoo
 from odoo import _, api, fields, models
-from odoo.exceptions import RedirectWarning, UserError, Warning
+from odoo.exceptions import RedirectWarning, UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -28,11 +28,9 @@ class account_sie_account(models.TransientModel):
     _description = "SIE Import New Account Line"
 
     @api.model
-    def default_user_type(self):
-        # ~ return self.env.ref('account.data_account_type_asset')
-        # data_account_type_current_assets
-        # data_account_type_fixed_assets
-        return self.env.ref("account.data_account_type_fixed_assets")
+    def default_account_type(self):
+        # Remplacement de l'ancien user_type par le nouveau account_type
+        return "asset_fixed"  # Exemple pour les actifs immobilisés (Fixed Assets)
 
     wizard_id = fields.Many2one(comodel_name="account.sie", string="Wizard")
     checked = fields.Boolean(string="")
@@ -57,13 +55,17 @@ class account_sie_account(models.TransientModel):
         "can have children accounts for multi-company consolidations, payable/receivable are for "
         "partners accounts (for debit/credit computations), closed for depreciated accounts.",
     )
-    user_type = fields.Many2one(
-        "account.account.type",
-        "Account Type",
+    account_type = fields.Selection(
+        selection=lambda self: self.env["account.account"]
+        ._fields["account_type"]
+        .selection,
+        string="Account Type",
         required=True,
-        default=default_user_type,
-        help="Account Type is used for information purpose, to generate "
-        "country-specific legal reports, and set the rules to close a fiscal year and generate opening entries.",
+        default=default_account_type,
+        help=(
+            "Account Type is used for information purposes, to generate country-specific legal reports, "
+            "and set the rules to close a fiscal year and generate opening entries."
+        ),
     )
     parent_id = fields.Many2one(
         comodel_name="account.account", string="Parent", domain=[("type", "=", "view")]
@@ -135,12 +137,15 @@ class account_sie(models.TransientModel):
         "can have children accounts for multi-company consolidations, payable/receivable are for "
         "partners accounts (for debit/credit computations), closed for depreciated accounts.",
     )
-    accounts_user_type = fields.Many2one(
-        "account.account.type",
-        "Account Type",
+    accounts_user_type = fields.Selection(
+        selection=lambda self: self.env["account.account"]
+        ._fields["account_type"]
+        .selection,
+        string="Account Type",
         help="Account Type is used for information purpose, to generate "
         "country-specific legal reports, and set the rules to close a fiscal year and generate opening entries.",
     )
+
     accounts_parent_id = fields.Many2one(
         comodel_name="account.account", string="Parent", domain=[("type", "=", "view")]
     )
@@ -204,7 +209,7 @@ class account_sie(models.TransientModel):
                     "name": line.name,
                     "code": line.code,
                     "internal_type": line.type,
-                    "user_type_id": line.user_type.id,
+                    "account_type": line.account_type,
                     "root_id": line.parent_id and line.parent_id.id or None,
                     "reconcile": line.reconcile,
                 }
@@ -294,23 +299,24 @@ class account_sie(models.TransientModel):
                     self._import_accounts(data)
                 )
                 for account in missing_accounts:
-                    # account type lookup
-                    account_type = self.env[
-                        "account.account.type"
-                    ]._account_type_lookup(code=account[0])
-                    if not account_type:
-                        account_type = self.env.ref(
-                            "account.data_account_type_fixed_assets"
-                        )
+                    # Determine account type based on the code
+                    account_type = next(
+                        (
+                            sel[0]
+                            for sel in self.env["account.account"]
+                            ._fields["account_type"]
+                            .selection
+                            if sel[0] == account[0]
+                        ),
+                        "asset_fixed",  # Default to Fixed Assets if not found
+                    )
 
-                    be_reconcilable = False
-                    if (
-                        account_type.type == "receivable"
-                        or account_type.type == "payable"
-                    ):
-                        be_reconcilable = True
+                    be_reconcilable = account_type in [
+                        "asset_receivable",
+                        "liability_payable",
+                    ]
 
-                    # check if account line exist
+                    # Check if account line already exists
                     sie_account_id = self.env["account.sie.account"].search(
                         [("code", "=", account[0]), ("wizard_id", "=", self.id)],
                         limit=1,
@@ -325,7 +331,7 @@ class account_sie(models.TransientModel):
                                         {
                                             "code": account[0],
                                             "name": account[1],
-                                            "user_type": account_type[0].id,
+                                            "account_type": account_type,
                                             "reconcile": be_reconcilable,
                                         },
                                     )
@@ -504,7 +510,7 @@ class account_sie(models.TransientModel):
                 domain=[
                     ("move_id.state", "=", "posted"),
                     ("date", "<", fiscalyear.date_from),
-                    ("account_id.user_type_id.include_initial_balance", "=", True),
+                    ("account_id.include_initial_balance", "=", True),
                     ("company_id", "=", company.id),
                 ],
                 fields=["account_id", "balance"],
@@ -533,7 +539,7 @@ class account_sie(models.TransientModel):
                         ">=",
                         self.fiscalyear_ids[0].date_from - relativedelta(years=1),
                     ),
-                    ("account_id.user_type_id.include_initial_balance", "=", False),
+                    ("account_id.include_initial_balance", "=", False),
                     ("company_id", "=", company.id),
                 ],
                 fields=["account_id", "balance"],
@@ -563,7 +569,7 @@ class account_sie(models.TransientModel):
                     bsacc = account_obj.search(
                         [
                             ("code", "=", account),
-                            ("user_type_id.include_initial_balance", "=", True),
+                            ("include_initial_balance", "=", True),
                             ("company_id", "=", company.id),
                         ]
                     )
@@ -618,7 +624,7 @@ class account_sie(models.TransientModel):
             bsacc = account_obj.search(
                 [
                     ("code", "=", account),
-                    ("user_type_id.include_initial_balance", "=", True),
+                    ("include_initial_balance", "=", True),
                     ("company_id", "=", company.id),
                 ]
             )
@@ -854,25 +860,19 @@ class account_sie(models.TransientModel):
                             ],
                             limit=1,
                         )
-                        if code.user_type_id.report_type == "income":
+                        if code.account_type in ["income", "income_other"]:
                             journal_types.append(
-                                "sale" and float(trans_balance) > 0.0 or "sale_refund"
+                                "sale" if float(trans_balance) > 0.0 else "sale_refund"
                             )
-                        elif (
-                            code.user_type_id.id
-                            == self.env.ref("account.data_account_type_liquidity").id
-                        ):  # changed from data_account_type_bank to data_account_type_liquidity
+                        elif code.account_type == "asset_cash":
                             journal_types.append("bank")
-                        elif (
-                            code.user_type_id.id
-                            == self.env.ref("account.data_account_type_liquidity").id
-                        ):  # changed from data_account_type_bank to data_account_type_liquidity
+                        elif code.account_type == "liability_credit_card":
                             journal_types.append("cash")
-                        elif code.user_type_id.report_type in ["asset", "expense"]:
+                        elif code.account_type in ["asset", "expense"]:
                             journal_types.append(
                                 "purchase"
-                                and float(trans_balance) > 0.0
-                                or "purchase_refund"
+                                if float(trans_balance) > 0.0
+                                else "purchase_refund"
                             )
 
                         # ~ raise Warning(self.env['account.move.line'].search([])[0].date)
