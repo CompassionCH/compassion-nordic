@@ -5,7 +5,7 @@ from odoo import api, fields, models
 _logger = logging.getLogger(__name__)
 
 
-class account_chart_template(models.Model):
+class account_chart_template(models.AbstractModel):
     _inherit = "account.chart.template"
     kptyp = fields.Char(string="Kptyp")
 
