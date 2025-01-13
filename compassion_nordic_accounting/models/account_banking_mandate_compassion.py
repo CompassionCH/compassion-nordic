@@ -39,7 +39,7 @@ class AccountBankingMandate(models.Model):
                     f"{self.partner_bank_id.acc_number or ''}"
                 ),
                 subject=_(f"Mandate {MANDATE_STATE[action]}"),
-                type="comment",
+                message_type="comment",
             )
 
     @api.model
