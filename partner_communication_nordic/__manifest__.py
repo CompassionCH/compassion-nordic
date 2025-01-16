@@ -48,6 +48,7 @@
         "views/field_office_view.xml",
         "views/download_child_pictures_view.xml",
         "views/communication_job_view.xml",
+        "views/res_partner_view.xml",
     ],
     "demo": [],
     "installable": True,

@@ -1,0 +1,33 @@
+<odoo>
+    <!-- Hide unwanted buttons from the button_box / multiple inheritance is needed -->
+    <record model="ir.ui.view" id="partner_nordic_hide_meetings_view">
+        <field name="name">res.partner.form.nordic.hide.meetings</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="calendar.view_partners_form" />
+        <field name="arch" type="xml">
+            <button name="schedule_meeting" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </button>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="partner_nordic_hide_sales_view">
+        <field name="name">res.partner.form.nordic.hide.sales</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="sale.res_partner_view_buttons" />
+        <field name="arch" type="xml">
+            <button name="action_view_sale_order" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </button>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="partner_nordic_hide_opportunities_view">
+        <field name="name">res.partner.form.nordic.hide.opportunities</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="crm.view_partners_form_crm1" />
+        <field name="arch" type="xml">
+            <button name="action_view_opportunity" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </button>
+        </field>
+    </record>
+</odoo>
