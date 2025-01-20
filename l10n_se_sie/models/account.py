@@ -1,25 +1,40 @@
 import logging
 
+from dateutil.relativedelta import relativedelta
+
 from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 
 
-class account_chart_template(models.AbstractModel):
+def escape_sie_string(s):
+    if s:
+        return s.replace("\n", " ").replace("\\", "\\\\").replace('"', '\\"')
+    else:
+        return ""
+
+
+class AccountChartTemplate(models.AbstractModel):
     _inherit = "account.chart.template"
     kptyp = fields.Char(string="Kptyp")
 
 
-class res_company(models.Model):
+class ResCompany(models.Model):
     _inherit = "res.company"
     kptyp = fields.Char(string="Kptyp")
 
 
-class account_account(models.Model):
+class Account(models.Model):
     _inherit = "account.account"
 
+    sie_name = fields.Char(compute="_compute_sie_name")
+
+    def _compute_sie_name(self):
+        for record in self:
+            record.sie_name = f'#KONTO {record.code} "{record.name}"'
+
     def export_sie(self):
-        ver_ids = (
+        move_ids = (
             self.env["account.move"]
             .search([])
             .filtered(
@@ -28,8 +43,8 @@ class account_account(models.Model):
                 )
             )
         )
-        _logger.warning(f"export_sie {ver_ids}")
-        return self.env["account.sie"].export_sie(ver_ids)
+        _logger.warning(f"export_sie {move_ids}")
+        return self.env["account.sie"].export_sie(move_ids)
 
     def check__missing_accounts(self, accounts):
         missing = []
@@ -42,30 +57,52 @@ class account_account(models.Model):
         return missing
 
 
-class account_journal(models.Model):
+class AccountJournal(models.Model):
     _inherit = "account.journal"
 
     def export_sie(self):
-        ver_ids = self.env["account.move"].search([("journal_id", "in", self.ids)])
+        move_ids = self.env["account.move"].search([("journal_id", "in", self.ids)])
         _logger.warning("account journal export sie")
-        return self.env["account.sie"].export_sie(ver_ids)
+        return self.env["account.sie"].export_sie(move_ids)
 
 
-class account_move(models.Model):
+class AccountMove(models.Model):
     _inherit = "account.move"
 
     is_incoming_balance_move = fields.Boolean(default=False)
 
     def export_sie(self):
-        # ~ ver_ids = self.env['account.move'].search([('id','in',ids)])
         return self.env["account.sie"].export_sie(self)
 
-
-class AccountChartTemplate(models.Model):
-    _inherit = "account.account"
+    def generate_sie_data(self, acc_balances):
+        self.ensure_one()
+        res = (
+            f'#VER {self.journal_id.type} "{self.id}" '
+            f'{self.date.strftime("%Y%m%d")} '
+            f'"{escape_sie_string((self.narration or "")[:20])}" '
+            f'{escape_sie_string(self.create_date.strftime("%Y%m%d"))} '
+            f'{escape_sie_string(self.create_uid.login)}\n{{\n'
+        )
+        for trans in self.line_ids:
+            if trans.display_type in ["line_note", "line_section"]:
+                continue
+            res += (
+                f'#TRANS {escape_sie_string(trans.account_id.code)} {{}} '
+                f'{trans.debit - trans.credit} '
+                f'{escape_sie_string(trans.date.strftime("%Y%m%d"))} '
+                f'"{escape_sie_string(trans.name or "")}" '
+                f'{trans.quantity} '
+                f'{escape_sie_string(trans.create_uid.login)}\n'
+            )
+            if trans.account_id.code not in acc_balances:
+                acc_balances[trans.account_id.code] = 0.0
+            acc_balances[trans.account_id.code] += trans.debit - trans.credit
+        res += "}\n"
+        return res
 
     @api.model
     def fix_account_types_skf(self):
+        liknande = "type_OvrigaRanteintakterLiknandeResultatposter"
         value_list = [
             {
                 "code": 1010,
@@ -235,12 +272,14 @@ class AccountChartTemplate(models.Model):
             {
                 "code": 2211,
                 "name": "Avsättningar för PRI-pensioner",
-                "user_type_id": "l10n_se.type_OvrigaAvsattningarPensionerLiknandeForpliktelser",
+                "user_type_id": "l10n_se."
+                "type_OvrigaAvsattningarPensionerLiknandeForpliktelser",
             },
             {
                 "code": 2219,
                 "name": "Avsättningar för övr pensioner",
-                "user_type_id": "l10n_se.type_OvrigaAvsattningarPensionerLiknandeForpliktelser",
+                "user_type_id": "l10n_se."
+                "type_OvrigaAvsattningarPensionerLiknandeForpliktelser",
             },
             {
                 "code": 2240,
@@ -635,7 +674,9 @@ class AccountChartTemplate(models.Model):
             {
                 "code": 4971,
                 "name": "Förändr påg arbete( Ext kund)",
-                "user_type_id": "l10n_se.type_ForandringLagerProdukterIArbeteFardigaVarorPagaendeArbetenAnnansRakning",
+                "user_type_id": "l10n_se.type_"
+                "ForandringLagerProdukterIArbeteFardigaVarorPagaende"
+                "ArbetenAnnansRakning",
             },
             {
                 "code": 4990,
@@ -850,32 +891,34 @@ class AccountChartTemplate(models.Model):
             {
                 "code": 8291,
                 "name": "Orealiserade värdeförändring anläggningstillgångar",
-                "user_type_id": "l10n_se.type_ResultatOvrigaFinansiellaAnlaggningstillgangar",
+                "user_type_id": "l10n_se."
+                "type_ResultatOvrigaFinansiellaAnlaggningstillgangar",
             },
             {
                 "code": 8295,
                 "name": "Orealiserade värdeförändring derivatinstrument",
-                "user_type_id": "l10n_se.type_ResultatOvrigaFinansiellaAnlaggningstillgangar",
+                "user_type_id": "l10n_se."
+                "type_ResultatOvrigaFinansiellaAnlaggningstillgangar",
             },
             {
                 "code": 8300,
                 "name": "Ränteintäkter",
-                "user_type_id": "l10n_se.type_OvrigaRanteintakterLiknandeResultatposter",
+                "user_type_id": f"l10n_se.{liknande}",
             },
             {
                 "code": 8320,
                 "name": "Värdering till verkligt värde, oms tillg",
-                "user_type_id": "l10n_se.type_OvrigaRanteintakterLiknandeResultatposter",
+                "user_type_id": f"l10n_se.{liknande}",
             },
             {
                 "code": 8321,
                 "name": "Orealiserade värdeföränd omsättn tillg",
-                "user_type_id": "l10n_se.type_OvrigaRanteintakterLiknandeResultatposter",
+                "user_type_id": f"l10n_se.{liknande}",
             },
             {
                 "code": 8325,
                 "name": "Orealiserade värdeföränd derivat",
-                "user_type_id": "l10n_se.type_OvrigaRanteintakterLiknandeResultatposter",
+                "user_type_id": f"l10n_se.{liknande}",
             },
             {
                 "code": 8401,
@@ -915,3 +958,60 @@ class AccountChartTemplate(models.Model):
                 account_dict["user_type_id"] = account_type_id.id
                 _logger.warning(f"{account_dict=}")
                 self.env["account.account"].create(account_dict)
+
+
+class AccountFiscalYear(models.Model):
+    _inherit = "account.fiscal.year"
+
+    def generate_initial_balance_data(self, acc_balances):
+        res = ""
+        for fiscal_year in self:
+            init_tb = self.env["account.move.line"].read_group(
+                domain=[
+                    ("move_id.state", "=", "posted"),
+                    ("date", "<", self.date_from),
+                    ("account_id.include_initial_balance", "=", True),
+                    ("company_id", "=", self.company_id.id),
+                ],
+                fields=["account_id", "balance"],
+                groupby=["account_id"],
+            )
+            for i in init_tb:
+                acc = self.env["account.account"].browse(i["account_id"][0]).code
+                bal = round(i["balance"], 2)
+                res += f"#IB {self.get_fiscal_year_position(fiscal_year)} {acc} {bal}\n"
+                if len(self) == 1:
+                    res += f"#UB -1 {acc} {bal}\n"
+                acc_balances[acc] = bal
+        return res
+
+    def generate_fiscalyear_sie(self):
+        res = ""
+        for fiscalyear in self:
+            fiscal_year_position = self.get_fiscal_year_position(fiscalyear)
+            date_from_str = fiscalyear.date_from.strftime("%Y%m%d")
+            date_to_str = fiscalyear.date_to.strftime("%Y%m%d")
+
+            res += f"#RAR {fiscal_year_position} {date_from_str} {date_to_str}\n"
+
+            if len(self) == 1:
+                previous_date_from = (
+                    fiscalyear.date_from - relativedelta(years=1)
+                ).strftime("%Y%m%d")
+                previous_date_to = (
+                    fiscalyear.date_to - relativedelta(years=1)
+                ).strftime("%Y%m%d")
+                res += f"#RAR -1 {previous_date_from} {previous_date_to}\n"
+
+        return res
+
+    def get_fiscal_year_position(self, reference_year):
+        """
+        Get the position of the reference year in the sorted list of fiscal years.
+        """
+        i = 0
+        for year in self.sorted(lambda r: r.date_from, reverse=True):
+            if reference_year == year:
+                return i
+            i -= 1
+        return i

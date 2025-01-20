@@ -50,45 +50,13 @@
                             <field name="company_id" widget="many2one" />
                         </group>
 
-                        <!--
-                        <page string="Import">
-                            <group rowspan="4" string="File to upload">
-                                <field name="data"/>
-                            </group>
-                            <group string="Choose a journal">
-                                <field name="move_journal_id"/>
-                                <field name="company_id" options="{'no_create': True}"
-                                       groups="base.group_multi_company"/>
-                            </group>
-                            <group string="Configure Serie To Journal">
-                                <field name="serie_to_journal_ids">
-                                    <tree editable="bottom">
-                                        <field name="name"/>
-                                        <field name="journal_id"/>
-                                    </tree>
-                                </field>
-                            </group>
-                            <field name="show_account_lines" invisible="1"/>
-                            <div>
-                                <group string="Import Accounts">
-                                    <field name="accounts_type"/>
-                                    <field name="accounts_user_type"/>
-                                    <field name="accounts_parent_id"/>
-                                </group>
-                                <button string="Create Accounts" name="create_accounts" type="object"
-                                        class="oe_highlight"/>
-                                <button string="Get Missing Accounts" name="get_missing_accounts" type="object"
-                                        class="oe_highlight" style="margin-left:10px;"/>
-                            </div>
-                        </page>
-                        -->
                     </div>
                     <div invisible="state != 'get'">
                         <h2>Export Complete</h2>
                         <p>
                             Here is the exported sie-file:
                             <field
-                name="sie_file"
+                name="data"
                 readonly="1"
                 filename="filename"
               />
