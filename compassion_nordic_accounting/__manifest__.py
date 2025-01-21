@@ -52,6 +52,10 @@
         "account_statement_import_file_reconcile_oca",
         "account_statement_import_sheet_file",
     ],
+    "excludes": [
+        # Does not work with account_statement_import_file_reconcile_oca
+        "account_accountant_batch_payment",
+    ],
     "data": [
         "views/account_move_view.xml",
         "views/load_mandate_wizard_view.xml",
