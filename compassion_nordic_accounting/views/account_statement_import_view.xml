@@ -20,14 +20,6 @@
           />
                 </group>
             </field>
-            <button
-        name="import_file_and_reconcile_button"
-        position="attributes"
-      >
-                <attribute name="invisible">
-                    large_file_import == True
-                </attribute>
-            </button>
             <button name="import_file_button" position="attributes">
                 <attribute name="invisible">
                     large_file_import == True
