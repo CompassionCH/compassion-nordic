@@ -35,6 +35,8 @@
     "license": "AGPL-3",
     "category": "Banking addons",
     "depends": [
+        # compassion-accounting
+        "account_reconcile_compassion_ee",
         # compassion-modules
         "sponsorship_compassion",
         # OCA/bank-payment
