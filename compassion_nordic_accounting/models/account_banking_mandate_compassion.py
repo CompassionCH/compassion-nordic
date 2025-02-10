@@ -42,12 +42,12 @@ class AccountBankingMandate(models.Model):
                 message_type="comment",
             )
 
-    @api.model
-    def create(self, data):
+    @api.model_create_multi
+    def create(self, vals_list):
         """Override function to notify creation in a message on partner feed"""
-        result = super().create(data)
-        result._update_mandate_status_partner("create")
-
+        result = super().create(vals_list)
+        for record in result:
+            record._update_mandate_status_partner("create")
         return result
 
     def validate(self):

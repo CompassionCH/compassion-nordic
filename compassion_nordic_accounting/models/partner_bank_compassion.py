@@ -17,29 +17,30 @@ class ResPartnerBank(models.Model):
 
     _inherit = "res.partner.bank"
 
-    def _account_notify_partner(self, account, action):
+    def _account_notify_partner(self, action):
         """
         Post a message on the partner's message feed with the account infos
         """
-        account.partner_id.message_post(
-            body=_(f"Account {action}, account no: {account.acc_number or '' }"),
+        self.ensure_one()
+        self.partner_id.message_post(
+            body=_(f"Account {action}, account no: {self.acc_number or '' }"),
             subject=_(f"Account {action}"),
             type="comment",
         )
 
-    @api.model
+    @api.model_create_multi
     def create(self, data):
         """Override function to notify creation in a message"""
         result = super().create(data)
-        if result.partner_id:
-            self._account_notify_partner(result, "created")
-
+        if not self.env.context.get("tracking_disable"):
+            for account in result.filtered("partner_id"):
+                account._account_notify_partner("created")
         return result
 
     def unlink(self):
         """Override function to notify delete in a message"""
         if not self.env.context.get("tracking_disable"):
             for acc in self:
-                self._account_notify_partner(acc, "deleted")
+                acc._account_notify_partner("deleted")
         result = super().unlink()
         return result
