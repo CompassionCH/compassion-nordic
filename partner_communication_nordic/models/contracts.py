@@ -30,20 +30,17 @@ class RecurringContract(models.Model):
     )
 
     def contract_waiting(self):
-        self = self.with_context(
-            async_mode=False
-        )  # Disable asynchronous to prevent serialization errors
         res = super().contract_waiting()
-        self.filtered(lambda c: "S" in c.type and not c.is_active).with_context(
-            {}
-        )._new_dossier()
+        new_sponsorships = self.filtered(lambda c: "S" in c.type and not c.is_active)
+        if new_sponsorships:
+            new_sponsorships.with_delay(
+                channel="root.partner_communication",
+                identity_key=f"{self._name}.send_new_dossier.{new_sponsorships.ids}",
+            )._new_dossier()
         return res
 
     def _new_dossier(self):
-        """
-        Sends the dossier of the new sponsorship to both payer and
-        correspondent.
-        """
+        """Sends the dossier of the new sponsorship to both payer and correspondent."""
         for spo in self:
             if spo.correspondent_id.id != spo.partner_id.id:
                 corresp = spo.correspondent_id
@@ -90,5 +87,5 @@ class RecurringContract(models.Model):
                 ]
             )
             if not already_sent:
-                self.with_context({}).send_communication(config, correspondent)
+                self.send_communication(config, correspondent)
         return True
