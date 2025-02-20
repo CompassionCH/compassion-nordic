@@ -9,7 +9,7 @@
 ##############################################################################
 import logging
 
-from odoo import models, fields
+from odoo import fields, models
 
 logger = logging.getLogger(__name__)
 
@@ -30,15 +30,17 @@ class RecurringContract(models.Model):
     )
 
     def contract_waiting(self):
-        self = self.with_context(async_mode=False) # Disable asynchronous to prevent serialization errors
         res = super().contract_waiting()
-        self.filtered(lambda c: "S" in c.type and not c.is_active).with_context({})._new_dossier()
+        new_sponsorships = self.filtered(lambda c: "S" in c.type and not c.is_active)
+        if new_sponsorships:
+            new_sponsorships.with_delay(
+                channel="root.partner_communication",
+                identity_key=f"{self._name}.send_new_dossier.{new_sponsorships.ids}",
+            )._new_dossier()
         return res
 
     def _new_dossier(self):
-        """
-        Sends the dossier of the new sponsorship to both payer and
-        correspondent.
+        """Sends the dossier of the new sponsorship to both payer and correspondent.
         """
         for spo in self:
             if spo.correspondent_id.id != spo.partner_id.id:
@@ -58,16 +60,20 @@ class RecurringContract(models.Model):
         :return: None
         """
         self.ensure_one()
-        new_dossier = self.env.ref("partner_communication_nordic.config_onboarding_sponsorship_confirmation")
+        new_dossier = self.env.ref(
+            "partner_communication_nordic.config_onboarding_sponsorship_confirmation"
+        )
         print_dossier = self.env.ref("partner_communication_compassion.planned_dossier")
         transfer = self.env.ref("partner_communication_compassion.new_dossier_transfer")
-        child_picture = self.env.ref("partner_communication_nordic.config_onboarding_photo_by_post")
+        child_picture = self.env.ref(
+            "partner_communication_nordic.config_onboarding_photo_by_post"
+        )
         partner = self.correspondent_id if correspondent else self.partner_id
         if self.origin_id.type == "transfer":
             configs = transfer
         elif (
-                not partner.email
-                or partner.global_communication_delivery_preference == "physical"
+            not partner.email
+            or partner.global_communication_delivery_preference == "physical"
         ):
             configs = print_dossier
         else:
@@ -82,5 +88,5 @@ class RecurringContract(models.Model):
                 ]
             )
             if not already_sent:
-                self.with_context({}).send_communication(config, correspondent)
+                self.send_communication(config, correspondent)
         return True
