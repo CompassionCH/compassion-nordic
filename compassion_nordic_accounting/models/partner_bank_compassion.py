@@ -25,7 +25,7 @@ class ResPartnerBank(models.Model):
         self.partner_id.message_post(
             body=_(f"Account {action}, account no: {self.acc_number or '' }"),
             subject=_(f"Account {action}"),
-            type="comment",
+            message_type="comment",
         )
 
     @api.model_create_multi
