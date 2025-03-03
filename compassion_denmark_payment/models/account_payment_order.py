@@ -57,7 +57,7 @@ class AccountPaymentOrder(models.Model):
                                                              + ' ' + pymt_trx.payment_line_ids[0].payment_type.capitalize())[:20],
                                                   amount=pymt_trx.amount,
                                                   sign_code=beservice.SignCode.COLLECTION,
-                                                  payment_date=pymt_trx.date,
+                                                  payment_date=pymt_trx.payment_line_ids[0].date,
                                                   text_lines=text_lines
                                                   )
         return data_delivery.to_ocr().encode('iso-8859-1'), "{}.txt".format(self.name)
