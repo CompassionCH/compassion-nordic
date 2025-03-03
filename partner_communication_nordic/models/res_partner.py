@@ -64,7 +64,7 @@ class ResPartner(models.Model):
                 # ACLs shouldn't produce data inconsistency
                 old_contacts.sudo().unlink()
                 new_contacts.sudo().write({"email": new_email})
-            if not new_contacts:
+            elif not new_contacts and new_email:
                 self.env["mail.blacklist"].create({
                     "email": new_email
                 })
