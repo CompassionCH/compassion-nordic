@@ -50,10 +50,8 @@ class PartnerCommunication(models.Model):
             "type": report_name,
             "doc_ids": children.ids,
         }
-        pdf = self._get_pdf_from_data(
-            data, self.sudo().env.ref("child_compassion.report_child_picture")
-        )
-        return {_("child dossier.pdf"): [report_name, pdf]}
+        pdf = self._get_pdf_from_data(data, "child_compassion.report_child_picture")
+        return {_("child dossier.pdf"): (report_name, pdf)}
 
     def send(self):
         """
