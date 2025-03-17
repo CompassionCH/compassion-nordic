@@ -41,13 +41,24 @@ class AccountStatementImport(models.TransientModel):
             # Import in background and return a message.
             self.with_company(
                 self.env["account.journal"].browse(journal_id).company_id.id
-            ).with_delay()._import_file_with_journal(journal_id)
-            self.env.user.notify_success(
-                message=_(
-                    "Import job launched. Come back in a few minutes"
-                    "to check your statements."
-                )
-            )
+            ).with_delay(
+                channel="root.accounting",
+                priority=50,
+                description="Import bank statement file",
+            )._import_file_with_journal(journal_id)
+            action_with_notif = {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "type": "warning",
+                    "sticky": True,
+                    "message": _(
+                            "Import job launched. Come back in a few minutes"
+                            "to check your statements."
+                        ),
+                },
+            }
+            return action_with_notif
         else:
             return_action = super().import_file_button()
             # Lauch a job for bank statements auto reconciliations

@@ -31,12 +31,13 @@
     "summary": "Add Features for nordic Accounting",
     "author": "Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
-    "version": "17.0.1.0.0",
+    "version": "17.0.1.0.1",
     "license": "AGPL-3",
     "category": "Banking addons",
     "depends": [
         # compassion-accounting
         "account_reconcile_compassion_ee",
+        "account_statement_import_compassion_ee",
         # compassion-modules
         "sponsorship_compassion",
         # OCA/bank-payment
@@ -48,10 +49,7 @@
         # OCA/account-invoicing
         "account_invoice_pricelist",
         # OCA/bank-statement-import
-        "account_statement_import_file",
         "account_statement_import_camt",
-        "account_statement_import_base",
-        "account_statement_import_sheet_file",
     ],
     "data": [
         "views/account_move_view.xml",
