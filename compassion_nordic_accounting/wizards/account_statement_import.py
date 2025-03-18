@@ -53,9 +53,9 @@ class AccountStatementImport(models.TransientModel):
                     "type": "warning",
                     "sticky": True,
                     "message": _(
-                            "Import job launched. Come back in a few minutes"
-                            "to check your statements."
-                        ),
+                        "Import job launched. Come back in a few minutes"
+                        "to check your statements."
+                    ),
                 },
             }
             return action_with_notif

@@ -9,7 +9,10 @@
     />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='activation_date']" position="before">
-                <field name="onboarding_start_date" />
+                <field
+          name="onboarding_start_date"
+          invisible="type not in ['S', 'SC', 'SWP']"
+        />
             </xpath>
         </field>
      </record>

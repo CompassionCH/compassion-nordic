@@ -2,17 +2,25 @@
     <record id="view_recurring_contract_filter_graph" model="ir.ui.view">
         <field name="name">sponsorship.norden.filter</field>
         <field name="model">recurring.contract</field>
+        <field name="priority">50</field>
         <field
       name="inherit_id"
       ref="recurring_contract.view_recurring_contract_filter"
     />
         <field name="arch" type="xml">
             <xpath expr="//filter[@name='state']" position="after">
+                <separator />
                 <filter
           name="group_pricelist"
           string="Pricelist"
           domain="[]"
           context="{'group_by':'pricelist_id'}"
+        />
+                <filter
+          name="group_company"
+          string="Company"
+          domain="[]"
+          context="{'group_by':'company_id'}"
         />
             </xpath>
         </field>
