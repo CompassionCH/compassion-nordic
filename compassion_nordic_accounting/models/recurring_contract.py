@@ -51,6 +51,6 @@ class RecurringContract(models.Model):
                 order.message_post(
                     body=f"Contract "
                     f"<a href='{contract._notify_get_action_link('view')}'>"
-                    f"{contract.name}</a> was terminated. "
+                         f"{contract.name}</a> was terminated. "
                     f"Payment lines were adapted."
                 )
