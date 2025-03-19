@@ -66,7 +66,7 @@ class AccountPaymentOrder(models.Model):
                 .move_line_id.move_id.line_ids.mapped("contract_id")
                 .group_id.ref,
                 reference=(
-                    pymt_trx.date.strftime("%b").capitalize()
+                    pymt_trx.payment_line_ids[0].date.strftime("%b").capitalize()
                     + " "
                     + pymt_trx.payment_line_ids[0].payment_type.capitalize()
                 )[:20],
