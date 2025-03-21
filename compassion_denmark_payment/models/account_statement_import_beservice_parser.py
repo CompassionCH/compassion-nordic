@@ -28,20 +28,10 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
     def parse(self, data_file, filename):
         file_data = beservice.parse(StringIO(data_file.decode("iso-8859-1")).read())
 
-        # TODO Place this logic here
+        journal = self.env["account.journal"].browse(self.env.context.get("journal_id"))
 
-        pbs_number = file_data.sections[0].pbs_number
-
-        journal = self.env["account.journal"].search(
-            [("bank_acc_number", "=", str(pbs_number))], limit=1
-        )
-
-        # journal = self.env["account.journal"].browse(
-        #   self.env.context.get("journal_id"))
-        # TODO if not journal, then search for bank account number link
-        #  to account journal. ( same PBS number in file header )
         currency_code = (journal.currency_id or journal.company_id.currency_id).name
-        # TODO get this number first
+
         account_number = journal.bank_account_id.acc_number
 
         name = _("%s: %s") % (
@@ -56,6 +46,7 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
         ]
         if not lines:
             return currency_code, account_number, [{"name": name, "transactions": []}]
+
         date = file_data.sections[0].section_date
 
         transactions = list(
