@@ -24,3 +24,12 @@ class RecurringContractGroup(models.Model):
         @return: Nothing
         """
         pass
+
+    @api.onchange("partner_id")
+    def _onchange_partner_id(self):
+        # Find appropriate company by default
+        if self.partner_id.country_id:
+            country_company = self.env["res.company"].search(
+                [("partner_id.country_id", "=", self.partner_id.country_id.id)], limit=1
+            )
+            self.company_id = country_company or self.env.company
