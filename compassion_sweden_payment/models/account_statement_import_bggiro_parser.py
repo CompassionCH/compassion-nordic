@@ -36,6 +36,13 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
         file_data = bggiro.objects.parse(
             StringIO(data_file.decode("iso-8859-1")).read()
         )
+        failed_lines = [
+            p
+            for p in file_data.payments
+            if p.payment_status_code != bggiro.objects.PaymentStatus.APPROVED
+        ]
+        if failed_lines:
+            self._free_debit_order_lines(failed_lines)
         lines = [
             p
             for p in file_data.payments
@@ -64,7 +71,7 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
     @api.model
     def _convert_line_to_transactions(self, line: bggiro.objects.Payment):
         pay_opt = self.env["recurring.contract.group"].search(
-            [("ref", "=", line.payer_number)], limit=1
+            [("ref", "=", line.reference)], limit=1
         )
         return {
             "partner_id": pay_opt.partner_id.id,
@@ -76,3 +83,23 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
             "ref": line.payer_number,
             "payment_ref": line.reference or "",
         }
+
+    @api.model
+    def _free_debit_order_lines(self, parsed_lines: list[bggiro.objects.Payment]):
+        """Free the debit order lines that are not approved"""
+        for line in parsed_lines:
+            in_payment_move = self.env["account.move"].search(
+                [("ref", "=", line.reference), ("payment_state", "=", "in_payment")],
+                limit=1,
+            )
+            if in_payment_move:
+                payment = (
+                    in_payment_move.line_ids._all_reconciled_lines()
+                    .mapped("payment_id")
+                    .filtered(
+                        lambda p, _li=line: p.ref == _li.reference
+                        and p.state == "posted"
+                    )
+                )
+                if payment:
+                    payment.action_cancel()
