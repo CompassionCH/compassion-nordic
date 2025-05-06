@@ -30,7 +30,7 @@
     "contributor": "",
     "maintainer": "Compassion Switzerland",
     "repository": "https://github.com/CompassionCH/compassion-nordic",
-    "depends": ["l10n_se", "account_fiscal_year"],
+    "depends": ["l10n_se"],
     "data": [
         "data/l10n_se_sie_view.xml",
         "views/account_view.xml",
