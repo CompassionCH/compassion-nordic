@@ -37,17 +37,24 @@
             <field name="name">Export SIE-files</field>
             <field name="model">account.sie</field>
             <field name="arch" type="xml">
-                <form string="Export SIE-files">
+                <form>
                     <field name="state" invisible="1" />
                     <div invisible="state != 'choose'">
-                        <h2> Export SIE-files</h2>
+                        <h2>Export SIE-files</h2>
                         <group string="Date interval">
                             <field name="date_start" string="Start" />
                             <field name="date_stop" string="End" />
                         </group>
                         <br />
                         <group>
+                            <field name="journal_ids" widget="many2many_tags" />
+                            <field name="partner_ids" widget="many2many_tags" />
                             <field name="company_id" widget="many2one" />
+                            <field name="account_ids" widget="many2many_tags" />
+                            <field
+                name="off_account_ids"
+                widget="many2many_tags"
+              />
                         </group>
 
                     </div>

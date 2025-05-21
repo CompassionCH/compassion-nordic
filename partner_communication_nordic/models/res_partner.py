@@ -63,6 +63,4 @@ class ResPartner(models.Model):
                 old_contacts.sudo().unlink()
                 new_contacts.sudo().write({"email": new_email})
             elif not new_contacts and new_email:
-                self.env["mail.blacklist"].create({
-                    "email": new_email
-                })
+                self.env["mail.blacklist"].create({"email": new_email})

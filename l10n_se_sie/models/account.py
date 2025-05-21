@@ -963,7 +963,7 @@ class AccountMove(models.Model):
 class AccountFiscalYear(models.Model):
     _inherit = "account.fiscal.year"
 
-    def generate_initial_balance_data(self, acc_balances):
+    def generate_initial_balance_data(self, acc_balances, offbalance_accounts):
         res = ""
         for fiscal_year in self:
             init_tb = self.env["account.move.line"].read_group(
@@ -972,6 +972,7 @@ class AccountFiscalYear(models.Model):
                     ("date", "<", self.date_from),
                     ("account_id.include_initial_balance", "=", True),
                     ("company_id", "=", self.company_id.id),
+                    ("account_id", "not in", offbalance_accounts),
                 ],
                 fields=["account_id", "balance"],
                 groupby=["account_id"],
