@@ -6,8 +6,8 @@ def migrate(cr, version):
     """
     cr.execute(
         """
-        update recurring_contract set country_id = (
+        update recurring_contract set country_id = COALESCE((
             select p.country_id from res_partner p where p.id = partner_id
-        ) where country_id is null;
+        ), 196) where country_id is null;
         """
     )
