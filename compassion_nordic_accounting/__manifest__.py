@@ -31,7 +31,7 @@
     "summary": "Add Features for nordic Accounting",
     "author": "Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
-    "version": "17.0.1.0.1",
+    "version": "17.0.1.0.2",
     "license": "AGPL-3",
     "category": "Banking addons",
     "depends": [
