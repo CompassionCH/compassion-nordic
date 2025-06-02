@@ -39,7 +39,11 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
         failed_lines = [
             p
             for p in file_data.payments
-            if p.payment_status_code != bggiro.objects.PaymentStatus.APPROVED
+            if p.payment_status_code
+            not in (
+                bggiro.objects.PaymentStatus.APPROVED,
+                bggiro.objects.PaymentStatus.RENEWED_FUNDS,
+            )
         ]
         if failed_lines:
             self._free_debit_order_lines(failed_lines)
@@ -100,6 +104,14 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
                         lambda p, _li=line: p.ref == _li.reference
                         and p.state == "posted"
                     )
+                )
+                in_payment_move.to_check = True
+                in_payment_move.message_post(
+                    body=_(
+                        "Failed to withdraw the partner bank account. "
+                        "Bankgiro returned error: %s"
+                    )
+                    % line.payment_status_code.name
                 )
                 if payment:
                     payment.action_cancel()
