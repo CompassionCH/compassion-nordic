@@ -48,7 +48,19 @@ class ResPartner(models.Model):
         return partners
 
     def write(self, vals):
-        new_email = vals.get("email")
-        if new_email:
-            self.env["mail.blacklist"].create({"email": new_email})
+        self._unlink_mailing_contacts_if_needed(vals)
         return super().write(vals)
+
+    def _unlink_mailing_contacts_if_needed(self, vals):
+        if "email" in vals:
+            new_email = vals["email"]
+            old_contacts = self.mapped("mass_mailing_contact_ids")
+            new_contacts = self.env["mailing.contact"].search(
+                [("email", "=", new_email), ("id", "not in", old_contacts.ids)]
+            )
+            if old_contacts and new_contacts:
+                # ACLs shouldn't produce data inconsistency
+                old_contacts.sudo().unlink()
+                new_contacts.sudo().write({"email": new_email})
+            elif not new_contacts and new_email:
+                self.env["mail.blacklist"].create({"email": new_email})

@@ -98,7 +98,17 @@ class AccountSie(models.TransientModel):
     )
     account_ids = fields.Many2many(
         comodel_name="account.account",
+        relation="account_sie_account_rel",
+        column1="sie_id",
+        column2="account_id",
         string="Account",
+    )
+    off_account_ids = fields.Many2many(
+        comodel_name="account.account",
+        relation="account_sie_off_account_rel",
+        column1="sie_id",
+        column2="account_id",
+        string="Off Balance Accounts to Hide",
     )
     account_line_ids = fields.One2many(
         comodel_name="account.sie.account",
@@ -446,10 +456,17 @@ class AccountSie(models.TransientModel):
 
         res = self._generate_header()
         res += self.fiscalyear_ids.generate_fiscalyear_sie()
-        res += "\n".join(move_ids.mapped("line_ids.account_id.sie_name"))
+        res += self._generate_inter_data()
+        res += "\n".join(
+            move_ids.line_ids.filtered(
+                lambda line: line.account_id not in self.off_account_ids
+            ).mapped("account_id.sie_name")
+        )
 
         acc_balances = defaultdict(float)
-        res += self.fiscalyear_ids.generate_initial_balance_data(acc_balances)
+        res += self.fiscalyear_ids.generate_initial_balance_data(
+            acc_balances, self.off_account_ids
+        )
 
         if len(self.fiscalyear_ids) == 1:
             pl_res = self.env["account.move.line"].read_group(
@@ -462,6 +479,7 @@ class AccountSie(models.TransientModel):
                         self.fiscalyear_ids[0].date_from - relativedelta(years=1),
                     ),
                     ("account_id.include_initial_balance", "=", False),
+                    ("account_id.id", "not in", self.off_account_ids.ids),
                     ("company_id", "=", self.company_id.id),
                 ],
                 fields=["account_id", "balance"],
@@ -471,35 +489,44 @@ class AccountSie(models.TransientModel):
                 acc = self.env["account.account"].browse(i["account_id"][0]).code
                 res += f"#RES -1 {acc} {round(i['balance'], 2)}\n"
 
-        prev_fy_position = False
-        fiscal_year_position = 0
-        for move in move_ids.sorted(lambda r: r.date, reverse=False):
-            fiscal_year_position = (
-                0
-                if len(self.fiscalyear_ids) == 1
-                else self.fiscalyear_ids.get_fiscal_year_position(
-                    self.fiscalyear_ids.filtered(
-                        lambda x, m=move: x.date_from <= m.date <= x.date_to
+        if move_ids.line_ids.filtered(
+            lambda line: line.account_id not in self.off_account_ids
+        ):
+            prev_fy_position = False
+            fiscal_year_position = 0
+            for move in move_ids.sorted(lambda r: r.date, reverse=False):
+                fiscal_year_position = (
+                    0
+                    if len(self.fiscalyear_ids) == 1
+                    else self.fiscalyear_ids.get_fiscal_year_position(
+                        self.fiscalyear_ids.filtered(
+                            lambda x, m=move: x.date_from <= m.date <= x.date_to
+                        )
                     )
                 )
-            )
-            if prev_fy_position and prev_fy_position != fiscal_year_position:
-                res += generate_residual_balance_data(acc_balances, prev_fy_position)
-            prev_fy_position = fiscal_year_position
-            res += move.generate_sie_data(acc_balances)
+                if prev_fy_position and prev_fy_position != fiscal_year_position:
+                    res += generate_residual_balance_data(
+                        acc_balances, prev_fy_position
+                    )
+                prev_fy_position = fiscal_year_position
+                res += move.generate_sie_data(acc_balances)
 
         res += generate_residual_balance_data(acc_balances, fiscal_year_position)
         return res.encode("cp437", "xmlcharrefreplace")
 
     def _generate_header(self):
-        company = self.company_id
-        user = self.env["res.users"].browse(self._context["uid"])
         return (
             "#FLAGGA 0\n"
             f'#PROGRAM "Odoo" {odoo.service.common.exp_version()["server_serie"]}\n'
             "#FORMAT PC8\n"
             f"#GEN {fields.Date.today().strftime('%Y%m%d')}\n"
             "#SIETYP 4\n"
+        )
+
+    def _generate_inter_data(self):
+        company = self.company_id
+        user = self.env["res.users"].browse(self._context["uid"])
+        return (
             f'#FNAMN "{company.name}"\n'
             f"#ORGNR {company.company_registry}\n"
             f'#ADRESS "{user.display_name}" "{company.street}" "{company.zip} '
