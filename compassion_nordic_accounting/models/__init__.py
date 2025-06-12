@@ -16,3 +16,4 @@ from . import recurring_contract_group
 from . import partner_bank_compassion
 from . import res_config_settings
 from . import res_partner
+from . import account_general_ledger
