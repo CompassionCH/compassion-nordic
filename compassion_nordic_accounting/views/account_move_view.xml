@@ -18,10 +18,10 @@
           name="invisible"
         >not mandate_required or move_type not in ('out_invoice', 'out_refund')</attribute>
             </field>
-            <field name="payment_reference" position="after">
+            <field name="tax_cash_basis_origin_move_id" position="after">
                 <field
           name="invoice_user_id"
-          string="Reviewer"
+          string="Approver"
           invisible="move_type not in ('in_invoice', 'in_refund', 'in_receipt')"
           readonly="state != 'draft'"
           widget="many2one_avatar_user"
