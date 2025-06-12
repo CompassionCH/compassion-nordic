@@ -18,3 +18,10 @@ def migrate(cr, version):
         )
         """
     )
+    # Delete invalid contract groups
+    cr.execute(
+        """
+        DELETE FROM recurring_contract_group
+        WHERE company_id = 1
+        """
+    )
