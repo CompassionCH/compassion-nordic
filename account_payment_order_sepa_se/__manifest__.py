@@ -20,7 +20,7 @@
 
 {
     "name": "Account: Payment Order Sepa Sweden",
-    "version": "14.0.0.0.1",
+    "version": "16.0.1.0.0",
     "summary": "Module that fixes some of the errors that the sepa files triggers "
     "for the SEB parser for Swedish payments",
     "category": "Accounting",
