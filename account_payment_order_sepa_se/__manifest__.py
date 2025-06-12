@@ -20,13 +20,13 @@
 
 {
     "name": "Account: Payment Order Sepa Sweden",
-    "version": "16.0.1.0.0",
+    "version": "17.0.1.0.0",
     "summary": "Module that fixes some of the errors that the sepa files triggers "
     "for the SEB parser for Swedish payments",
     "category": "Accounting",
     "author": "Vertel AB,Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
-    "images": ["/static/description/banner.png"],  # 560x280 px.
+    "images": ["static/description/banner.png"],  # 560x280 px.
     "license": "AGPL-3",
     "contributor": "",
     "maintainer": "Vertel AB",
