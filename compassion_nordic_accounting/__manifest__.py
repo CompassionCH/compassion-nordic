@@ -31,7 +31,7 @@
     "summary": "Add Features for nordic Accounting",
     "author": "Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
-    "version": "17.0.1.0.2",
+    "version": "17.0.1.0.3",
     "license": "AGPL-3",
     "category": "Banking addons",
     "depends": [
@@ -50,8 +50,11 @@
         "account_invoice_pricelist",
         # OCA/bank-statement-import
         "account_statement_import_camt",
+        # odoo/enterprise
+        "l10n_se_sie4_export",
     ],
     "data": [
+        "data/general_ledger_offbalance_filter.xml",
         "views/account_move_view.xml",
         "views/load_mandate_wizard_view.xml",
         "views/partner_tax_file_res.xml",
