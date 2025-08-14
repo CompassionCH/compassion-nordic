@@ -41,7 +41,6 @@
     ],
     "external_dependencies": {"python": []},
     "data": [
-        "data/res_users.xml",
         "data/ir_cron.xml",
         "data/correspondence_template.xml",
         "views/res_config_settings_view.xml",
