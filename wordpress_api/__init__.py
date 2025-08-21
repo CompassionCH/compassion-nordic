@@ -8,7 +8,7 @@
 #
 ##############################################################################
 
-from . import controllers
+from . import fastapi
 from . import wizards
 from . import models
 

@@ -1,0 +1,8 @@
+<odoo>
+    <record model="fastapi.endpoint" id="wordpress_endpoint">
+        <field name="name">WordPress</field>
+        <field name="app">wordpress</field>
+        <field name="root_path">/wapi</field>
+        <field name="save_http_session" eval="False" />
+    </record>
+</odoo>
