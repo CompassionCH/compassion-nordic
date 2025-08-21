@@ -29,6 +29,22 @@ The Wordpress API module
 .. contents::
    :local:
 
+Configuration
+=============
+
+To enable the Wordpress Endpoint, go in FastAPI menu and :
+
+1. Assign a user to the Wordpress Endpoint.
+2. Hit the "Sync Registry" button to activate the Wordpress service.
+
+Changelog
+=========
+
+17.0.1.1.0
+----------
+
+-  Use FastAPI to manage the Wordpress endpoint.
+
 Bug Tracker
 ===========
 

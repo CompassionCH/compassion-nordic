@@ -6,7 +6,7 @@
         name="model_id"
         ref="child_compassion.model_compassion_childpool_search"
       />
-            <field name="user_id" ref="user_wordpress" />
+            <field name="user_id" ref="base.user_admin" />
             <field name="interval_number">1</field>
             <field name="interval_type">hours</field>
             <field name="state">code</field>
