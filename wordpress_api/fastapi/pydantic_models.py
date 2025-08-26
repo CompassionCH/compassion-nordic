@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_pascal
 
 
@@ -29,7 +29,7 @@ class LetterPostModel(PascalCaseModel):
     beneficiary: BeneficiaryModel
     original_language: str
     pages: list[str]
-    pdf_base64: str
+    pdf_base64: str = Field(alias="PDFBase64")
 
 
 class SupporterInfoModel(PascalCaseModel):
