@@ -137,6 +137,7 @@ class WordpressService(AbstractModel):
                 }
             ]
         )
+        new_letter.validate()
         return f"New letter created with id {new_letter.id}"
 
     def get_sponsor_info(self, sponsor: ResPartner) -> SupporterInfoModel:
