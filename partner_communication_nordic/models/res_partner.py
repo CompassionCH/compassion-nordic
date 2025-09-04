@@ -9,13 +9,15 @@
 ##############################################################################
 import logging
 
-from odoo import api, models
+from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 
 
 class ResPartner(models.Model):
     _inherit = "res.partner"
+
+    contact_address_inline = fields.Char(tracking=False)
 
     def _get_salutation_sv_SE(self):
         self.ensure_one()
