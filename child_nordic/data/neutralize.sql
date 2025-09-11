@@ -39,3 +39,5 @@ delete from queue_job where state != 'done';
 -- Delete mailchimp account
 DELETE FROM mailchimp_template;
 DELETE FROM mailchimp_account;
+
+UPDATE fs_storage SET directory_path = 'stage' WHERE directory_path = 'production';
