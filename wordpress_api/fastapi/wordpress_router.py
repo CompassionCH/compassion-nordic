@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
@@ -8,7 +9,6 @@ from odoo.addons.sponsorship_compassion.models.res_partner import ResPartner
 
 from .pydantic_models import (
     ConsignedChildListModel,
-    LanguageCode,
     LetterPostModel,
     SupporterInfoModel,
 )
@@ -23,7 +23,15 @@ LANG_MAPPING = {
     "NOR": "nb_NO",
     "Norwegian": "nb_NO",
     "DAK": "da_DK",
+    "Danish": "da_DK",
 }
+
+
+class LanguageCode(str, Enum):
+    ENG = "ENG"
+    SVE = "SVE"
+    NOR = "NOR"
+    DAK = "DAK"
 
 
 # ruff: noqa: B008

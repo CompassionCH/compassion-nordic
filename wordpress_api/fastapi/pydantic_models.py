@@ -4,11 +4,12 @@ from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel, to_pascal
 
 
-class LanguageCode(str, Enum):
-    ENG = "ENG"
-    SVE = "SVE"
-    NOR = "NOR"
+class LetterLanguageCode(str, Enum):
+    ENG = "English"
+    SVE = "Swedish"
+    NOR = "Norwegian"
     DAK = "DAK"
+    DANISH = "Danish"
 
 
 class PascalCaseModel(BaseModel):
@@ -36,7 +37,7 @@ class SupporterModel(PascalCaseModel):
 class LetterPostModel(PascalCaseModel):
     supporter: SupporterModel
     beneficiary: BeneficiaryModel
-    original_language: LanguageCode
+    original_language: LetterLanguageCode
     pages: list[str] = Field(
         description="The content of the letter from the sponsor, split into pages. "
         "Each string in the list represents a single page of the letter."
