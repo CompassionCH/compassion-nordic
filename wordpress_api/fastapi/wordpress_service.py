@@ -11,7 +11,9 @@ from odoo.addons.sbc_compassion.models.correspondence_page import PAGE_SEPARATOR
 from odoo.addons.sponsorship_compassion.models.res_partner import ResPartner
 
 from .pydantic_models import (
+    AvailableChildModel,
     BeneficiaryModel,
+    ConsignedChildListModel,
     LetterPostModel,
     SupporterInfoModel,
     SupporterModel,
@@ -27,7 +29,7 @@ class WordpressService(AbstractModel):
 
     def get_consigned_children(
         self, lang: str, limit: int = 0, offset: int = 0
-    ) -> dict:
+    ) -> ConsignedChildListModel:
         """
         Fetch consigned children from the database and
         format them for the WordPress API.
@@ -55,6 +57,8 @@ class WordpressService(AbstractModel):
             )
         )
         data = children.data_to_json("Wordpress Consignment Child")
+        if not isinstance(data, list):
+            data = [data]
         for child_vals in data:
             try:
                 child_vals["localSociatySituated"] = (
@@ -71,13 +75,11 @@ class WordpressService(AbstractModel):
                 child_vals["householdMember"] = caregivers.get_list("role")
             except (KeyError, TypeError):
                 continue
-        return {
-            "ChildList": {
-                "count": count,
-                "range": f"{offset}-{offset + (limit - 1)}" if limit else "ALL",
-                "children": data,
-            }
-        }
+        return ConsignedChildListModel(
+            count=count,
+            range=f"{offset}-{offset + (limit - 1)}" if limit else "ALL",
+            children=[AvailableChildModel(**vals) for vals in data],
+        )
 
     def wordpress_sponsor_child(self, child: CompassionChild):
         child.hold_id.write(
