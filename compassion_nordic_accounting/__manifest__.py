@@ -31,7 +31,7 @@
     "summary": "Add Features for nordic Accounting",
     "author": "Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
-    "version": "17.0.1.0.3",
+    "version": "17.0.1.0.4",
     "license": "AGPL-3",
     "category": "Banking addons",
     "depends": [
@@ -61,7 +61,6 @@
         "views/menu_finance_receivables.xml",
         "views/generate_tax_wizard_view.xml",
         "views/res_partner_view.xml",
-        "views/account_statement_import_view.xml",
         "views/mandate_staff_notif_settings_view.xml",
         "views/contracts_view.xml",
         "security/ir.model.access.csv",
