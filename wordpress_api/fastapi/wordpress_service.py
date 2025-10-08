@@ -15,6 +15,7 @@ from .pydantic_models import (
     BeneficiaryModel,
     ConsignedChildListModel,
     LetterPostModel,
+    PeterChildListModel,
     SupporterInfoModel,
     SupporterModel,
 )
@@ -29,7 +30,7 @@ class WordpressService(AbstractModel):
 
     def get_consigned_children(
         self, lang: str, limit: int = 0, offset: int = 0
-    ) -> ConsignedChildListModel:
+    ) -> PeterChildListModel:
         """
         Fetch consigned children from the database and
         format them for the WordPress API.
@@ -75,10 +76,12 @@ class WordpressService(AbstractModel):
                 child_vals["householdMember"] = caregivers.get_list("role")
             except (KeyError, TypeError):
                 continue
-        return ConsignedChildListModel(
-            count=count,
-            range=f"{offset}-{offset + (limit - 1)}" if limit else "ALL",
-            children=[AvailableChildModel(**vals) for vals in data],
+        return PeterChildListModel(
+            child_list=ConsignedChildListModel(
+                count=count,
+                range=f"{offset}-{offset + (limit - 1)}" if limit else "ALL",
+                children=[AvailableChildModel(**vals) for vals in data],
+            )
         )
 
     def wordpress_sponsor_child(self, child: CompassionChild):

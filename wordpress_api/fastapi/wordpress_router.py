@@ -8,8 +8,8 @@ from odoo.addons.fastapi.dependencies import odoo_env
 from odoo.addons.sponsorship_compassion.models.res_partner import ResPartner
 
 from .pydantic_models import (
-    ConsignedChildListModel,
     LetterPostModel,
+    PeterChildListModel,
     SupporterInfoModel,
 )
 
@@ -99,7 +99,7 @@ def get_consigned_children(
     limit: int = Query(0, ge=0),
     offset: int = Query(0, ge=0),
     language_code: LanguageCode = Query(LanguageCode.ENG, min_length=2, max_length=3),
-) -> ConsignedChildListModel:
+) -> PeterChildListModel:
     """
     ### Retrieves a paginated list of children who are available for sponsorship.
     This data is intended for display on the *"Sponsor a Child"* page.

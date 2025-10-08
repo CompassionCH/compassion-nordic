@@ -100,3 +100,7 @@ class ConsignedChildListModel(BaseModel):
         "in the current response, formatted as \n\n `{start}-{end}`. \n\n"
         "**Example:** `0-10`",
     )
+
+
+class PeterChildListModel(PascalCaseModel):
+    child_list: ConsignedChildListModel
