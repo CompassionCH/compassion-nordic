@@ -82,7 +82,7 @@ class AvailableChildModel(BaseModel):
     personal_name: str | None = None
     project_activities: str | None = None
     project_name: str | None = None
-    risk_area: list[str] | None = None
+    risk_area: list[str] | str | None = None
     shool_level: str | None = None
     sourroundings: str | None = None
     sponsor_id: str | int | None = Field(default=None, alias="sponsor_id")
