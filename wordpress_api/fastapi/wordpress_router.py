@@ -33,6 +33,7 @@ class LanguageCode(str, Enum):
     SVE = "SVE"
     NOR = "NOR"
     DAK = "DAK"
+    DAN = "DAN"
 
 
 # ruff: noqa: B008
