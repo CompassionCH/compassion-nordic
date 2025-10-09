@@ -98,7 +98,9 @@ def get_consigned_children(
     env: odoo_env = Depends(odoo_env),
     limit: int = Query(0, ge=0),
     offset: int = Query(0, ge=0),
-    language_code: LanguageCode = Query(LanguageCode.ENG, min_length=2, max_length=3),
+    language_code: LanguageCode = Query(
+        LanguageCode.ENG, min_length=2, max_length=3, alias="LanguageCode"
+    ),
 ) -> PeterChildListModel:
     """
     ### Retrieves a paginated list of children who are available for sponsorship.
