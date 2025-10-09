@@ -42,7 +42,10 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
             a
             for a in self._calculate_lines(file_data.sections[0])
             if a.transaction_code
-            == beservice.TransactionCode.AUTOMATED_PAYMENT_COMPLETED
+            in (
+                beservice.TransactionCode.AUTOMATED_PAYMENT_COMPLETED,
+                beservice.TransactionCode.AUTOMATED_PAYMENT_REJECTED,
+            )
         ]
         if not lines:
             return currency_code, account_number, [{"name": name, "transactions": []}]
@@ -81,6 +84,11 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
         transactions = []
         details = line.reference
         gross_amount = line.amount
+        if (
+            line.transaction_code
+            == beservice.TransactionCode.AUTOMATED_PAYMENT_REJECTED
+        ):
+            gross_amount = -gross_amount
         #
         res = self.env["recurring.contract.group"].search(
             [("ref", "=", line.mandate_number)]
