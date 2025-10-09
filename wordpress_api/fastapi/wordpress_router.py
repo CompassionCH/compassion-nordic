@@ -23,6 +23,7 @@ LANG_MAPPING = {
     "NOR": "nb_NO",
     "Norwegian": "nb_NO",
     "DAK": "da_DK",
+    "DAN": "da_DK",
     "Danish": "da_DK",
 }
 

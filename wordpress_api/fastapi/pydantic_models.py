@@ -9,6 +9,7 @@ class LetterLanguageCode(str, Enum):
     SVE = "Swedish"
     NOR = "Norwegian"
     DAK = "DAK"
+    DAN = "DAN"
     DANISH = "Danish"
 
 
