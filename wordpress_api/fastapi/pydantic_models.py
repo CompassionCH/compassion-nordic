@@ -79,6 +79,7 @@ class AvailableChildModel(BaseModel):
     name: str | None = None
     nick_name: str | None = None
     no_of_inhabitants: int | None = None
+    no_of_children_at_home: int | None = None
     orphan: bool | None = None
     personal_name: str | None = None
     project_activities: str | None = None

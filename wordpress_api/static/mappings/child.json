@@ -66,6 +66,10 @@
       "field": "project_id.community_population",
       "to_json_conversion": "odoo_value or None"
     },
+    "noOfChildrenAtHome": {
+      "field": "household_id.member_ids",
+      "to_json_conversion": "len(odoo_value.filtered(lambda m: not m.is_caregiver)) or None"
+    },
     "sourroundings": {
       "field": "project_id.community_terrain",
       "to_json_conversion": "odoo_value or None"
@@ -104,7 +108,7 @@
     },
     "famalyActivities": {
       "field": "duty_ids.value",
-      "to_json_conversion": "odoo_value or None"
+      "to_json_conversion": "', '.join(odoo_value) if isinstance(odoo_value, list) else odoo_value"
     },
     "Hiv": {
       "to_json_conversion": "False"
