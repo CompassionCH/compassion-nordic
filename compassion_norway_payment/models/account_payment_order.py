@@ -7,7 +7,7 @@
 #    The licence is in the file __manifest__.py
 #
 ##############################################################################
-
+import re
 
 import netsgiro
 
@@ -41,7 +41,7 @@ class AccountPaymentOrder(models.Model):
             assignment.add_payment_request(
                 kid=payment_line.move_line_id.move_id.line_ids.mapped(
                     "contract_id"
-                ).group_id.ref,
+                ).group_id.ref or payment_line.move_line_id.ref,
                 bank_notification=payment_line.move_line_id.move_id.line_ids.mapped(
                     "contract_id"
                 ).group_id.notify_payee,
@@ -50,4 +50,6 @@ class AccountPaymentOrder(models.Model):
                 reference=f"{payment_line.name:>25}",
                 payer_name=f"{payment_line.partner_id.ref:>10}",
             )
-        return transmission.to_ocr().encode("iso-8859-1"), f"{self.name}.txt"
+        file_content = transmission.to_ocr()
+        file_content_windows = re.sub(r"(?<!\r)\n", "\r\n", file_content)
+        return file_content_windows.encode("iso-8859-1"), f"{self.name}.txt"
