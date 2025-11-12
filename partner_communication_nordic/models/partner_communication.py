@@ -43,14 +43,14 @@ class PartnerCommunication(models.Model):
         lang = self.partner_id.lang
         sponsorships = self.get_objects()
         children = sponsorships.mapped("child_id")
-        report_name = "child_compassion.report_child_picture"
+        report_name = "child_compassion.report_childpack_small"
         data = {
             "lang": lang,
             "is_pdf": self.send_mode != "physical",
-            "type": report_name,
+            "type": "child_compassion.childpack_small",
             "doc_ids": children.ids,
         }
-        pdf = self._get_pdf_from_data(data, "child_compassion.report_child_picture")
+        pdf = self._get_pdf_from_data(data, report_name)
         return {_("child dossier.pdf"): (report_name, pdf)}
 
     def send(self):
