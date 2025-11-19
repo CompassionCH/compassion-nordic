@@ -48,6 +48,6 @@
     ],
     "post_init_hook": "load_mappings",
     "demo": [],
-    "installable": True,
+    'installable': False,
     "auto_install": False,
 }

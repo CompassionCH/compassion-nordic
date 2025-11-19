@@ -42,5 +42,5 @@
             "netsgiro",
         ],
     },
-    "installable": True,
+    'installable': False,
 }

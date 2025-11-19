@@ -41,5 +41,5 @@
     "data": [
         "data/account_payment_method.xml",
     ],
-    "installable": True,
+    'installable': False,
 }
