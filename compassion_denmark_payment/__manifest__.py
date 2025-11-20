@@ -26,13 +26,13 @@
 #
 ##############################################################################
 
-
+# pylint: disable=C8101
 {
     "name": "Compassion Denmark Payment",
     "summary": "Create Denmark Direct Debit",
     "author": "Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
-    "version": "17.0.1.0.0",
+    "version": "18.0.1.0.0",
     "license": "AGPL-3",
     "category": "Banking addons",
     "depends": [
@@ -41,5 +41,5 @@
     "data": [
         "data/account_payment_method.xml",
     ],
-    'installable': False,
+    "installable": True,
 }

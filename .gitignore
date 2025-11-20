@@ -55,3 +55,4 @@ docs/_build/
 
 # Unported modules
 __unported__
+/oca.cfg

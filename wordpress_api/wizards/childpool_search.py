@@ -13,7 +13,7 @@ class ChildpoolSearch(models.TransientModel):
         if wizard.global_child_ids:
             hold_wizard = (
                 self.env["child.hold.wizard"]
-                .with_context({"active_id": wizard.id})
+                .with_context(active_id=wizard.id)
                 .create(
                     [
                         {

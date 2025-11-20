@@ -32,11 +32,12 @@ class MandateStaffNotifSettings(models.TransientModel):
             "compassion_nordic_accounting.mandate_notif"
         )
         if mandate_notif_id and mandate_notif_id.isdigit():
-            res["mandate_notif_id"] = int(mandate_notif_id)
+            user = self.env["res.users"].browse(int(mandate_notif_id))
+            res["mandate_notif_id"] = user
         return res
 
     def set_values(self):
         self._set_param_multi_company(
             "compassion_nordic_accounting.mandate_notif", str(self.mandate_notif_id.id)
         )
-        super().set_values()
+        return super().set_values()

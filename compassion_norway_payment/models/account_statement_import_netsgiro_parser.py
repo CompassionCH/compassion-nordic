@@ -15,7 +15,7 @@ from os import path
 
 import netsgiro
 
-from odoo import _, api, models
+from odoo import api, models
 
 _logger = logging.getLogger(__name__)
 
@@ -30,10 +30,7 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
         currency_code = (journal.currency_id or journal.company_id.currency_id).name
         account_number = journal.bank_account_id.acc_number
 
-        name = _("%s: %s") % (
-            journal.code,
-            path.basename(filename),
-        )
+        name = f"{journal.code}: {path.basename(filename)}"
         file_data = netsgiro.parse(StringIO(data_file.decode("iso-8859-1")).read())
         assignement_dict_list = []
         for assignement in file_data.assignments:

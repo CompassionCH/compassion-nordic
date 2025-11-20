@@ -20,7 +20,7 @@ class ContractGroup(models.Model):
 
     @api.depends("partner_id", "contract_ids")
     def _compute_ref(self):
-        super()._compute_ref()
+        res = super()._compute_ref()
         for group in self:
             if (
                 group.company_id.country_id == self.env.ref("base.se")
@@ -42,3 +42,4 @@ class ContractGroup(models.Model):
                     )
                 ) % 10
                 group.ref = f"{ref}{check_digit}"
+        return res

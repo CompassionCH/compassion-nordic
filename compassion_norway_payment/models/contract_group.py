@@ -20,11 +20,11 @@ class ContractGroup(models.Model):
     ##########################################################################
     #                                 FIELDS                                 #
     ##########################################################################
-    notify_payee = fields.Boolean("Notify Payee", default=False, required=True)
+    notify_payee = fields.Boolean(default=False, required=True)
 
     @api.depends("partner_id", "contract_ids")
     def _compute_ref(self):
-        super()._compute_ref()
+        res = super()._compute_ref()
         for group in self:
             if (
                 group.company_id.country_id == self.env.ref("base.no")
@@ -46,3 +46,4 @@ class ContractGroup(models.Model):
                     )
                 ) % 10
                 group.ref = f"{ref}{check_digit}"
+        return res

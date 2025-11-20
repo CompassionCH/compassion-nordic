@@ -25,11 +25,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
+# pylint: disable=C8101
 {
     "name": "Compassion Sweden Payment",
     "summary": "Create Sweden Direct Debit",
-    "version": "17.0.1.0.1",
+    "version": "18.0.1.0.0",
     "author": "Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
     "license": "AGPL-3",
@@ -38,5 +38,5 @@
     "data": [
         "data/account_payment_method.xml",
     ],
-    'installable': False,
+    "installable": True,
 }

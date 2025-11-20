@@ -25,13 +25,13 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
+# pylint: disable=C8101
 {
     "name": "Compassion Nordic Accounting",
     "summary": "Add Features for nordic Accounting",
     "author": "Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
-    "version": "17.0.1.0.4",
+    "version": "18.0.1.0.0",
     "license": "AGPL-3",
     "category": "Banking addons",
     "depends": [
@@ -65,5 +65,5 @@
         "views/contracts_view.xml",
         "security/ir.model.access.csv",
     ],
-    'installable': False,
+    "installable": True,
 }

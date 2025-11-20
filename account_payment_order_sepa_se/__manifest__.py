@@ -17,10 +17,10 @@
 #    along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
+# pylint: disable=C8101
 {
     "name": "Account: Payment Order Sepa Sweden",
-    "version": "17.0.1.0.0",
+    "version": "18.0.1.0.0",
     "summary": "Module that fixes some of the errors that the sepa files triggers "
     "for the SEB parser for Swedish payments",
     "category": "Accounting",
@@ -42,7 +42,7 @@
     ],
     "demo": [],
     "qweb": [],
-    'installable': False,
+    "installable": True,
     "application": False,
     "auto_install": False,
 }

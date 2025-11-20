@@ -355,6 +355,43 @@
       >get_child_picture_attachment</field>
         </record>
 
+        <!-- Server Actions -->
+        <record id="action_server_onboarding_step1" model="ir.actions.server">
+            <field name="name">Send Sponsorship Onboarding Step 1</field>
+            <field name="model_id" ref="model_recurring_contract"/>
+            <field name="state">communication</field>
+            <field name="config_id" ref="config_onboarding_step1"/>
+            <field name="partner_field">correspondent_id</field>
+        </record>
+        <record id="action_server_onboarding_step2" model="ir.actions.server">
+            <field name="name">Send Sponsorship Onboarding Step 2</field>
+            <field name="model_id" ref="model_recurring_contract"/>
+            <field name="state">communication</field>
+            <field name="config_id" ref="config_onboarding_step2"/>
+            <field name="partner_field">correspondent_id</field>
+        </record>
+        <record id="action_server_onboarding_step3" model="ir.actions.server">
+            <field name="name">Send Sponsorship Onboarding Step 3</field>
+            <field name="model_id" ref="model_recurring_contract"/>
+            <field name="state">communication</field>
+            <field name="config_id" ref="config_onboarding_step3"/>
+            <field name="partner_field">correspondent_id</field>
+        </record>
+        <record id="action_server_onboarding_step4" model="ir.actions.server">
+            <field name="name">Send Sponsorship Onboarding Step 4</field>
+            <field name="model_id" ref="model_recurring_contract"/>
+            <field name="state">communication</field>
+            <field name="config_id" ref="config_onboarding_step4"/>
+            <field name="partner_field">correspondent_id</field>
+        </record>
+        <record id="action_server_onboarding_step5" model="ir.actions.server">
+            <field name="name">Send Sponsorship Onboarding Step 5</field>
+            <field name="model_id" ref="model_recurring_contract"/>
+            <field name="state">communication</field>
+            <field name="config_id" ref="config_onboarding_step5"/>
+            <field name="partner_field">correspondent_id</field>
+        </record>
+
         <!-- Automations -->
         <record id="onboarding_step1_automation" model="base.automation">
             <field name="name">Sponsorship Onboarding: step1</field>
@@ -370,9 +407,7 @@
       />
             <field name="trg_date_range">5</field>
             <field name="trg_date_range_type">day</field>
-            <field name="state">communication</field>
-            <field name="config_id" ref="config_onboarding_step1" />
-            <field name="partner_field">correspondent_id</field>
+            <field name="action_server_ids" eval="[(6,0,[action_server_onboarding_step1])]"/>
         </record>
         <record id="onboarding_step2_automation" model="base.automation">
             <field name="name">Sponsorship Onboarding: step2</field>
@@ -388,9 +423,7 @@
       />
             <field name="trg_date_range">8</field>
             <field name="trg_date_range_type">day</field>
-            <field name="state">communication</field>
-            <field name="config_id" ref="config_onboarding_step2" />
-            <field name="partner_field">correspondent_id</field>
+            <field name="action_server_ids" eval="[(6, 0, [action_server_onboarding_step2])]"/>
         </record>
         <record id="onboarding_step3_automation" model="base.automation">
             <field name="name">Sponsorship Onboarding: step3</field>
@@ -406,9 +439,7 @@
       />
             <field name="trg_date_range">12</field>
             <field name="trg_date_range_type">day</field>
-            <field name="state">communication</field>
-            <field name="config_id" ref="config_onboarding_step3" />
-            <field name="partner_field">correspondent_id</field>
+            <field name="action_server_ids" eval="[(6, 0, [action_server_onboarding_step3])]"/>
         </record>
         <record id="onboarding_step4_automation" model="base.automation">
             <field name="name">Sponsorship Onboarding: step4</field>
@@ -424,9 +455,7 @@
       />
             <field name="trg_date_range">15</field>
             <field name="trg_date_range_type">day</field>
-            <field name="state">communication</field>
-            <field name="config_id" ref="config_onboarding_step4" />
-            <field name="partner_field">correspondent_id</field>
+            <field name="action_server_ids" eval="[(6,0, [action_server_onboarding_step4])]"/>
         </record>
         <record id="onboarding_step5_automation" model="base.automation">
             <field name="name">Sponsorship Onboarding: step5</field>
@@ -442,9 +471,7 @@
       />
             <field name="trg_date_range">18</field>
             <field name="trg_date_range_type">day</field>
-            <field name="state">communication</field>
-            <field name="config_id" ref="config_onboarding_step5" />
-            <field name="partner_field">correspondent_id</field>
+            <field name="action_server_ids" eval="[(6, 0, [action_server_onboarding_step5])]"/>
         </record>
     </data>
 </odoo>

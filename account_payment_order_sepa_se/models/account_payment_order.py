@@ -104,7 +104,7 @@ class AccountPaymentOrder(models.Model):
         party_agent_institution = False
         logger.warning(f"{partner_bank=}")
         if partner_bank.bank_bic:
-            party_agent = etree.SubElement(parent_node, "%sAgt" % party_type)
+            party_agent = etree.SubElement(parent_node, f"{party_type}Agt")
             logger.warning(f"party_agent:{party_agent.text}")
             party_agent_institution = etree.SubElement(party_agent, "FinInstnId")
             logger.warning(f"party_agent_institution:{party_agent_institution.text}")
@@ -124,7 +124,7 @@ class AccountPaymentOrder(models.Model):
                 or order == "C"
                 and re.match(r"\d{3,4}-\d{4}$", partner_bank.acc_number)
             ):
-                party_agent = etree.SubElement(parent_node, "%sAgt" % party_type)
+                party_agent = etree.SubElement(parent_node, f"{party_type}Agt")
                 party_agent_institution = etree.SubElement(party_agent, "FinInstnId")
 
                 if partner_bank.acc_number and re.match(
@@ -162,9 +162,9 @@ class AccountPaymentOrder(models.Model):
     def generate_party_acc_number(
         self, parent_node, party_type, order, partner_bank, gen_args, bank_line=None
     ):
-        party_account = etree.SubElement(parent_node, "%sAcct" % party_type)
+        party_account = etree.SubElement(parent_node, f"{party_type}Acct")
         party_account_id = etree.SubElement(party_account, "Id")
-        logger.warning("%sAcct" % party_type)
+        logger.warning(f"{party_type}Acct")
         if partner_bank.acc_type == "iban":
             party_account_iban = etree.SubElement(party_account_id, "IBAN")
             party_account_iban.text = partner_bank.sanitized_acc_number

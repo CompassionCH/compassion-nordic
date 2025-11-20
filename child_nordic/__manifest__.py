@@ -28,7 +28,7 @@
 # pylint: disable=C8101
 {
     "name": "Compassion Child Nordic",
-    "version": "17.0.1.0.0",
+    "version": "18.0.1.0.0",
     "category": "Other",
     "sequence": 150,
     "author": "Compassion CH",
@@ -45,6 +45,6 @@
         "views/compassion_project.xml",
     ],
     "demo": [],
-    'installable': False,
+    "installable": True,
     "auto_install": False,
 }

@@ -13,7 +13,7 @@ import logging
 from io import StringIO
 from os import path
 
-from odoo import _, api, models
+from odoo import api, models
 
 from . import beservice
 
@@ -34,10 +34,7 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
 
         account_number = journal.bank_account_id.acc_number
 
-        name = _("%s: %s") % (
-            journal.code,
-            path.basename(filename),
-        )
+        name = f"{journal.code}: {path.basename(filename)}"
         lines = [
             a
             for a in self._calculate_lines(file_data.sections[0])

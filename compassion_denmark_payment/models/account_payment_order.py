@@ -44,7 +44,7 @@ class AccountPaymentOrder(models.Model):
                     child = invoice_line.contract_id.child_id
                     str_child = ""
                     product_name = invoice_line.product_id.with_context(
-                        {"lang": invoice_line.partner_id.lang}
+                        lang=invoice_line.partner_id.lang
                     ).name
                     if child:
                         # Build a string that looks like (BF Maria-Louisa)

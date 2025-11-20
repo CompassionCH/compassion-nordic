@@ -33,7 +33,7 @@
         <field name="name">Loaded mandates results</field>
         <field name="model">load.mandate.wizard</field>
         <field name="arch" type="xml">
-            <tree
+            <list
         decoration-danger="current_mandate_state == 'cancel'"
         decoration-success="current_mandate_state == 'valid'"
         decoration-warning="current_mandate_state == 'error'"
@@ -50,7 +50,7 @@
                 <field name="old_mandate_state" />
                 <field name="current_mandate_state" />
                 <field name="create_date" />
-            </tree>
+            </list>
         </field>
     </record>
 

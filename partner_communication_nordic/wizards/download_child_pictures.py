@@ -82,4 +82,4 @@ class DownloadChildPictures(models.TransientModel):
             else:
                 self.preview = False
         else:
-            super()._compute_preview()
+            return super()._compute_preview()

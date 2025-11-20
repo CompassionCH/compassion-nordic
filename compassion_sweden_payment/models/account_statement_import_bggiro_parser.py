@@ -29,10 +29,7 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
         currency_code = (journal.currency_id or journal.company_id.currency_id).name
         account_number = journal.bank_account_id.acc_number
 
-        name = _("%s: %s") % (
-            journal.code,
-            path.basename(filename),
-        )
+        name = f"{journal.code}: {path.basename(filename)}"
         file_data = bggiro.objects.parse(
             StringIO(data_file.decode("iso-8859-1")).read()
         )

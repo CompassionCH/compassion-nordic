@@ -6,7 +6,6 @@
             <field
         name="description"
       >Your feedback about the start of your sponsorship</field>
-            <field name="state">open</field>
         </record>
         <!-- Questions -->
         <record id="onbs_question_rating" model="survey.question">
@@ -15,7 +14,6 @@
       >How have you experienced the start of your sponsorship</field>
             <field name="question_type">simple_choice</field>
             <field name="constr_mandatory" eval="True" />
-            <field name="column_nb">2</field>
             <field name="survey_id" ref="onboarding_survey" />
         </record>
         <record id="onbs_rating_1" model="survey.question.answer">
