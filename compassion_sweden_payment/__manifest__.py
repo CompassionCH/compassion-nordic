@@ -36,6 +36,7 @@
     "category": "Banking addons",
     "depends": ["compassion_nordic_accounting"],
     "data": [
+        "security/ir.model.access.csv",
         "data/account_payment_method.xml",
     ],
     "installable": True,
