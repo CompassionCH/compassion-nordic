@@ -23,6 +23,9 @@ update ir_config_parameter set value = (
 update ir_config_parameter set value = (
     SELECT value FROM ir_config_parameter WHERE key = 'message_center_compassion.connect_secret_stage'
     ) where key = 'message_center_compassion.connect_secret';
+update ir_config_parameter set value = (
+    SELECT value FROM ir_config_parameter WHERE key = 'wordpress_api.api_key_stage'
+    ) where key = 'wordpress_api.api_key';
 
 -- Admin password
 update res_users set password=(
