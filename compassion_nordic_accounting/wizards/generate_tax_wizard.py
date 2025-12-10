@@ -165,22 +165,19 @@ class GenerateTaxWizard(models.TransientModel):
                 return partner_id
 
         # Process credits
+        # Process credits
         for record in credit_lines:
             key = get_key(record, groupby_fields)
             if key is None:
                 continue
-            if key not in net_income:
-                net_income[key] = 0
-            net_income[key] += record["credit"]
+            net_income[key] = net_income.get(key, 0.0) + record["credit"]
 
         # Process debits (subtract from credits)
         for record in debit_lines:
             key = get_key(record, groupby_fields)
             if key is None:
                 continue
-            if key not in net_income:
-                net_income[key] = 0
-            net_income[key] -= record["debit"]
+            net_income[key] = net_income.get(key, 0.0) - record["debit"]
 
         # Apply minimum threshold and aggregate by partner
         total_amount_year = {}
@@ -232,12 +229,10 @@ class GenerateTaxWizard(models.TransientModel):
         # Create attachment
         data = base64.b64encode(xml_str)
         attachment_id = attachment_obj.create(
-            [
-                {
-                    "name": f"{filename_prefix}_{self.tax_year}_{company.name}.xml",
-                    "datas": data,
-                }
-            ]
+            {
+                "name": f"{filename_prefix}_{self.tax_year}_{company.name}.xml",
+                "datas": data,
+            }
         )
 
         # Prepare download URL
