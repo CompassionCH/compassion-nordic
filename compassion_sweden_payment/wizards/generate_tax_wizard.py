@@ -44,6 +44,9 @@ class GenerateTaxWizard(models.TransientModel):
         total_amount_year = {}
         for record in ret:
             if record["amount_total"] >= 200:
+                # Skip records without a partner_id
+                if not record.get("partner_id"):
+                    continue
                 partner_id = record["partner_id"][0]
                 if partner_id not in total_amount_year:
                     total_amount_year[partner_id] = 0
@@ -193,6 +196,5 @@ class GenerateTaxWizard(models.TransientModel):
             data_map: Dictionary mapping tag names to (value, faltkod) tuples
         """
         for key, (value, faltkod) in data_map.items():
-            GenerateTaxWizard._create_xml_element(
-                parent, f"ku:{key}", value, faltkod=faltkod
-            )
+            elem = ET.SubElement(parent, f"ku:{key}", {"faltkod": faltkod})
+            elem.text = value

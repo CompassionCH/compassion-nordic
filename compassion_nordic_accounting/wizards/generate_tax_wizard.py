@@ -117,6 +117,9 @@ class GenerateTaxWizard(models.TransientModel):
         # Aggregate amounts by partner
         total_amount_year = {}
         for record in ret:
+            # Skip records without a partner_id
+            if not record.get("partner_id"):
+                continue
             partner_id = record["partner_id"][0]
             if partner_id not in total_amount_year:
                 total_amount_year[partner_id] = 0
