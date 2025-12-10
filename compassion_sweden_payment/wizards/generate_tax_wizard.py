@@ -28,7 +28,7 @@ class GenerateTaxWizard(models.TransientModel):
         # Get aggregated amounts with minimum threshold of 200 per day
         # For Sweden, we consider only income greater than kr 200 per day
         grouped_amounts = self._get_paid_invoices_aggregated(
-            groupby_fields=["partner_id", "last_payment:day"], min_amount=200
+            groupby_fields=["partner_id", "date:day"], min_amount=200
         )
 
         # Build XML structure for Sweden

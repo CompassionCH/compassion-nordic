@@ -112,13 +112,13 @@ class GenerateTaxWizard(models.TransientModel):
         credit_lines = self.env["account.move.line"].read_group(
             [
                 ("company_id", "=", company.id),
-                ("last_payment", ">=", f"{year}-01-01"),
-                ("last_payment", "<=", f"{year}-12-31"),
+                ("date", ">=", f"{year}-01-01"),
+                ("date", "<=", f"{year}-12-31"),
                 ("account_id.is_off_balance", "=", False),
                 ("account_id.account_type", "=", "income"),
                 ("credit", ">", 0),
             ],
-            ["credit", "partner_id", "last_payment"],
+            ["credit", "partner_id", "date"],
             groupby=groupby_fields,
             lazy=False,
         )
@@ -127,13 +127,13 @@ class GenerateTaxWizard(models.TransientModel):
         debit_lines = self.env["account.move.line"].read_group(
             [
                 ("company_id", "=", company.id),
-                ("last_payment", ">=", f"{year}-01-01"),
-                ("last_payment", "<=", f"{year}-12-31"),
+                ("date", ">=", f"{year}-01-01"),
+                ("date", "<=", f"{year}-12-31"),
                 ("account_id.is_off_balance", "=", False),
                 ("account_id.account_type", "=", "income"),
                 ("debit", ">", 0),
             ],
-            ["debit", "partner_id", "last_payment"],
+            ["debit", "partner_id", "date"],
             groupby=groupby_fields,
             lazy=False,
         )
@@ -157,9 +157,9 @@ class GenerateTaxWizard(models.TransientModel):
             partner_id = record["partner_id"][0]
 
             # Create key based on groupby fields
-            if "last_payment:day" in fields:
+            if "date:day" in fields:
                 # For daily grouping, we need to track by date
-                date_key = record.get("last_payment:day")
+                date_key = record.get("date:day")
                 return (partner_id, date_key)
             else:
                 return partner_id
@@ -198,7 +198,7 @@ class GenerateTaxWizard(models.TransientModel):
             total_amount_year[partner_id] += amount
 
         # For yearly grouping, apply min_amount to total
-        if "last_payment:day" not in groupby_fields:
+        if "date:day" not in groupby_fields:
             if min_amount > 0:
                 total_amount_year = {
                     partner_id: amount

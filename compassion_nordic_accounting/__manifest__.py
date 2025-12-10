@@ -38,7 +38,6 @@
         # compassion-accounting
         "account_reconcile_compassion_ee",
         "account_statement_import_compassion_ee",
-        "account_offbalance_sponsorship",
         # compassion-modules
         "sponsorship_compassion",
         # OCA/bank-payment
