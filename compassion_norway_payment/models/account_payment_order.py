@@ -41,7 +41,8 @@ class AccountPaymentOrder(models.Model):
             assignment.add_payment_request(
                 kid=payment_line.move_line_id.move_id.line_ids.mapped(
                     "contract_id"
-                ).group_id.ref or payment_line.move_line_id.ref,
+                ).group_id.ref
+                or payment_line.move_line_id.ref,
                 bank_notification=payment_line.move_line_id.move_id.line_ids.mapped(
                     "contract_id"
                 ).group_id.notify_payee,

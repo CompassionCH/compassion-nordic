@@ -27,33 +27,12 @@ class GenerateTaxWizard(models.TransientModel):
 
         # Get aggregated amounts with minimum threshold of 200 and daily grouping
         # For Sweden, we need to group by day first, then aggregate by partner
-        ret = self.env["account.move"].read_group(
-            [
-                ("payment_state", "=", "paid"),
-                ("company_id", "=", company.id),
-                ("last_payment", ">=", datetime(int(self.tax_year), 1, 1)),
-                ("last_payment", "<=", datetime(int(self.tax_year), 12, 31)),
-                ("invoice_category", "!=", "other"),
-            ],
-            ["amount_total", "last_payment"],
-            groupby=["partner_id", "last_payment:day"],
-            lazy=False,
+        grouped_amounts = self._get_paid_invoices_aggregated(
+            groupby_fields=["partner_id", "last_payment:day"], min_amount=200
         )
 
-        # Aggregate by partner, filtering transactions >= 200
-        total_amount_year = {}
-        for record in ret:
-            if record["amount_total"] >= 200:
-                # Skip records without a partner_id
-                if not record.get("partner_id"):
-                    continue
-                partner_id = record["partner_id"][0]
-                if partner_id not in total_amount_year:
-                    total_amount_year[partner_id] = 0
-                total_amount_year[partner_id] += record["amount_total"]
-
         # Build XML structure for Sweden
-        skatteverket = self._build_sweden_xml(company, total_amount_year)
+        skatteverket = self._build_sweden_xml(company, grouped_amounts)
 
         # Create and download attachment
         return self._create_and_download_attachment(skatteverket)
@@ -106,7 +85,9 @@ class GenerateTaxWizard(models.TransientModel):
         )
 
         self._populate_xml_elements(
-            avsandare, {"Skapad": f"{datetime.now():%Y-%m-%dT%H:%M:%S}"}, tag_prefix="ku:"
+            avsandare,
+            {"Skapad": f"{datetime.now():%Y-%m-%dT%H:%M:%S}"},
+            tag_prefix="ku:",
         )
 
         # Build Blankettgemensamt section
@@ -140,11 +121,6 @@ class GenerateTaxWizard(models.TransientModel):
             ):
                 is_taxable = True
                 identifier = partner.social_sec_nr.replace("-", "")
-
-            # The swedish doesn't include company anymore
-            # if partner.is_company and self._validate_vat_company(partner, amount):
-            #     is_taxable = True
-            #     identifier = partner.vat
 
             # If the partner is eligible we put it in the file
             if is_taxable:

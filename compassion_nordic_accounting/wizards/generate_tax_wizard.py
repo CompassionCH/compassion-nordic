@@ -155,7 +155,12 @@ class GenerateTaxWizard(models.TransientModel):
         # Create attachment
         data = base64.b64encode(xml_str)
         attachment_id = attachment_obj.create(
-            [{"name": f"{filename_prefix}_{self.tax_year}_{company.name}.xml", "datas": data}]
+            [
+                {
+                    "name": f"{filename_prefix}_{self.tax_year}_{company.name}.xml",
+                    "datas": data,
+                }
+            ]
         )
 
         # Prepare download URL
