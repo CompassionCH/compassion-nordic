@@ -121,6 +121,12 @@ class ResPartner(models.Model):
         )
         return super().anonymize(vals)
 
+    def action_view_partner_donations(self):
+        # Limit to on-balance accounts only
+        action = super().action_view_partner_donations()
+        action["domain"].append(("account_id.is_off_balance", "=", False))
+        return action
+
 
 def del_from_lib(orig_lib_list, lib_list):
     """@return a new list of stdnum object library"""
