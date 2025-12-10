@@ -22,7 +22,8 @@ class GenerateTaxWizard(models.TransientModel):
         if company.country_id.name != "Norway":
             return super().generate_tax()
 
-        # Get aggregated amounts with minimum threshold of 500
+        # Get aggregated amounts with minimum threshold of 500 per year
+        # For Norway, we consider only total income greater than kr 500 per year
         grouped_amounts = self._get_paid_invoices_aggregated(
             groupby_fields=["partner_id"], min_amount=500
         )

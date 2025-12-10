@@ -91,47 +91,116 @@ class GenerateTaxWizard(models.TransientModel):
             GenerateTaxWizard._create_xml_element(parent, tag, value)
 
     def _get_paid_invoices_aggregated(self, groupby_fields, min_amount=0):
-        """Get aggregated amounts from paid invoices for the tax year.
+        """Get aggregated income amounts from on-balance accounts for the tax year.
+
+        This method calculates net income (credit - debit) from move lines in
+        on-balance income accounts for the specified tax year.
 
         Args:
             groupby_fields: List of fields to group by (e.g., ["partner_id"])
-            min_amount: Minimum amount threshold to include in results
+            min_amount: Minimum amount threshold to include in results.
+                       For daily grouping, this applies per day.
+                       For yearly grouping, this applies per year.
 
         Returns:
             Dictionary mapping partner_id to total amount
         """
         company = self.env.company
-        ret = self.env["account.move"].read_group(
+        
+        # Query for credit move lines in on_balance income accounts
+        credit_lines = self.env["account.move.line"].read_group(
             [
-                ("payment_state", "=", "paid"),
                 ("company_id", "=", company.id),
-                ("last_payment", ">=", datetime(int(self.tax_year), 1, 1)),
-                ("last_payment", "<=", datetime(int(self.tax_year), 12, 31)),
-                ("invoice_category", "!=", "other"),
+                ("date", ">=", f"{self.tax_year}-01-01"),
+                ("date", "<=", f"{self.tax_year}-12-31"),
+                ("account_id.is_off_balance", "=", False),
+                ("account_id.account_type", "=", "income"),
+                ("credit", ">", 0),
             ],
-            ["amount_total", "last_payment"],
+            ["credit", "partner_id", "date"],
             groupby=groupby_fields,
             lazy=False,
         )
-
-        # Aggregate amounts by partner
-        total_amount_year = {}
-        for record in ret:
-            # Skip records without a partner_id
+        
+        # Query for debit move lines in on_balance income accounts
+        debit_lines = self.env["account.move.line"].read_group(
+            [
+                ("company_id", "=", company.id),
+                ("date", ">=", f"{self.tax_year}-01-01"),
+                ("date", "<=", f"{self.tax_year}-12-31"),
+                ("account_id.is_off_balance", "=", False),
+                ("account_id.account_type", "=", "income"),
+                ("debit", ">", 0),
+            ],
+            ["debit", "partner_id", "date"],
+            groupby=groupby_fields,
+            lazy=False,
+        )
+        
+        # Calculate net income per groupby key
+        net_income = {}
+        
+        # Process credits
+        for record in credit_lines:
             if not record.get("partner_id"):
                 continue
             partner_id = record["partner_id"][0]
+            
+            # Create key based on groupby fields
+            if "date:day" in groupby_fields or "last_payment:day" in groupby_fields:
+                # For daily grouping, we need to track by date
+                date_key = record.get("date:day") or record.get("date")
+                key = (partner_id, date_key)
+            else:
+                key = partner_id
+                
+            if key not in net_income:
+                net_income[key] = 0
+            net_income[key] += record["credit"]
+        
+        # Process debits (subtract from credits)
+        for record in debit_lines:
+            if not record.get("partner_id"):
+                continue
+            partner_id = record["partner_id"][0]
+            
+            # Create key based on groupby fields
+            if "date:day" in groupby_fields or "last_payment:day" in groupby_fields:
+                date_key = record.get("date:day") or record.get("date")
+                key = (partner_id, date_key)
+            else:
+                key = partner_id
+                
+            if key not in net_income:
+                net_income[key] = 0
+            net_income[key] -= record["debit"]
+        
+        # Apply minimum threshold and aggregate by partner
+        total_amount_year = {}
+        
+        for key, amount in net_income.items():
+            # Extract partner_id from key
+            if isinstance(key, tuple):
+                partner_id = key[0]
+                # For daily grouping, apply min_amount per day
+                if min_amount > 0 and amount < min_amount:
+                    continue
+            else:
+                partner_id = key
+            
             if partner_id not in total_amount_year:
                 total_amount_year[partner_id] = 0
-            total_amount_year[partner_id] += record["amount_total"]
-
-        # Filter by minimum amount if specified
-        if min_amount > 0:
-            return {
-                partner_id: amount
-                for partner_id, amount in total_amount_year.items()
-                if amount >= min_amount
-            }
+            total_amount_year[partner_id] += amount
+        
+        # For yearly grouping, apply min_amount to total
+        if "date:day" not in groupby_fields and "last_payment:day" not in groupby_fields:
+            if min_amount > 0:
+                total_amount_year = {
+                    partner_id: amount
+                    for partner_id, amount in total_amount_year.items()
+                    if amount >= min_amount
+                }
+        
         return total_amount_year
 
     def _create_and_download_attachment(self, xml_element, filename_prefix="Tax"):
