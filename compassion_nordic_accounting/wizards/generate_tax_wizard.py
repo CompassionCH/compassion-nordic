@@ -107,62 +107,63 @@ class GenerateTaxWizard(models.TransientModel):
         """
         company = self.env.company
         year = str(self.tax_year)  # Ensure tax_year is a string
-        
+
         # Query for credit move lines in on_balance income accounts
         credit_lines = self.env["account.move.line"].read_group(
             [
                 ("company_id", "=", company.id),
-                ("date", ">=", f"{year}-01-01"),
-                ("date", "<=", f"{year}-12-31"),
+                ("last_payment", ">=", f"{year}-01-01"),
+                ("last_payment", "<=", f"{year}-12-31"),
                 ("account_id.is_off_balance", "=", False),
                 ("account_id.account_type", "=", "income"),
                 ("credit", ">", 0),
             ],
-            ["credit", "partner_id", "date"],
+            ["credit", "partner_id", "last_payment"],
             groupby=groupby_fields,
             lazy=False,
         )
-        
+
         # Query for debit move lines in on_balance income accounts
         debit_lines = self.env["account.move.line"].read_group(
             [
                 ("company_id", "=", company.id),
-                ("date", ">=", f"{year}-01-01"),
-                ("date", "<=", f"{year}-12-31"),
+                ("last_payment", ">=", f"{year}-01-01"),
+                ("last_payment", "<=", f"{year}-12-31"),
                 ("account_id.is_off_balance", "=", False),
                 ("account_id.account_type", "=", "income"),
                 ("debit", ">", 0),
             ],
-            ["debit", "partner_id", "date"],
+            ["debit", "partner_id", "last_payment"],
             groupby=groupby_fields,
             lazy=False,
         )
-        
+
         # Calculate net income per groupby key
         net_income = {}
-        
+
         def get_key(record, fields):
             """Helper to generate consistent key from record based on groupby fields.
-            
+
             Args:
                 record: The record dictionary from read_group
                 fields: List of groupby fields
-                
+
             Returns:
-                Tuple of (partner_id, date_key) for daily grouping, or partner_id for yearly
+                Tuple of (partner_id, date_key) for daily grouping,
+                or partner_id for yearly
             """
             if not record.get("partner_id"):
                 return None
             partner_id = record["partner_id"][0]
-            
+
             # Create key based on groupby fields
-            if "date:day" in fields:
+            if "last_payment:day" in fields:
                 # For daily grouping, we need to track by date
-                date_key = record.get("date:day")
+                date_key = record.get("last_payment:day")
                 return (partner_id, date_key)
             else:
                 return partner_id
-        
+
         # Process credits
         for record in credit_lines:
             key = get_key(record, groupby_fields)
@@ -171,7 +172,7 @@ class GenerateTaxWizard(models.TransientModel):
             if key not in net_income:
                 net_income[key] = 0
             net_income[key] += record["credit"]
-        
+
         # Process debits (subtract from credits)
         for record in debit_lines:
             key = get_key(record, groupby_fields)
@@ -180,10 +181,10 @@ class GenerateTaxWizard(models.TransientModel):
             if key not in net_income:
                 net_income[key] = 0
             net_income[key] -= record["debit"]
-        
+
         # Apply minimum threshold and aggregate by partner
         total_amount_year = {}
-        
+
         for key, amount in net_income.items():
             # Extract partner_id from key
             # Note: Tuples are used for daily grouping, partner_id alone for yearly
@@ -194,20 +195,20 @@ class GenerateTaxWizard(models.TransientModel):
                     continue
             else:
                 partner_id = key
-            
+
             if partner_id not in total_amount_year:
                 total_amount_year[partner_id] = 0
             total_amount_year[partner_id] += amount
-        
+
         # For yearly grouping, apply min_amount to total
-        if "date:day" not in groupby_fields:
+        if "last_payment:day" not in groupby_fields:
             if min_amount > 0:
                 total_amount_year = {
                     partner_id: amount
                     for partner_id, amount in total_amount_year.items()
                     if amount >= min_amount
                 }
-        
+
         return total_amount_year
 
     def _create_and_download_attachment(self, xml_element, filename_prefix="Tax"):
