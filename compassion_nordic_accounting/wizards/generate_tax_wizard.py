@@ -317,3 +317,27 @@ class GenerateTaxWizard(models.TransientModel):
             [("tax_company_id", "=", self.env.company.id)]
         )
         to_del.sudo().unlink()
+
+    def _get_partner_tax_identifier(self, partner, amount, company_vat_check=False):
+        """Get tax identifier for partner based on validation.
+        Args:
+            partner: Partner record
+            amount: Transaction amount
+            company_vat_check: Whether to validate company VAT
+        Returns:
+            Tuple of (is_taxable, identifier)
+        """
+        is_taxable, identifier = False, None
+        if not partner.is_company and self._validate_partner_tax_eligibility(
+            partner, amount
+        ):
+            is_taxable = True
+            identifier = partner.social_sec_nr.replace("-", "")
+        elif (
+            company_vat_check
+            and partner.is_company
+            and self._validate_vat_company(partner, amount)
+        ):
+            is_taxable = True
+            identifier = partner.vat
+        return is_taxable, identifier

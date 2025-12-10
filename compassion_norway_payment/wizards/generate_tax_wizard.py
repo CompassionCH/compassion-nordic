@@ -91,7 +91,9 @@ class GenerateTaxWizard(models.TransientModel):
 
         for partner_id, amount in grouped_amounts.items():
             partner = self.env["res.partner"].browse(partner_id)
-            is_taxable, identifier = self._get_partner_tax_identifier(partner, amount)
+            is_taxable, identifier = self._get_partner_tax_identifier(
+                partner, amount, company_vat_check=True
+            )
 
             # If the partner is eligible we put it in the file
             if is_taxable:
@@ -112,28 +114,3 @@ class GenerateTaxWizard(models.TransientModel):
         )
 
         return melding
-
-    def _get_partner_tax_identifier(self, partner, amount):
-        """Get tax identifier for partner based on validation.
-
-        Args:
-            partner: Partner record
-            amount: Transaction amount
-
-        Returns:
-            Tuple of (is_taxable, identifier)
-        """
-        is_taxable = False
-        identifier = None
-
-        # We test the tax identifier to make sure it is valid
-        if (not partner.is_company) and self._validate_partner_tax_eligibility(
-            partner, amount
-        ):
-            is_taxable = True
-            identifier = partner.social_sec_nr
-        elif partner.is_company and self._validate_vat_company(partner, amount):
-            is_taxable = True
-            identifier = partner.vat
-
-        return is_taxable, identifier

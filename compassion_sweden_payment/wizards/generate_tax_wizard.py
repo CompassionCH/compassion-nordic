@@ -28,7 +28,7 @@ class GenerateTaxWizard(models.TransientModel):
         # Get aggregated amounts with minimum threshold of 200 per day
         # For Sweden, we consider only income greater than kr 200 per day
         grouped_amounts = self._get_paid_invoices_aggregated(
-            groupby_fields=["partner_id", "date:day"], min_amount=200
+            groupby_fields=["partner_id", "last_payment:day"], min_amount=200
         )
 
         # Build XML structure for Sweden
@@ -112,15 +112,7 @@ class GenerateTaxWizard(models.TransientModel):
         # Add partner entries
         for partner_id, amount in grouped_amounts.items():
             partner = self.env["res.partner"].browse(partner_id)
-            is_taxable = False
-            identifier = None
-
-            # We test if the tax identifier is valid or not
-            if not partner.is_company and self._validate_partner_tax_eligibility(
-                partner, amount
-            ):
-                is_taxable = True
-                identifier = partner.social_sec_nr.replace("-", "")
+            is_taxable, identifier = self._get_partner_tax_identifier(partner, amount)
 
             # If the partner is eligible we put it in the file
             if is_taxable:
