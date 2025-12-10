@@ -106,13 +106,14 @@ class GenerateTaxWizard(models.TransientModel):
             Dictionary mapping partner_id to total amount
         """
         company = self.env.company
+        year = str(self.tax_year)  # Ensure tax_year is a string
         
         # Query for credit move lines in on_balance income accounts
         credit_lines = self.env["account.move.line"].read_group(
             [
                 ("company_id", "=", company.id),
-                ("date", ">=", f"{self.tax_year}-01-01"),
-                ("date", "<=", f"{self.tax_year}-12-31"),
+                ("date", ">=", f"{year}-01-01"),
+                ("date", "<=", f"{year}-12-31"),
                 ("account_id.is_off_balance", "=", False),
                 ("account_id.account_type", "=", "income"),
                 ("credit", ">", 0),
@@ -126,8 +127,8 @@ class GenerateTaxWizard(models.TransientModel):
         debit_lines = self.env["account.move.line"].read_group(
             [
                 ("company_id", "=", company.id),
-                ("date", ">=", f"{self.tax_year}-01-01"),
-                ("date", "<=", f"{self.tax_year}-12-31"),
+                ("date", ">=", f"{year}-01-01"),
+                ("date", "<=", f"{year}-12-31"),
                 ("account_id.is_off_balance", "=", False),
                 ("account_id.account_type", "=", "income"),
                 ("debit", ">", 0),
@@ -140,37 +141,42 @@ class GenerateTaxWizard(models.TransientModel):
         # Calculate net income per groupby key
         net_income = {}
         
-        # Process credits
-        for record in credit_lines:
+        def get_key(record, fields):
+            """Helper to generate consistent key from record based on groupby fields.
+            
+            Args:
+                record: The record dictionary from read_group
+                fields: List of groupby fields
+                
+            Returns:
+                Tuple of (partner_id, date_key) for daily grouping, or partner_id for yearly
+            """
             if not record.get("partner_id"):
-                continue
+                return None
             partner_id = record["partner_id"][0]
             
             # Create key based on groupby fields
-            if "date:day" in groupby_fields or "last_payment:day" in groupby_fields:
+            if "date:day" in fields:
                 # For daily grouping, we need to track by date
-                date_key = record.get("date:day") or record.get("date")
-                key = (partner_id, date_key)
+                date_key = record.get("date:day")
+                return (partner_id, date_key)
             else:
-                key = partner_id
-                
+                return partner_id
+        
+        # Process credits
+        for record in credit_lines:
+            key = get_key(record, groupby_fields)
+            if key is None:
+                continue
             if key not in net_income:
                 net_income[key] = 0
             net_income[key] += record["credit"]
         
         # Process debits (subtract from credits)
         for record in debit_lines:
-            if not record.get("partner_id"):
+            key = get_key(record, groupby_fields)
+            if key is None:
                 continue
-            partner_id = record["partner_id"][0]
-            
-            # Create key based on groupby fields
-            if "date:day" in groupby_fields or "last_payment:day" in groupby_fields:
-                date_key = record.get("date:day") or record.get("date")
-                key = (partner_id, date_key)
-            else:
-                key = partner_id
-                
             if key not in net_income:
                 net_income[key] = 0
             net_income[key] -= record["debit"]
@@ -180,6 +186,7 @@ class GenerateTaxWizard(models.TransientModel):
         
         for key, amount in net_income.items():
             # Extract partner_id from key
+            # Note: Tuples are used for daily grouping, partner_id alone for yearly
             if isinstance(key, tuple):
                 partner_id = key[0]
                 # For daily grouping, apply min_amount per day
@@ -193,7 +200,7 @@ class GenerateTaxWizard(models.TransientModel):
             total_amount_year[partner_id] += amount
         
         # For yearly grouping, apply min_amount to total
-        if "date:day" not in groupby_fields and "last_payment:day" not in groupby_fields:
+        if "date:day" not in groupby_fields:
             if min_amount > 0:
                 total_amount_year = {
                     partner_id: amount
