@@ -13,4 +13,21 @@
             </field>
         </field>
      </record>
+    <record id="view_job_lang_filters" model="ir.ui.view">
+        <field name="name">communication.job.lang.filters</field>
+        <field name="model">partner.communication.job</field>
+        <field
+      name="inherit_id"
+      ref="partner_communication.communication_job_search"
+    />
+        <field name="arch" type="xml">
+            <filter name="last7days" position="after">
+                <separator/>
+                <filter name="swedish" string="Swedish" domain="[('partner_id.lang', '=', 'sv_SE')]"/>
+                <filter name="norwegian" string="Norwegian" domain="[('partner_id.lang', '=', 'nb_NO')]"/>
+                <filter name="danish" string="Danish" domain="[('partner_id.lang', '=', 'da_DK')]"/>
+                <filter name="english" string="English" domain="[('partner_id.lang', 'in', ['en_US', 'fi_FI'])]"/>
+            </filter>
+        </field>
+     </record>
 </odoo>
