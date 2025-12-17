@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -11,6 +12,12 @@ class LetterLanguageCode(str, Enum):
     DAK = "DAK"
     DAN = "DAN"
     DANISH = "Danish"
+
+
+class RegionEnum(str, Enum):
+    AFRICA = "Africa"
+    ASIA = "Asia"
+    LATIN_AMERICA = "Latin America and Caribbean"
 
 
 class PascalCaseModel(BaseModel):
@@ -61,6 +68,10 @@ class AvailableChildModel(BaseModel):
     hiv: bool | None = Field(default=None, alias="Hiv")
     mother_work_as: str | None = Field(default=None, alias="MotherWorkAs")
     age: int | None = None
+    waiting_days: int | None = None
+    available_until: datetime | None = None
+    region: RegionEnum | None = None
+    sponsorship_url: str | None = None
     church_activities: str | None = None
     common_language: str | None = None
     country: str | None = None

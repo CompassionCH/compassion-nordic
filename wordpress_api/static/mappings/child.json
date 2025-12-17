@@ -130,6 +130,21 @@
       "field": "project_id.field_office_id.country_id.name",
       "to_json_conversion": "odoo_value or None"
     },
+    "available_until": {
+      "field": "hold_id.expiration_date",
+      "to_json_conversion": "fields.Datetime.to_datetime(odoo_value).timestamp() if odoo_value else None"
+    },
+    "waiting_days": {
+      "field": "waiting_days",
+      "to_json_conversion": "odoo_value or None"
+    },
+    "region": {
+      "field": "project_id.field_office_id.region",
+      "to_json_conversion": "odoo_value or None"
+    },
+    "sponsorship_url": {
+      "to_json_conversion": "'https://stage.compassion.se/'"
+    },
     "Fullshot": {
       "field": "image_url",
       "to_json_conversion": "odoo_value.replace('/w_150', '')"

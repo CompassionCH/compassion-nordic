@@ -23,6 +23,9 @@ update ir_config_parameter set value = (
 update ir_config_parameter set value = (
     SELECT value FROM ir_config_parameter WHERE key = 'message_center_compassion.connect_secret_stage'
     ) where key = 'message_center_compassion.connect_secret';
+update ir_config_parameter set value = (
+    SELECT value FROM ir_config_parameter WHERE key = 'wordpress_api.api_key_stage'
+    ) where key = 'wordpress_api.api_key';
 
 -- Admin password
 update res_users set password=(
@@ -39,3 +42,6 @@ delete from queue_job where state != 'done';
 -- Delete mailchimp account
 DELETE FROM mailchimp_template;
 DELETE FROM mailchimp_account;
+
+-- Update FS Storage to use staging bucket
+UPDATE fs_storage SET directory_path = 'stage' WHERE directory_path = 'production';
