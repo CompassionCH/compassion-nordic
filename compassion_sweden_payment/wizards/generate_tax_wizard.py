@@ -132,7 +132,7 @@ class GenerateTaxWizard(models.TransientModel):
                     uppgiftslamnare_ku65,
                     {
                         "UppgiftslamnarId": (orgnr, "201"),
-                        "NamnUppgiftslamnare": (partner.name, "202"),
+                        "NamnUppgiftslamnare": (company.name, "202"),
                     },
                 )
 
