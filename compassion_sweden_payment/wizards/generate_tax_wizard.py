@@ -14,6 +14,9 @@ from odoo import _, models
 from odoo.exceptions import ValidationError
 
 
+MIN_AMOUNT = 200  # Minimum amount threshold for Sweden tax reporting (per day)
+
+
 class GenerateTaxWizard(models.TransientModel):
     _inherit = "generate.tax.wizard"
 
@@ -28,7 +31,7 @@ class GenerateTaxWizard(models.TransientModel):
         # Get aggregated amounts with minimum threshold of 200 per day
         # For Sweden, we consider only income greater than kr 200 per day
         grouped_amounts = self._get_paid_invoices_aggregated(
-            groupby_fields=["partner_id", "date:day"], min_amount=200
+            groupby_fields=["partner_id", "date:day"], min_amount=MIN_AMOUNT
         )
 
         # Build XML structure for Sweden
@@ -111,6 +114,8 @@ class GenerateTaxWizard(models.TransientModel):
 
         # Add partner entries
         for partner_id, amount in grouped_amounts.items():
+            if amount < MIN_AMOUNT:
+                continue  # Skip amounts below threshold
             partner = self.env["res.partner"].browse(partner_id)
             is_taxable, identifier = self._get_partner_tax_identifier(partner, amount)
 

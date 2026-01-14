@@ -190,7 +190,7 @@ class GenerateTaxWizard(models.TransientModel):
             if isinstance(key, tuple):
                 partner_id = key[0]
                 # For daily grouping, apply min_amount per day
-                if min_amount > 0 and amount < min_amount:
+                if min_amount > 0 and abs(amount) < min_amount:
                     continue
             else:
                 partner_id = key
