@@ -8,8 +8,11 @@
 #
 ##############################################################################
 import logging
+from datetime import datetime
 
-from odoo import fields, models
+from dateutil.relativedelta import relativedelta
+
+from odoo import api, fields, models
 
 logger = logging.getLogger(__name__)
 
@@ -89,3 +92,42 @@ class RecurringContract(models.Model):
             if not already_sent:
                 self.send_communication(config, correspondent)
         return True
+
+    @api.model
+    def cron_generate_birthday_reminders(self):
+        logger.info("Creating Birthday Reminder Communications")
+        today = datetime.now()
+        in_two_month = today + relativedelta(months=2)
+        sponsorships_with_birthday_in_two_months = self.search(
+            [
+                ("child_id", "!=", False),
+                ("state", "=", "active"),
+                ("child_id.birthdate", "like", in_two_month.strftime("%%-%m-%d")),
+                ("type", "=like", "S%"),
+            ]
+        )
+        sponsorships_with_birthday_in_two_months._send_birthday_reminders()
+
+    def _send_birthday_reminders(self):
+        for sponsorship in self:
+            payer = sponsorship.partner_id
+            correspondent = sponsorship.correspondent_id
+            # Sweden automatic gifts receive the thank you communication instead
+            is_sweden_company = sponsorship.company_id.country_id.code == "SE"
+            send_to_payer = payer.email and not (
+                is_sweden_company and sponsorship.birthday_invoice
+            )
+            send_to_correspondent = correspondent != payer and correspondent.email
+            if send_to_correspondent or send_to_payer:
+                sponsorship.with_delay(
+                    channel="root.partner_communication",
+                    identity_key=f"{sponsorship._name}."
+                    f"send_birthday_reminder.{sponsorship.id}",
+                    priority=50,
+                ).send_communication(
+                    self.env.ref(
+                        "partner_communication_nordic.config_birthday_reminder"
+                    ),
+                    correspondent=send_to_correspondent,
+                    both=send_to_payer and send_to_correspondent,
+                )

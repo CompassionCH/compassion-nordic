@@ -13,7 +13,6 @@ from datetime import datetime
 from odoo import _, models
 from odoo.exceptions import ValidationError
 
-
 MIN_AMOUNT = 200  # Minimum amount threshold for Sweden tax reporting (per day)
 
 
