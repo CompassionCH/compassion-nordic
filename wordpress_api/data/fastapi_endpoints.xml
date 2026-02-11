@@ -5,4 +5,10 @@
         <field name="root_path">/wapi</field>
         <field name="save_http_session" eval="False" />
     </record>
+    <record model="fastapi.endpoint" id="giving_platform_endpoint">
+        <field name="name">Giving Platform</field>
+        <field name="app">giving_platform</field>
+        <field name="root_path">/giving-api</field>
+        <field name="save_http_session" eval="False" />
+    </record>
 </odoo>

@@ -10,7 +10,7 @@ from odoo.addons.child_compassion.models.compassion_hold import HoldType
 from odoo.addons.sbc_compassion.models.correspondence_page import PAGE_SEPARATOR
 from odoo.addons.sponsorship_compassion.models.res_partner import ResPartner
 
-from .pydantic_models import (
+from .wordpress_pydantic_models import (
     AvailableChildModel,
     BeneficiaryModel,
     ConsignedChildListModel,
