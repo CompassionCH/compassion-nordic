@@ -60,6 +60,7 @@ class AccountMove(models.Model):
                 ("company_id", "=", self.company_id.id),
             ],
             limit=1,
+            order="id asc",
         )
         if not journal:
             self._notify_managers_error(

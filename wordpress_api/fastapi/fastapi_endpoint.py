@@ -16,8 +16,10 @@ class FastapiEndpoint(models.Model):
     )
 
     def _get_fastapi_routers(self):
-        if self.app == "wordpress":
-            return [wordpress_router]
-        if self.app == "giving_platform":
-            return [giving_platform_router]
+        routers = {
+            "wordpress": wordpress_router,
+            "giving_platform": giving_platform_router,
+        }
+        if self.app in routers:
+            return [routers[self.app]]
         return super()._get_fastapi_routers()
