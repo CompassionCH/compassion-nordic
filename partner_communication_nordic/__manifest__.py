@@ -29,7 +29,7 @@
 # pylint: disable=C8101
 {
     "name": "Compassion Nordic Communications",
-    "version": "18.0.1.0.1",
+    "version": "18.0.1.0.2",
     "category": "Other",
     "author": "Compassion Switzerland",
     "license": "AGPL-3",
@@ -46,6 +46,7 @@
         "report/onboarding_photo_by_post.xml",
         "data/onboarding_process.xml",
         "data/onboarding_survey.xml",
+        "data/birthday_reminders.xml",
         "views/contract_view.xml",
         "views/field_office_view.xml",
         "views/download_child_pictures_view.xml",

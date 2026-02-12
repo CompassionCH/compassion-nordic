@@ -15,12 +15,21 @@
     />
         <field name="arch" type="xml">
             <xpath expr="//app[@name='compassion_settings']" position="inside">
-                <block title="Wordpress API">
+                <block
+          title="External APIs"
+          name="compassion_settings_external_apis"
+        >
                     <setting
             string="Wordpress API Key"
             help="Enter your Wordpress API key here."
           >
                         <field name="wordpress_api_key" />
+                    </setting>
+                    <setting
+            string="Giving Platform API Key"
+            help="Enter your Giving Platform API key here."
+          >
+                        <field name="giving_platform_api_key" />
                     </setting>
                 </block>
             </xpath>
