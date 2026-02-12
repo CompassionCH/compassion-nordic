@@ -59,12 +59,12 @@ class GivingPlatformService(AbstractModel):
                 detail="Donor email and/or phone are required.",
             )
         currency = self.env["res.currency"].search(
-            [("name", "=", donate_data.currency_code)], limit=1
+            [("name", "=", donate_data.currency_code.value)], limit=1
         )
         if not currency:
             raise HTTPException(
                 status_code=422,
-                detail=f"Currency {donate_data.currency_code} is not supported.",
+                detail=f"Currency {donate_data.currency_code.name} is not supported.",
             )
         fund = self.env["product.product"].search([("id", "=", donate_data.fund_id)])
         if not fund:
