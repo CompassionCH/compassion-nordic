@@ -1,3 +1,4 @@
+import hmac
 from enum import Enum
 from typing import Annotated
 
@@ -7,7 +8,7 @@ from odoo.addons.child_compassion.models.child_compassion import CompassionChild
 from odoo.addons.fastapi.dependencies import odoo_env
 from odoo.addons.sponsorship_compassion.models.res_partner import ResPartner
 
-from .pydantic_models import (
+from .wordpress_pydantic_models import (
     LetterPostModel,
     PeterChildListModel,
     SupporterInfoModel,
@@ -45,7 +46,9 @@ def _validate_api_key(
     """
     if not api_key:
         raise HTTPException(status_code=400, detail="API key is required.")
-    if api_key != env["res.config.settings"].get_param("wordpress_api_key"):
+    if not hmac.compare_digest(
+        api_key, env["res.config.settings"].get_param("wordpress_api_key", "")
+    ):
         raise HTTPException(status_code=403, detail="Invalid API key.")
 
 

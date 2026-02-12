@@ -15,3 +15,4 @@ class StaffNotificationSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
     wordpress_api_key = fields.Char(config_parameter="wordpress_api.api_key")
+    giving_platform_api_key = fields.Char(config_parameter="giving_platform.api_key")
