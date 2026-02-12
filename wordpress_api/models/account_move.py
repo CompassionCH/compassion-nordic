@@ -42,7 +42,7 @@ class AccountMove(models.Model):
                     .search(
                         [
                             ("account_type", "=", "asset_receivable"),
-                            ("company_id", "=", self.company_id.id),
+                            ("company_ids", "=", self.company_id.id),
                             ("is_off_balance", "=", False),
                         ],
                         order="id asc",
