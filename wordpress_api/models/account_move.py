@@ -41,12 +41,8 @@ class AccountMove(models.Model):
                     "account_id": self.env["account.account"]
                     .search(
                         [
-                            ("account_type", "=", "asset_receivable"),
-                            ("company_ids", "=", self.company_id.id),
-                            ("is_off_balance", "=", False),
+                            ("code", "=", "15100"),
                         ],
-                        order="id asc",
-                        limit=1,
                     )
                     .id,
                     "debit": donation_data.amount,
