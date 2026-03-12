@@ -33,9 +33,9 @@ Nordic operations.
 Features
 --------
 
--  Customized tree and form views for disbursement records.
--  Improved filtering and searching capabilities.
--  User-friendly layout for better data visualization.
+- Customized tree and form views for disbursement records.
+- Improved filtering and searching capabilities.
+- User-friendly layout for better data visualization.
 
 **Table of contents**
 

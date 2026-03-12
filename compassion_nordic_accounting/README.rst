@@ -30,10 +30,10 @@ organizations operating in the Nordic region.
 Features
 --------
 
--  **Tax File Generation**: Generate and manage tax files for partners,
-   including validation of social security numbers and age checks.
--  **Mandate Management**: Load and manage banking mandates, including
-   handling cancellations and scheduling follow-up activities.
+- **Tax File Generation**: Generate and manage tax files for partners,
+  including validation of social security numbers and age checks.
+- **Mandate Management**: Load and manage banking mandates, including
+  handling cancellations and scheduling follow-up activities.
 
 **Table of contents**
 

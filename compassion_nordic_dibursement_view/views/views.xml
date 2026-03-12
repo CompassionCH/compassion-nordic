@@ -4,11 +4,11 @@
             <field name="name">Disbursement Data List View</field>
             <field name="model">disbursement.data</field>
             <field name="arch" type="xml">
-                <list create="false">
-                    <field name="company" />
+                <list>
+                    <field name="company_id" />
                     <field name="month" />
-                    <field name="account" />
-                    <field name="fund" />
+                    <field name="account_id" />
+                    <field name="product_id" />
                     <field name="debit" />
                     <field name="credit" />
                     <field name="amount" />

@@ -24,9 +24,9 @@ Compassion Denmark Payment
 
 This enables Denmark customizations including:
 
--  Danish payment methods
--  Danish mandate files parsing (beservice)
--  Danish payment files generation
+- Danish payment methods
+- Danish mandate files parsing (beservice)
+- Danish payment files generation
 
 **Table of contents**
 

@@ -9,10 +9,10 @@ class DisbursementData(models.Model):
     _auto = False
     _description = "Disbursement Data"
 
-    company = fields.Char(required=True, readonly=True)
-    month = fields.Date(required=True, readonly=True)
-    account = fields.Char(required=True, readonly=True)
-    fund = fields.Char(readonly=True)
+    company_id = fields.Many2one("res.company", required=True)
+    month = fields.Date(required=True)
+    account_id = fields.Many2one("account.account", required=True)
+    product_id = fields.Many2one("product.product")
     debit = fields.Float(readonly=True)
     credit = fields.Float(readonly=True)
     amount = fields.Float(readonly=True)
@@ -23,10 +23,10 @@ class DisbursementData(models.Model):
             SQL("""
             CREATE OR REPLACE VIEW {table} AS (
             SELECT row_number() over() as id,
-                rc."name" as company,
+                rc.id as company_id,
                 date_trunc('month', am."date")::date as month,
-                aa.code_store as account,
-                pp.default_code as fund,
+                pp.id as product_id,
+                aa.id as account_id,
                 sum(aml.debit) as debit,
                 sum(aml.credit) as credit,
                 sum(aml.debit - aml.credit) as amount
@@ -42,13 +42,9 @@ class DisbursementData(models.Model):
                     (am.move_type = 'out_invoice' AND am.payment_state = 'paid')
                     OR am.move_type <> 'out_invoice'
                     )
-                AND EXISTS (
-                    SELECT 1
-                    FROM jsonb_array_elements_text(aa.code_store) AS elem(value)
-                    WHERE elem.value LIKE '7%' OR elem.value LIKE '3%'
-                )
-            GROUP BY rc."name", date_trunc('month', am."date"), aa.code_store,
-                pp.default_code
+                AND (aa.code_store ->> rc.id::char LIKE '7%' OR aa.code_store ->> rc.id::char LIKE'3%')
+            GROUP BY rc.id, date_trunc('month', am."date"), aa.id,
+                pp.id
             HAVING (sum(aml.debit) > 0 OR sum(aml.credit) > 0)
             ORDER BY month)
         """).format(table=Identifier(self._table))
