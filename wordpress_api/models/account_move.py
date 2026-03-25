@@ -42,6 +42,7 @@ class AccountMove(models.Model):
                     .search(
                         [
                             ("code", "=", "15100"),
+                            ("company_id", "=", self.company_id.id),
                         ],
                     )
                     .id,
