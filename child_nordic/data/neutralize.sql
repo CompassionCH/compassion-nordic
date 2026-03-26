@@ -28,9 +28,9 @@ update ir_config_parameter set value = (
     ) where key = 'wordpress_api.api_key';
 update ir_config_parameter set value = (
     COALESCE(
-            SELECT value FROM ir_config_parameter WHERE key = 'giving_platform.api_key_stage',
+        (SELECT value FROM ir_config_parameter WHERE key = 'giving_platform.api_key_stage'),
         'dummy'
-        )
+    )
     ) where key = 'giving_platform.api_key';
 
 -- Admin password
