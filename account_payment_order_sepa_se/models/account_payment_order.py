@@ -91,7 +91,13 @@ class AccountPaymentOrder(models.Model):
 
     @api.model
     def generate_party_agent(
-        self, parent_node, party_type, order, partner_bank, gen_args, bank_line=None
+        self,
+        parent_node,
+        party_type,
+        order,
+        partner_bank,
+        gen_args,
+        bank_line=None,
     ):
         """Generate the piece of the XML file corresponding to BIC
         This code is mutualized between TRF and DD

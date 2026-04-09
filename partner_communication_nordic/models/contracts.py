@@ -102,7 +102,7 @@ class RecurringContract(models.Model):
             [
                 ("child_id", "!=", False),
                 ("state", "=", "active"),
-                ("child_id.birthdate", "like", in_two_month.strftime("%%-%m-%d")),
+                ("child_id.birthdate", "like", in_two_month.strftime("%%-%m-%%")),
                 ("type", "=like", "S%"),
             ]
         )
@@ -113,7 +113,9 @@ class RecurringContract(models.Model):
             payer = sponsorship.partner_id
             correspondent = sponsorship.correspondent_id
             # Sweden automatic gifts receive the thank you communication instead
-            is_sweden_company = sponsorship.company_id.country_id.code == "SE"
+            is_sweden_company = (
+                sponsorship.pricelist_id.company_id.country_id.code == "SE"
+            )
             send_to_payer = payer.email and not (
                 is_sweden_company and sponsorship.birthday_invoice
             )
