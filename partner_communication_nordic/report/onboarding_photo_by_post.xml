@@ -17,9 +17,16 @@
         <field name="name">Onboarding photo by post</field>
         <field name="model">partner.communication.job</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">partner_communication_nordic.onboarding_photo_by_post</field>
-        <field name="report_file">partner_communication_nordic.onboarding_photo_by_post</field>
-        <field name="binding_model_id" ref="partner_communication.model_partner_communication_job" />
+        <field
+      name="report_name"
+    >partner_communication_nordic.onboarding_photo_by_post</field>
+        <field
+      name="report_file"
+    >partner_communication_nordic.onboarding_photo_by_post</field>
+        <field
+      name="binding_model_id"
+      ref="partner_communication.model_partner_communication_job"
+    />
         <field name="binding_type">report</field>
         <field name="paperformat_id" ref="paperformat_photo_by_post" />
     </record>
