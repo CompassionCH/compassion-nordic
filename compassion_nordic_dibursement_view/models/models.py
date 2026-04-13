@@ -27,6 +27,7 @@ class DisbursementData(models.Model):
                 date_trunc('month', am."date")::date as month,
                 pp.id as product_id,
                 aa.id as account_id,
+                aa.code_store ->> rc.id::char as account_code,
                 sum(aml.debit) as debit,
                 sum(aml.credit) as credit,
                 sum(aml.debit - aml.credit) as amount
@@ -36,14 +37,15 @@ class DisbursementData(models.Model):
             LEFT JOIN product_product pp on pp.id = aml.product_id
             LEFT JOIN res_company rc on rc.id = am.company_id
             WHERE am.date > '2022-06-30'
-                AND aa.account_type = 'income_other'
+                AND (aa.account_type like 'income%' OR aa.account_type = 'expense')
                 AND am.state = 'posted'
                 AND (
                     (am.move_type = 'out_invoice' AND am.payment_state = 'paid')
                     OR am.move_type <> 'out_invoice'
                     )
-                AND (aa.code_store ->> rc.id::char LIKE '7%' OR aa.code_store ->> rc.id::char LIKE'3%')
-            GROUP BY rc.id, date_trunc('month', am."date"), aa.id,
+                AND (aa.code_store ->> rc.id::char LIKE '7%'
+                     OR aa.code_store ->> rc.id::char LIKE'3%')
+            GROUP BY rc.id, date_trunc('month', am."date"), aa.id, account_code,
                 pp.id
             HAVING (sum(aml.debit) > 0 OR sum(aml.credit) > 0)
             ORDER BY month)

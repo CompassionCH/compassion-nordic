@@ -6,7 +6,7 @@
     "license": "AGPL-3",
     "website": "https://github.com/CompassionCH/compassion-nordic",
     "category": "Uncategorized",
-    "version": "18.0.1.0.1",
+    "version": "18.0.1.0.2",
     "depends": ["base", "account"],
     "data": ["security/ir.model.access.csv", "views/views.xml", "security/ir.rule.xml"],
     "installable": True,
