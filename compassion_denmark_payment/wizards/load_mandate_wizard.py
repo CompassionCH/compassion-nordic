@@ -52,37 +52,29 @@ class LoadMandateWizard(models.Model):
                             beservice.TransactionCode.MANDATE_CANCELLED_BY_CREDITOR,
                         ]:
                             is_cancelled = True
-                            res = self.env["recurring.contract.group"].search(
-                                [("ref", "=", info.mandate_number)]
-                            )
-                            if not res:
-                                raise ValidationError(
-                                    _("Contract Group '%s' does not exists")
-                                    % info.mandate_number
-                                )
                             mandate = partner.valid_mandate_id
                             mandate.cancel()
                             mandate_id = mandate.id
                             # We have to set the payment mode to bank transfer again
-                            active_dd_contract = partner.sponsorship_ids.filtered(
-                                lambda a, i=info: a.state
-                                not in ("terminated", "cancelled")
-                                and a.group_id.ref == str(i.mandate_number)
+                            groups = self.env["recurring.contract.group"].search(
+                                [
+                                    ("ref", "=", info.mandate_number),
+                                    ("has_active_contracts", "=", True),
+                                ]
                             )
-                            payment_mode_id = (
-                                self.env["account.payment.mode"]
-                                .search(
-                                    [
-                                        ("payment_method_id.code", "=", "manual"),
-                                        ("company_id", "=", self.env.company.id),
-                                    ],
-                                    limit=1,
+                            if groups:
+                                payment_mode_id = (
+                                    self.env["account.payment.mode"]
+                                    .search(
+                                        [
+                                            ("payment_method_id.code", "=", "manual"),
+                                            ("company_id", "=", self.env.company.id),
+                                        ],
+                                        limit=1,
+                                    )
+                                    .id
                                 )
-                                .id
-                            )
-                            active_dd_contract.group_id.update(
-                                {"payment_mode_id": payment_mode_id}
-                            )
+                                groups.write({"payment_mode_id": payment_mode_id})
                         elif (
                             info.transaction_code
                             == beservice.TransactionCode.MANDATE_REGISTERED
@@ -90,9 +82,6 @@ class LoadMandateWizard(models.Model):
                             old_state = "None"
                             # we need to update all contract that the sponsor
                             # pays with the new mandate number received.
-                            active_dd_contract = partner.sponsorship_ids.filtered(
-                                lambda a: a.state not in ("terminated", "cancelled")
-                            )
                             payment_mode_id = (
                                 self.env["account.payment.mode"]
                                 .search(
@@ -107,7 +96,13 @@ class LoadMandateWizard(models.Model):
                                 )
                                 .id
                             )
-                            active_dd_contract.group_id.update(
+                            groups = self.env["recurring.contract.group"].search(
+                                [
+                                    ("partner_id", "=", partner.id),
+                                    ("has_active_contracts", "=", True),
+                                ]
+                            )
+                            groups.write(
                                 {
                                     "ref": info.mandate_number,
                                     "payment_mode_id": payment_mode_id,
@@ -159,3 +154,4 @@ class LoadMandateWizard(models.Model):
                         data.append(data_dict)
         self._log_results(data)
         self.unlink()
+        return True
