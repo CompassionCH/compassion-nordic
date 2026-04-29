@@ -98,11 +98,11 @@ class AccountBankStatementImportPayPalParser(models.TransientModel):
                     in_payment_move.line_ids._all_reconciled_lines()
                     .mapped("payment_id")
                     .filtered(
-                        lambda p, _li=line: p.ref == _li.reference
-                        and p.state == "posted"
+                        lambda p, _li=line: p.payment_reference == _li.reference
+                        and p.state != "canceled"
                     )
                 )
-                in_payment_move.to_check = True
+                in_payment_move.checked = False
                 in_payment_move.message_post(
                     body=_(
                         "Failed to withdraw the partner bank account. "
