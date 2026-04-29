@@ -104,6 +104,7 @@ class RecurringContract(models.Model):
                 ("state", "=", "active"),
                 ("child_id.birthdate", "like", in_two_month.strftime("%%-%m-%%")),
                 ("type", "=like", "S%"),
+                ("pricelist_id.company_id.country_id.code", "=", "SE"),
             ]
         )
         sponsorships_with_birthday_in_two_months._send_birthday_reminders()
