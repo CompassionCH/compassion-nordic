@@ -118,6 +118,7 @@ class LoadMandateWizard(models.Model):
                                         "acc_number": info.customer_number,
                                         "partner_id": partner.id,
                                         "company_id": company_id,
+                                        "allow_out_payment": True,
                                     }
                                 )
                             valid = bank_account.mandate_ids.filtered(

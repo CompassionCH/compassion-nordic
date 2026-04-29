@@ -104,6 +104,7 @@ class LoadMandateWizard(models.Model):
                                     "acc_number": transaction.kid,
                                     "partner_id": partner.id,
                                     "company_id": company_id,
+                                    "allow_out_payment": True,
                                 }
                             )
                         else:
