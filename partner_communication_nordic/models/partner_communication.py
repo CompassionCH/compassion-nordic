@@ -64,7 +64,6 @@ class PartnerCommunication(models.Model):
         )
         welcome_comms = self.filtered(
             lambda j: j.config_id == welcome_onboarding
-            and j.get_objects().filtered("is_first_sponsorship")
         )
         if welcome_comms:
             welcome_comms.get_objects().write(
