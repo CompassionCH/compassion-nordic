@@ -62,9 +62,7 @@ class PartnerCommunication(models.Model):
         welcome_onboarding = self.env.ref(
             "partner_communication_nordic.config_onboarding_sponsorship_confirmation"
         )
-        welcome_comms = self.filtered(
-            lambda j: j.config_id == welcome_onboarding
-        )
+        welcome_comms = self.filtered(lambda j: j.config_id == welcome_onboarding)
         if welcome_comms:
             welcome_comms.get_objects().write(
                 {"onboarding_start_date": datetime.today()}
