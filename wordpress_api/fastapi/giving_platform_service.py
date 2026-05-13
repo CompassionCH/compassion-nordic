@@ -112,7 +112,13 @@ class GivingPlatformService(AbstractModel):
         donation = (
             self.env["account.move"]
             .with_company(company)
-            .search([("ref", "=", str(donate_data.donation_id))], limit=1)
+            .search(
+                [
+                    ("payment_reference", "=", donate_data.payment_request_id),
+                    ("move_type", "=", "out_invoice"),
+                ],
+                limit=1,
+            )
         )
         if not donation:
             donation = (
