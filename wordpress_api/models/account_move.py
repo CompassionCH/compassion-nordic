@@ -83,5 +83,7 @@ class AccountMove(models.Model):
 
     def _notify_managers_error(self, error_message):
         user = self.env["res.config.settings"].get_param("mandate_notif_id")
-        accounting_manager = self.env["res.partner"].search([("user_ids", "=", user)])
+        accounting_manager = self.env["res.partner"].search(
+            [("user_ids", "=", user.id)]
+        )
         self.message_post(body=error_message, partner_ids=accounting_manager.ids)
