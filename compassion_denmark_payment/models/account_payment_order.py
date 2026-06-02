@@ -37,42 +37,55 @@ class AccountPaymentOrder(models.Model):
             debtor_group_number=1,
         )
 
+        # Here I probably need to create a single data_delivery.sections[0].add_payment instead of one in every loop
+        # so that I can merge the different products under a single bill
+        # Just have to check if it doesn't break other behavior, also could be good to know why this behavior changed
+
+        grouped_payments = {}
+
         for pymt_trx in self.payment_ids:
+            group_key = pymt_trx.payment_line_ids[0].move_line_id.move_id.line_ids.mapped("contract_id").group_id
+            if group_key not in grouped_payments:
+                grouped_payments[group_key] = []
+            grouped_payments[group_key].append(pymt_trx)
+
+        for contract_group in grouped_payments:
             text_lines = []
-            for line in pymt_trx.payment_line_ids:
-                for invoice_line in line.move_line_id.move_id.invoice_line_ids:
-                    child = invoice_line.contract_id.child_id
-                    str_child = ""
-                    product_name = invoice_line.product_id.with_context(
-                        lang=invoice_line.partner_id.lang
-                    ).name
-                    if child:
-                        # Build a string that looks like (BF Maria-Louisa)
-                        str_child = (
-                            f"({child.field_office_id.country_id.code + ' ' or None}"
-                            f"{child.preferred_name or None})"
+            for pymt_trx in grouped_payments[contract_group]:
+                for line in pymt_trx.payment_line_ids:
+                    for invoice_line in line.move_line_id.move_id.invoice_line_ids:
+                        child = invoice_line.contract_id.child_id
+                        str_child = ""
+                        product_name = invoice_line.product_id.with_context(
+                            lang=invoice_line.partner_id.lang
+                        ).name
+                        if child:
+                            # Build a string that looks like (BF Maria-Louisa)
+                            str_child = (
+                                f"({child.field_office_id.country_id.code + ' ' or None}"
+                                f"{child.preferred_name or None})"
+                            )
+                        text_lines.append(
+                            (
+                                invoice_line.product_id.id,
+                                f"{int(invoice_line.credit)} {product_name} " + str_child,
+                            )
                         )
-                    text_lines.append(
-                        (
-                            invoice_line.product_id.id,
-                            f"{int(invoice_line.credit)} {product_name} " + str_child,
-                        )
-                    )
             text_lines.sort(key=lambda a: a[0])
 
+            contract = grouped_payments[contract_group][0]
+
             data_delivery.sections[0].add_payment(
-                customer_number=f"{pymt_trx.partner_id.ref:15}",
-                mandate_number=pymt_trx.payment_line_ids[0]
-                .move_line_id.move_id.line_ids.mapped("contract_id")
-                .group_id.ref,
+                customer_number=f"{contract.partner_id.ref:15}",
+                mandate_number=contract_group.ref,
                 reference=(
-                    pymt_trx.payment_line_ids[0].date.strftime("%b").capitalize()
+                    contract.payment_line_ids[0].date.strftime("%b").capitalize()
                     + " "
-                    + pymt_trx.payment_line_ids[0].payment_type.capitalize()
+                    + contract.payment_line_ids[0].payment_type.capitalize()
                 )[:20],
-                amount=pymt_trx.amount,
+                amount= sum(pymt_trx.amount for pymt_trx in grouped_payments[contract_group]),
                 sign_code=beservice.SignCode.COLLECTION,
-                payment_date=pymt_trx.payment_line_ids[0].date,
+                payment_date=contract.payment_line_ids[0].date,
                 text_lines=text_lines,
             )
         return data_delivery.to_ocr().encode("iso-8859-1"), f"{self.name}.txt"
