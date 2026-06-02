@@ -37,10 +37,6 @@ class AccountPaymentOrder(models.Model):
             debtor_group_number=1,
         )
 
-        # Here I probably need to create a single data_delivery.sections[0].add_payment instead of one in every loop
-        # so that I can merge the different products under a single bill
-        # Just have to check if it doesn't break other behavior, also could be good to know why this behavior changed
-
         grouped_payments = {}
 
         for pymt_trx in self.payment_ids:
