@@ -69,19 +69,19 @@ class AccountPaymentOrder(models.Model):
                         )
             text_lines.sort(key=lambda a: a[0])
 
-            contract = transactions[0]
+            payment_date = transactions[0].payment_line_ids[0].date
 
             data_delivery.sections[0].add_payment(
-                customer_number=f"{contract.partner_id.ref:15}",
+                customer_number=f"{contract_group.partner_id.ref:15}",
                 mandate_number=contract_group.ref,
                 reference=(
-                    contract.payment_line_ids[0].date.strftime("%b").capitalize()
+                    payment_date.strftime("%b").capitalize()
                     + " "
-                    + contract.payment_line_ids[0].payment_type.capitalize()
+                    + contract_group.payment_mode_id.payment_type.capitalize()
                 )[:20],
                 amount= sum(pymt_trx.amount for pymt_trx in transactions),
                 sign_code=beservice.SignCode.COLLECTION,
-                payment_date=contract.payment_line_ids[0].date,
+                payment_date=payment_date,
                 text_lines=text_lines,
             )
         return data_delivery.to_ocr().encode("iso-8859-1"), f"{self.name}.txt"
