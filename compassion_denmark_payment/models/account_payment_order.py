@@ -40,7 +40,9 @@ class AccountPaymentOrder(models.Model):
         grouped_payment_transactions = {}
 
         for pymt_trx in self.payment_ids:
-            group_key = pymt_trx.payment_line_ids[0].move_line_id.move_id.line_ids.mapped("contract_id").group_id
+            if not pymt_trx.payment_line_ids:
+                continue
+            group_key = pymt_trx.payment_line_ids[0].move_line_id.move_id.line_ids.mapped("contract_id").group_id[:1]
             if group_key not in grouped_payment_transactions:
                 grouped_payment_transactions[group_key] = []
             grouped_payment_transactions[group_key].append(pymt_trx)
@@ -57,10 +59,10 @@ class AccountPaymentOrder(models.Model):
                         ).name
                         if child:
                             # Build a string that looks like (BF Maria-Louisa)
-                            str_child = (
-                                f"({child.field_office_id.country_id.code + ' ' or None}"
-                                f"{child.preferred_name or None})"
-                            )
+                            country_code = child.field_office_id.country_id.code
+                            pref_name = child.preferred_name
+                            if country_code or pref_name:
+                                str_child = f"({country_code + ' ' if country_code else ''}{pref_name or ''})"
                         text_lines.append(
                             (
                                 invoice_line.product_id.id,
