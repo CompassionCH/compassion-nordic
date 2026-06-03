@@ -37,17 +37,17 @@ class AccountPaymentOrder(models.Model):
             debtor_group_number=1,
         )
 
-        grouped_payments = {}
+        grouped_payment_transactions = {}
 
         for pymt_trx in self.payment_ids:
             group_key = pymt_trx.payment_line_ids[0].move_line_id.move_id.line_ids.mapped("contract_id").group_id
-            if group_key not in grouped_payments:
-                grouped_payments[group_key] = []
-            grouped_payments[group_key].append(pymt_trx)
+            if group_key not in grouped_payment_transactions:
+                grouped_payment_transactions[group_key] = []
+            grouped_payment_transactions[group_key].append(pymt_trx)
 
-        for contract_group in grouped_payments:
+        for contract_group, transactions in grouped_payment_transactions.items():
             text_lines = []
-            for pymt_trx in grouped_payments[contract_group]:
+            for pymt_trx in transactions:
                 for line in pymt_trx.payment_line_ids:
                     for invoice_line in line.move_line_id.move_id.invoice_line_ids:
                         child = invoice_line.contract_id.child_id
@@ -69,7 +69,7 @@ class AccountPaymentOrder(models.Model):
                         )
             text_lines.sort(key=lambda a: a[0])
 
-            contract = grouped_payments[contract_group][0]
+            contract = transactions[0]
 
             data_delivery.sections[0].add_payment(
                 customer_number=f"{contract.partner_id.ref:15}",
@@ -79,7 +79,7 @@ class AccountPaymentOrder(models.Model):
                     + " "
                     + contract.payment_line_ids[0].payment_type.capitalize()
                 )[:20],
-                amount= sum(pymt_trx.amount for pymt_trx in grouped_payments[contract_group]),
+                amount= sum(pymt_trx.amount for pymt_trx in transactions),
                 sign_code=beservice.SignCode.COLLECTION,
                 payment_date=contract.payment_line_ids[0].date,
                 text_lines=text_lines,
