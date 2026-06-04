@@ -43,7 +43,11 @@ class AccountPaymentOrder(models.Model):
         for pymt_trx in self.payment_ids:
             if not pymt_trx.payment_line_ids:
                 continue
-            group_key = pymt_trx.payment_line_ids[0].move_line_id.move_id.line_ids.mapped("contract_id").group_id[:1]
+            group_key = (
+                pymt_trx.payment_line_ids[0]
+                .move_line_id.move_id.line_ids.mapped("contract_id")
+                .group_id[:1]
+            )
             if group_key not in grouped_payment_transactions:
                 grouped_payment_transactions[group_key] = []
             grouped_payment_transactions[group_key].append(pymt_trx)
@@ -67,7 +71,8 @@ class AccountPaymentOrder(models.Model):
                         text_lines.append(
                             (
                                 invoice_line.product_id.id,
-                                f"{int(invoice_line.credit)} {product_name} " + str_child,
+                                f"{int(invoice_line.credit)} {product_name} "
+                                + str_child,
                             )
                         )
             text_lines.sort(key=lambda a: a[0])
@@ -82,7 +87,7 @@ class AccountPaymentOrder(models.Model):
                     + " "
                     + contract_group.payment_mode_id.payment_type.capitalize()
                 )[:20],
-                amount= sum(pymt_trx.amount for pymt_trx in transactions),
+                amount=sum(pymt_trx.amount for pymt_trx in transactions),
                 sign_code=beservice.SignCode.COLLECTION,
                 payment_date=payment_date,
                 text_lines=text_lines,
