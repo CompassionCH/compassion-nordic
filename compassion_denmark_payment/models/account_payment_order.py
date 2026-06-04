@@ -67,7 +67,10 @@ class AccountPaymentOrder(models.Model):
                             country_code = child.field_office_id.country_id.code
                             pref_name = child.preferred_name
                             if country_code or pref_name:
-                                str_child = f"({country_code + ' ' if country_code else ''}{pref_name or ''})"
+                                str_child = (
+                                    f"({country_code + ' ' if country_code else ''}"
+                                    f"{pref_name or ''})"
+                                )
                         text_lines.append(
                             (
                                 invoice_line.product_id.id,
