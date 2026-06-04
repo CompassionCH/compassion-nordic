@@ -39,6 +39,7 @@ class AccountPaymentOrder(models.Model):
 
         grouped_payment_transactions = {}
 
+        # Group payments under the same contract group
         for pymt_trx in self.payment_ids:
             if not pymt_trx.payment_line_ids:
                 continue
