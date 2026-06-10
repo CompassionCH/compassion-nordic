@@ -41,7 +41,7 @@ class AccountMove(models.Model):
                     "account_id": self.env["account.account"]
                     .search(
                         [
-                            ("code", "=", "15100"),
+                            ("code", "=", "15120"),
                             ("company_ids", "=", self.company_id.id),
                         ],
                     )
