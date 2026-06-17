@@ -43,8 +43,9 @@ class DisbursementData(models.Model):
                     (am.move_type = 'out_invoice' AND am.payment_state = 'paid')
                     OR am.move_type <> 'out_invoice'
                     )
-                AND (aa.code_store ->> rc.id::char LIKE '7%'
-                     OR aa.code_store ->> rc.id::char LIKE'3%')
+                AND (aa.code_store ->> rc.id::char IN (
+                        '74710', '74725', '74730', '74800', '74810')
+                     OR aa.code_store ->> rc.id::char LIKE '3%')
             GROUP BY rc.id, date_trunc('month', am."date"), aa.id, account_code,
                 pp.id
             HAVING (sum(aml.debit) > 0 OR sum(aml.credit) > 0)
