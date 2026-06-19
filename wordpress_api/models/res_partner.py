@@ -1,5 +1,6 @@
 from odoo import models
 
+
 class ResPartner(models.Model):
     _inherit = ["res.partner", "mail.thread.phone"]
     _name = "res.partner"
@@ -15,7 +16,8 @@ class ResPartner(models.Model):
             partner = self._match_search_field("email", email)
         if not partner:
             sanitized_phone = self._phone_format(number=phone)
-            # Fallback to given number if it cannot be sanitized
+            # Fallback to given number if it cannot be sanitized and not already
+            # in international E.164 format
             if sanitized_phone:
                 phone = sanitized_phone
             partner = self.create(
