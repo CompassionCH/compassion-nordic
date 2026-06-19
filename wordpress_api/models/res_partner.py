@@ -1,8 +1,4 @@
-from phonenumbers.phonenumberutil import NumberParseException
-
 from odoo import models
-import phonenumbers
-
 
 class ResPartner(models.Model):
     _inherit = ["res.partner", "mail.thread.phone"]
@@ -45,32 +41,3 @@ class ResPartner(models.Model):
                     body=f"Reactivated partner based on {field_name} match"
                 )
         return partner
-
-def standardise_partner_phones():
-    partners_to_update = []
-    partners = env['res.partner'].search([])
-    for partner in partners:
-        try:
-            parsed_number = phonenumbers.parse(partner.phone, None)
-            if phonenumbers.is_valid_number(parsed_number):
-                sanitized_phone = phonenumbers.format_number(parsed_number, phonenumbers.PhoneNumberFormat.E164)
-                if sanitized_phone != partner.phone:
-                    partners_to_update.append((partner, sanitized_phone))
-                continue
-        except NumberParseException as numEx:
-            try:
-                if numEx.error_type == NumberParseException.INVALID_COUNTRY_CODE and partner.country_id:
-                    parsed_number = phonenumbers.parse(partner.phone, partner.country_id.code)
-                    if phonenumbers.is_valid_number(parsed_number):
-                        sanitized_phone = phonenumbers.format_number(parsed_number, phonenumbers.PhoneNumberFormat.E164)
-                        if sanitized_phone != partner.phone:
-                            partners_to_update.append((partner, sanitized_phone))
-            except:
-                pass
-        except:
-            pass
-    partners_to_update = partners_to_update[:10]
-    for partner, standardized_phone in partners_to_update:
-        print(f"WILL FIX PARTNER {partner.id} WITH PHONE {partner.phone} TO HAVE STANDARDISED PHONE {standardized_phone}")
-        partner.with_context(tracking_disable=True).write({'phone': standardized_phone})
-    print(f"Out of  {len(partners)} | {len(partners_to_update)} will be updated\n")
