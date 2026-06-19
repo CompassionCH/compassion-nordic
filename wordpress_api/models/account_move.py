@@ -24,7 +24,6 @@ class AccountMove(models.Model):
             phone=donation_data.donor_phone,
         )
         self.partner_id = partner.id
-
         self.line_ids = [
             (
                 0,
@@ -42,7 +41,7 @@ class AccountMove(models.Model):
                     "account_id": self.env["account.account"]
                     .search(
                         [
-                            ("code", "=", "915100"), # TODO NiP : REVERT LIKE IT WAS BEFORE BEFORE PR
+                            ("code", "=", "15120"),
                             ("company_ids", "=", self.company_id.id),
                         ],
                     )
@@ -51,9 +50,7 @@ class AccountMove(models.Model):
                 },
             ),
         ]
-
         self.action_post()
-
         journal = self.env["account.journal"].search(
             [
                 ("name", "ilike", donation_data.payment_provider.value),
