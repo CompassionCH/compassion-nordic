@@ -15,6 +15,12 @@ class ResPartner(models.Model):
         if not partner and email:
             partner = self._match_search_field("email", email)
         if not partner:
+            if phone:
+                sanitized_phone = self._phone_format(number=phone)
+                # Fallback to given number if it cannot be sanitized and not already
+                # in international E.164 format
+                if sanitized_phone:
+                    phone = sanitized_phone
             partner = self.create(
                 {
                     "name": name or email or phone,
