@@ -36,10 +36,11 @@ class RecurringContract(models.Model):
         res = super().contract_waiting()
         new_sponsorships = self.filtered(lambda c: "S" in c.type and not c.is_active)
         if new_sponsorships:
-            new_sponsorships.with_delay(
+            new_sponsorships.with_delay_sh(
+                "_new_dossier",
                 channel="root.partner_communication",
                 identity_key=f"{self._name}.send_new_dossier.{new_sponsorships.ids}",
-            )._new_dossier()
+            )
         return res
 
     def _new_dossier(self):
@@ -122,15 +123,15 @@ class RecurringContract(models.Model):
             )
             send_to_correspondent = correspondent != payer and correspondent.email
             if send_to_correspondent or send_to_payer:
-                sponsorship.with_delay(
+                sponsorship.with_delay_sh(
+                    "send_communication",
+                    self.env.ref(
+                        "partner_communication_nordic.config_birthday_reminder"
+                    ).id,
+                    send_to_correspondent,
+                    send_to_payer and send_to_correspondent,
                     channel="root.partner_communication",
                     identity_key=f"{sponsorship._name}."
                     f"send_birthday_reminder.{sponsorship.id}",
                     priority=50,
-                ).send_communication(
-                    self.env.ref(
-                        "partner_communication_nordic.config_birthday_reminder"
-                    ),
-                    correspondent=send_to_correspondent,
-                    both=send_to_payer and send_to_correspondent,
                 )

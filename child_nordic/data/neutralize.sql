@@ -43,7 +43,7 @@ update ir_cron set active = false;
 update base_automation SET active=false;
 
 -- Delete queue jobs
-delete from queue_job where state != 'done';
+delete from queue_job_replacement where state != 'done';
 
 -- Delete mailchimp account
 DELETE FROM mailchimp_template;
