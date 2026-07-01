@@ -2,11 +2,8 @@
 -- ruff: noqa: E501
 
 -- Children on hold
-delete from correspondence where child_id IN (select id from compassion_child where state in ('N','I'));
-delete from sponsorship_gift where child_id IN (select id from compassion_child where state in ('N','I'));
-delete from recurring_contract where child_id IN (select id from compassion_child where state in ('N','I'));
-delete from compassion_child where state in ('N','I');
-delete from compassion_hold where state = 'active';
+UPDATE compassion_child SET state = 'R' where state in ('N','I');
+UPDATE compassion_hold SET state = 'expired' where state = 'active';
 
 -- Changing parameters
 update ir_config_parameter set value = 'https://stage.compassion.se' where key = 'web.external.url';
