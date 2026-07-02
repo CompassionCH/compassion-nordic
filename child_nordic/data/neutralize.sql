@@ -2,11 +2,8 @@
 -- ruff: noqa: E501
 
 -- Children on hold
-delete from correspondence where child_id IN (select id from compassion_child where state in ('N','I'));
-delete from sponsorship_gift where child_id IN (select id from compassion_child where state in ('N','I'));
-delete from recurring_contract where child_id IN (select id from compassion_child where state in ('N','I'));
-delete from compassion_child where state in ('N','I');
-delete from compassion_hold where state = 'active';
+UPDATE compassion_child SET state = 'R' where state in ('N','I');
+UPDATE compassion_hold SET state = 'expired' where state = 'active';
 
 -- Changing parameters
 update ir_config_parameter set value = 'https://stage.compassion.se' where key = 'web.external.url';
@@ -43,7 +40,15 @@ update ir_cron set active = false;
 update base_automation SET active=false;
 
 -- Delete queue jobs
-delete from queue_job where state != 'done';
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_tables WHERE tablename = 'queue_job') THEN
+        DELETE FROM queue_job WHERE state != 'done';
+    END IF;
+    IF EXISTS (SELECT FROM pg_tables WHERE tablename = 'queue_job_replacement') THEN
+        DELETE FROM queue_job_replacement WHERE state != 'done';
+    END IF;
+END $$;
 
 -- Delete mailchimp account
 DELETE FROM mailchimp_template;

@@ -38,10 +38,8 @@ class GivingPlatformService(AbstractModel):
         """
         # Make sure we don't lose the information received.
         json_data = donate_data.model_dump_json()
-        self.env["ir.logging"].with_delay(
-            channel="root.wordpress_api",
-            description="Log donation from Giving Platform",
-        ).create(
+        self.env["ir.logging"].with_delay_sh(
+            "create",
             {
                 "level": "info",
                 "name": "giving_platform_service.donate",
@@ -51,7 +49,9 @@ class GivingPlatformService(AbstractModel):
                 "path": __file__,
                 "func": "donate",
                 "line": inspect.currentframe().f_lineno,
-            }
+            },
+            channel="root.wordpress_api",
+            description="Log donation from Giving Platform",
         )
         if not donate_data.donor_phone and not donate_data.donor_email:
             raise HTTPException(
@@ -134,5 +134,7 @@ class GivingPlatformService(AbstractModel):
                     }
                 )
             )
-        donation.with_delay(channel="root.wordpress_api").process_donation(json_data)
+        donation.with_delay_sh(
+            "process_donation", json_data, channel="root.wordpress_api"
+        )
         return DonateResponseModel(success=True, odoo_id=donation.id)
