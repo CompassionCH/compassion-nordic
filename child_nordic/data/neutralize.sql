@@ -40,15 +40,7 @@ update ir_cron set active = false;
 update base_automation SET active=false;
 
 -- Delete queue jobs
-DO $$
-BEGIN
-    IF EXISTS (SELECT FROM pg_tables WHERE tablename = 'queue_job') THEN
-        DELETE FROM queue_job WHERE state != 'done';
-    END IF;
-    IF EXISTS (SELECT FROM pg_tables WHERE tablename = 'queue_job_replacement') THEN
-        DELETE FROM queue_job_replacement WHERE state != 'done';
-    END IF;
-END $$;
+DELETE FROM queue_job_replacement WHERE state != 'done';
 
 -- Delete mailchimp account
 DELETE FROM mailchimp_template;
