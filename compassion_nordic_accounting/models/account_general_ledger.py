@@ -1,4 +1,5 @@
 from odoo import api, models
+from odoo.tools import SQL
 
 from odoo.addons.l10n_se_sie4_export.models.account_general_ledger import (
     DATEFORMAT_SIE4,
@@ -31,42 +32,61 @@ class AccountGeneralLedger(models.AbstractModel):
 
     @api.model
     def _export_l10n_se_sie4_verification(self, options):
-        """
-        Unfortunately, the parent method cannot be patched to filter out
-        off-balance accounts, so we override it completely.
-        """
+        # Complete code copied from enterprise waiting for our fix to be merged
+        # see https://github.com/odoo/enterprise/pull/122499#event-27434439701
         sie4_verification_lines = []
-        dates = self._get_l10n_se_sie4_dates(options)
-        company_id = options["companies"][0]["id"]
-        unsupported_display_type = {"line_note", "line_section"}
-        moves = self.env["account.move"].search(
-            [
-                *self.env["account.move"]._check_company_domain(company_id),
-                ("state", "=", "posted"),
-                ("date", ">=", dates["curr_date_from"]),
-                ("date", "<=", dates["curr_date_to"]),
-            ]
+        report = self.env["account.report"].browse(options.get("report_id"))
+        company_ids = report.get_report_company_ids(options)
+        query = report._get_report_query(options, "strict_range", [])
+        account_alias = query.left_join(
+            lhs_alias="account_move_line",
+            lhs_column="account_id",
+            rhs_table="account_account",
+            rhs_column="id",
+            link="account_id",
         )
-
-        for verification_idx, move in enumerate(moves.sorted(reverse=True), start=1):
-            transactions = []
-            for line in move.line_ids:
-                if (
-                    line.display_type not in unsupported_display_type
-                    and not line.account_id.is_off_balance
-                ):
-                    transactions.append(
-                        f"    #TRANS {line.account_id.code} {{}} {line.balance}"
+        account_env = self.env["account.account"].with_context(
+            allowed_company_ids=company_ids
+        )
+        account_code = account_env._field_to_sql(account_alias, "code", query)
+        sql_query = SQL(
+            """
+            SELECT m.id                      AS move_id,
+                   m.name                    AS move_name,
+                   m.date                    AS move_date,
+                   %(account_code)s          AS account_code,
+                   account_move_line.balance AS balance
+            FROM %(table)s
+                     JOIN account_move m ON m.id = account_move_line.move_id
+            WHERE %(where_clause)s
+            ORDER BY m.date ASC, m.name ASC, m.id ASC, account_move_line.id ASC
+            """,
+            account_code=account_code,
+            table=query.from_clause,
+            where_clause=query.where_clause,
+        )
+        self.env.flush_all()
+        self.env.cr.execute(sql_query)
+        last_move_id = None
+        verification_idx = 0
+        for row in self.env.cr.dictfetchall():
+            current_move_id = row["move_id"]
+            if current_move_id != last_move_id:
+                if last_move_id is not None:
+                    sie4_verification_lines.append("}")
+                verification_idx += 1
+                move_date_str = row["move_date"].strftime(DATEFORMAT_SIE4)
+                sie4_verification_lines.extend(
+                    (
+                        f'#VER A {verification_idx} {move_date_str} '
+                        f'"{row["move_name"]}"',
+                        "{",
                     )
-
-            sie4_verification_lines.extend(
-                (
-                    f"#VER A {verification_idx} {move.date.strftime(DATEFORMAT_SIE4)} "
-                    f'"{move.name}"',
-                    "{",
-                    *transactions,
-                    "}",
                 )
+                last_move_id = current_move_id
+            sie4_verification_lines.append(
+                f'    #TRANS {row["account_code"]} {{}} {row["balance"]}'
             )
-
+        if last_move_id is not None:
+            sie4_verification_lines.append("}")
         return sie4_verification_lines
