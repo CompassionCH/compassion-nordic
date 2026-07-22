@@ -28,13 +28,15 @@
 {
     "name": "MyCompassion Nordic",
     "summary": "Nordic data & customisation for the my_compassion sponsor portal",
-    "version": "18.0.1.0.0",
+    "version": "18.0.1.1.0",
     "license": "AGPL-3",
     "author": "Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
     "category": "Website",
     "depends": ["my_compassion", "payment_adyen"],
-    "data": [],
+    "data": [
+        "data/auto_rescue_params.xml",
+    ],
     "post_init_hook": "post_init_hook",
     "installable": True,
 }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+  <record id="param_auto_rescue_enabled" model="ir.config_parameter">
+    <field name="key">my_compassion_nordic.auto_rescue_enabled</field>
+    <field name="value">True</field>
+  </record>
+  <record id="param_max_days_to_rescue" model="ir.config_parameter">
+    <field name="key">my_compassion_nordic.max_days_to_rescue</field>
+    <field name="value">21</field>
+  </record>
+</odoo>
