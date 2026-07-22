@@ -9,9 +9,12 @@
 ##############################################################################
 
 
+import logging
 from functools import reduce
 
 from odoo import api, fields, models
+
+_logger = logging.getLogger(__name__)
 
 
 class ContractGroup(models.Model):
@@ -33,6 +36,19 @@ class ContractGroup(models.Model):
             ):
                 partner_ref = group.partner_id.ref
                 reference = group.contract_ids[:1].reference
+                if not (partner_ref or "").isdigit():
+                    # The OCR number embeds the partner reference as digits.
+                    # Leave the group without one rather than fail whatever
+                    # is creating the contract; bank collection needs the
+                    # partner reference fixed first.
+                    _logger.warning(
+                        "Contract group %s: cannot generate the OCR reference,"
+                        " partner %s has a non-numeric reference %r.",
+                        group.id,
+                        group.partner_id.id,
+                        partner_ref,
+                    )
+                    continue
                 ref = f"7{int(partner_ref):05d}{int(reference[3:]):07d}"
                 check_digit = (
                     10
