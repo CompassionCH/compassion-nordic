@@ -36,6 +36,8 @@
     "depends": ["my_compassion", "payment_adyen"],
     "data": [
         "data/auto_rescue_params.xml",
+        "data/digital_fixit_communication.xml",
+        "data/portal_invitation.xml",
     ],
     "post_init_hook": "post_init_hook",
     "installable": True,

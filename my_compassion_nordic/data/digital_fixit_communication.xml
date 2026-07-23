@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+  <data noupdate="1">
+    <!-- First fix-it email. Sent right when an off-session charge fails
+         for good, with no provider-side rescue left. -->
+    <record id="mail_digital_payment_fixit_first" model="mail.template">
+      <field name="name">Digital payment fix-it (first notice)</field>
+      <field
+        name="model_id"
+        ref="partner_communication.model_partner_communication_job"
+      />
+      <field
+        name="email_from"
+      >"{{object.company_id.name}}"&lt;{{(object.company_id.email or 'noreply@mycompassion.com')}}&gt;</field>
+      <field name="email_to">{{object.partner_id.email}}</field>
+      <field name="use_default_to">True</field>
+      <field name="subject">We could not process your sponsorship payment</field>
+      <field name="body_html" type="html">
+        <div>
+          <t t-set="partner" t-value="object.partner_id" />
+          <t t-set="group" t-value="object.get_objects()[:1].group_id" />
+        </div>
+        <p>
+          <t t-out="partner.salutation" />
+        </p>
+        <p>
+    We could not collect your monthly sponsorship payment: your card was declined. It may have expired or been replaced.
+</p>
+        <p>
+    You can update your card in a minute using the secure link below. Any outstanding amount will be collected right away and your sponsorship will continue without interruption.
+</p>
+        <div style="margin:20px auto; text-align: center;">
+          <a
+            t-att-href="group._my2_update_card_url()"
+            style="padding: 12px 18px; font-size: 12px;
+     line-height: 18px; color: #FFFFFF; border-color:#0054A6; text-decoration: none; display: inline-block; margin-bottom: 0px; font-weight: 400; text-align: center; vertical-align: middle; cursor: pointer; white-space: nowrap; background-image: none; background-color: #0054A6; border: 1px solid #0054A6; border-radius:3px"
+            title=""
+          >
+        Update my card
+    </a>
+        </div>
+        <p>
+    If you have already updated your card, you can safely ignore this email.
+</p>
+        <p>
+    Thank you for your faithful support!
+</p>
+        <p>
+          <t t-out="object.user_id.signature" />
+        </p>
+      </field>
+      <field name="lang">{{object.partner_id.lang}}</field>
+    </record>
+
+    <!-- Final fix-it email. The escalation cron sends it when the invoices
+         are still unpaid after the escalation delay, together with the
+         staff activity. -->
+    <record id="mail_digital_payment_fixit_final" model="mail.template">
+      <field name="name">Digital payment fix-it (final notice)</field>
+      <field
+        name="model_id"
+        ref="partner_communication.model_partner_communication_job"
+      />
+      <field
+        name="email_from"
+      >"{{object.company_id.name}}"&lt;{{(object.company_id.email or 'noreply@mycompassion.com')}}&gt;</field>
+      <field name="email_to">{{object.partner_id.email}}</field>
+      <field name="use_default_to">True</field>
+      <field name="subject">Reminder: your sponsorship payment is still outstanding</field>
+      <field name="body_html" type="html">
+        <div>
+          <t t-set="partner" t-value="object.partner_id" />
+          <t t-set="group" t-value="object.get_objects()[:1].group_id" />
+        </div>
+        <p>
+          <t t-out="partner.salutation" />
+        </p>
+        <p>
+    Two weeks ago we let you know that your monthly sponsorship payment could not be collected. The payment is still outstanding.
+</p>
+        <p>
+    Please update your card using the secure link below - it only takes a minute, the outstanding amount is collected right away and your sponsorship continues without interruption.
+</p>
+        <div style="margin:20px auto; text-align: center;">
+          <a
+            t-att-href="group._my2_update_card_url()"
+            style="padding: 12px 18px; font-size: 12px;
+     line-height: 18px; color: #FFFFFF; border-color:#0054A6; text-decoration: none; display: inline-block; margin-bottom: 0px; font-weight: 400; text-align: center; vertical-align: middle; cursor: pointer; white-space: nowrap; background-image: none; background-color: #0054A6; border: 1px solid #0054A6; border-radius:3px"
+            title=""
+          >
+        Update my card
+    </a>
+        </div>
+        <p>
+    If we do not hear from you, one of our team members will contact you personally.
+</p>
+        <p>
+    Thank you for standing with your sponsored child!
+</p>
+        <p>
+          <t t-out="object.user_id.signature" />
+        </p>
+      </field>
+      <field name="lang">{{object.partner_id.lang}}</field>
+    </record>
+
+    <record id="config_digital_payment_fixit_first" model="partner.communication.config">
+      <field name="name">Digital Payment Fix-it 1</field>
+      <field name="send_mode">digital</field>
+      <field name="print_if_not_email">False</field>
+      <field name="email_template_id" ref="mail_digital_payment_fixit_first" />
+      <field name="model_id" ref="sponsorship_compassion.model_recurring_contract" />
+      <field
+        name="user_id"
+        search="[('groups_id.display_name', 'like', 'Accounting')]"
+      />
+    </record>
+    <record id="config_digital_payment_fixit_final" model="partner.communication.config">
+      <field name="name">Digital Payment Fix-it 2 (final)</field>
+      <field name="send_mode">digital</field>
+      <field name="print_if_not_email">False</field>
+      <field name="email_template_id" ref="mail_digital_payment_fixit_final" />
+      <field name="model_id" ref="sponsorship_compassion.model_recurring_contract" />
+      <!-- This user also owns the staff activity the escalation raises. -->
+      <field
+        name="user_id"
+        search="[('groups_id.display_name', 'like', 'Accounting')]"
+      />
+    </record>
+  </data>
+</odoo>
