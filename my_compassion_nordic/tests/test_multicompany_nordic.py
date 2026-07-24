@@ -10,9 +10,9 @@ class TestAdyenMultiCompany(DigitalSeamCase):
     charge."""
 
     def _two_sale_companies(self):
-        companies = self.env["account.journal"].search(
-            [("type", "=", "sale")]
-        ).company_id
+        companies = (
+            self.env["account.journal"].search([("type", "=", "sale")]).company_id
+        )
         self.assertGreaterEqual(
             len(companies), 2, "the database needs two companies with sale accounting"
         )
@@ -38,6 +38,10 @@ class TestAdyenMultiCompany(DigitalSeamCase):
         )
         invoice_a.line_ids.contract_id.group_id.payment_mode_id.write(
             {"payment_provider_id": adyen_a.id}
+        )
+        # the opt-in ships off, so turn it on to read the per-company context
+        self.env["ir.config_parameter"].sudo().set_param(
+            "my_compassion_nordic.auto_rescue_enabled", "True"
         )
         Group = self.env["recurring.contract.group"]
         ctx_a = Group._digital_charge_context(invoice_a)

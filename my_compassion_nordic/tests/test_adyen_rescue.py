@@ -225,11 +225,19 @@ class TestAdyenRescue(DigitalSeamCase):
         Group = self.env["recurring.contract.group"]
         params = self.env["ir.config_parameter"].sudo()
         self.assertEqual(Group._digital_charge_context(invoice), {})
-        # re-point the mode to an Adyen provider: the opt-in appears
+        # re-point the mode to an Adyen provider. With no parameter set at
+        # all there is still no opt-in: the feature stays off until Adyen
+        # enables it on the merchant account.
         adyen = self._make_adyen_provider()
         invoice.line_ids.contract_id.group_id.payment_mode_id.write(
             {"payment_provider_id": adyen.id}
         )
+        params.search(
+            [("key", "=", "my_compassion_nordic.auto_rescue_enabled")]
+        ).unlink()
+        self.assertEqual(Group._digital_charge_context(invoice), {})
+        # turning the parameter on is what opts the charges in
+        params.set_param("my_compassion_nordic.auto_rescue_enabled", "True")
         context = Group._digital_charge_context(invoice)
         self.assertEqual(context["my2_auto_rescue"]["maxDaysToRescue"], 21)
         self.assertEqual(
