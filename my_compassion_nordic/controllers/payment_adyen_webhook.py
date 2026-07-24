@@ -1,6 +1,8 @@
 import logging
 import pprint
 
+from werkzeug.exceptions import BadRequest
+
 from odoo import http
 from odoo.exceptions import ValidationError
 from odoo.http import request
@@ -21,10 +23,18 @@ class MyCompassionAdyenController(AdyenController):
         The stock pass runs first so a batch carrying both the winning
         retry's AUTHORISATION and the rescue outcome settles in order.
         """
+        try:
+            data = request.get_json_data()
+        except ValueError as e:
+            # Malformed webhook body. Reject before the stock handler indexes it.
+            raise BadRequest() from e
+        if not isinstance(data, dict) or not isinstance(
+            data.get("notificationItems"), list
+        ):
+            raise BadRequest()
         res = super().adyen_webhook()
-        data = request.get_json_data()
         for notification_item in data["notificationItems"]:
-            notification_data = notification_item["NotificationRequestItem"]
+            notification_data = notification_item.get("NotificationRequestItem") or {}
             if notification_data.get("eventCode") != "AUTORESCUE":
                 continue
             _logger.info(
