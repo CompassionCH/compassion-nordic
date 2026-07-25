@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+  <data noupdate="1">
+    <!-- Invitation to create the portal account, sent once a wizard
+         signup is confirmed. For digital payments that is the first
+         collected payment. For bank payments it is the staff validation
+         of the contract. -->
+    <record id="mail_portal_invitation" model="mail.template">
+      <field name="name">MyCompassion account invitation</field>
+      <field
+        name="model_id"
+        ref="partner_communication.model_partner_communication_job"
+      />
+      <field
+        name="email_from"
+      >"{{object.company_id.name}}"&lt;{{(object.company_id.email or 'noreply@mycompassion.com')}}&gt;</field>
+      <field name="email_to">{{object.partner_id.email}}</field>
+      <field name="use_default_to">True</field>
+      <field name="subject">Welcome! Create your MyCompassion account</field>
+      <field name="body_html" type="html">
+        <div>
+          <t t-set="partner" t-value="object.partner_id" />
+        </div>
+        <p>
+          <t t-out="partner.salutation" />
+        </p>
+        <p>
+    Thank you for becoming a sponsor! Your sponsorship is now confirmed.
+</p>
+        <p>
+    Create your personal MyCompassion account to write to your sponsored child, follow their story and manage your sponsorship online.
+</p>
+        <div style="margin:20px auto; text-align: center;">
+          <a
+            t-att-href="partner._get_signup_url()"
+            style="padding: 12px 18px; font-size: 12px;
+     line-height: 18px; color: #FFFFFF; border-color:#0054A6; text-decoration: none; display: inline-block; margin-bottom: 0px; font-weight: 400; text-align: center; vertical-align: middle; cursor: pointer; white-space: nowrap; background-image: none; background-color: #0054A6; border: 1px solid #0054A6; border-radius:3px"
+            title=""
+          >
+        Create my account
+    </a>
+        </div>
+        <p>
+    If you did not expect this, you can safely ignore this email.
+</p>
+        <p>
+    Best regards
+</p>
+        <p>
+          <t t-out="object.user_id.signature" />
+        </p>
+      </field>
+      <field name="lang">{{object.partner_id.lang}}</field>
+    </record>
+
+    <record id="config_portal_invitation" model="partner.communication.config">
+      <field name="name">MyCompassion Portal Invitation</field>
+      <field name="send_mode">digital</field>
+      <field name="print_if_not_email">False</field>
+      <field name="email_template_id" ref="mail_portal_invitation" />
+      <field name="model_id" ref="base.model_res_partner" />
+    </record>
+  </data>
+</odoo>

@@ -1,0 +1,293 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-23 11:52+0000\n"
+"PO-Revision-Date: 2026-07-23 11:52+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: nb_NO\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: my_compassion_nordic
+#: model:mail.template,body_html:my_compassion_nordic.mail_digital_payment_fixit_final
+msgid ""
+"<div>\n"
+"          <t t-set=\"partner\" t-value=\"object.partner_id\"/>\n"
+"          <t t-set=\"group\" t-value=\"object.get_objects()[:1].group_id\"/>\n"
+"        </div>\n"
+"        <p>\n"
+"          <t t-out=\"partner.salutation\"/>\n"
+"        </p>\n"
+"        <p>\n"
+"    Two weeks ago we let you know that your monthly sponsorship payment could not be collected. The payment is still outstanding.\n"
+"</p>\n"
+"        <p>\n"
+"    Please update your card using the secure link below - it only takes a minute, the outstanding amount is collected right away and your sponsorship continues without interruption.\n"
+"</p>\n"
+"        <div style=\"margin:20px auto; text-align: center;\">\n"
+"          <a t-att-href=\"group._my2_update_card_url()\" style=\"padding: 12px 18px; font-size: 12px;      line-height: 18px; color: #FFFFFF; border-color:#0054A6; text-decoration: none; display: inline-block; margin-bottom: 0px; font-weight: 400; text-align: center; vertical-align: middle; cursor: pointer; white-space: nowrap; background-image: none; background-color: #0054A6; border: 1px solid #0054A6; border-radius:3px\" title=\"\">\n"
+"        Update my card\n"
+"    </a>\n"
+"        </div>\n"
+"        <p>\n"
+"    If we do not hear from you, one of our team members will contact you personally.\n"
+"</p>\n"
+"        <p>\n"
+"    Thank you for standing with your sponsored child!\n"
+"</p>\n"
+"        <p>\n"
+"          <t t-out=\"object.user_id.signature\"/>\n"
+"        </p>\n"
+"      "
+msgstr ""
+"<div>\n"
+"          <t t-set=\"partner\" t-value=\"object.partner_id\"/>\n"
+"          <t t-set=\"group\" t-value=\"object.get_objects()[:1].group_id\"/>\n"
+"        </div>\n"
+"        <p>\n"
+"          <t t-out=\"partner.salutation\"/>\n"
+"        </p>\n"
+"        <p>\n"
+"    For to uker siden ga vi deg beskjed om at din månedlige fadderskapsbetaling ikke kunne trekkes. Betalingen er fortsatt utestående.\n"
+"</p>\n"
+"        <p>\n"
+"    Vennligst oppdater kortet ditt via den sikre lenken nedenfor - det tar bare ett minutt, det utestående beløpet trekkes med en gang, og fadderskapet ditt fortsetter uten avbrudd.\n"
+"</p>\n"
+"        <div style=\"margin:20px auto; text-align: center;\">\n"
+"          <a t-att-href=\"group._my2_update_card_url()\" style=\"padding: 12px 18px; font-size: 12px;      line-height: 18px; color: #FFFFFF; border-color:#0054A6; text-decoration: none; display: inline-block; margin-bottom: 0px; font-weight: 400; text-align: center; vertical-align: middle; cursor: pointer; white-space: nowrap; background-image: none; background-color: #0054A6; border: 1px solid #0054A6; border-radius:3px\" title=\"\">\n"
+"        Oppdater kortet mitt\n"
+"    </a>\n"
+"        </div>\n"
+"        <p>\n"
+"    Hvis vi ikke hører fra deg, vil en av våre medarbeidere kontakte deg personlig.\n"
+"</p>\n"
+"        <p>\n"
+"    Takk for at du står sammen med fadderbarnet ditt!\n"
+"</p>\n"
+"        <p>\n"
+"          <t t-out=\"object.user_id.signature\"/>\n"
+"        </p>\n"
+"      "
+
+#. module: my_compassion_nordic
+#: model:mail.template,body_html:my_compassion_nordic.mail_digital_payment_fixit_first
+msgid ""
+"<div>\n"
+"          <t t-set=\"partner\" t-value=\"object.partner_id\"/>\n"
+"          <t t-set=\"group\" t-value=\"object.get_objects()[:1].group_id\"/>\n"
+"        </div>\n"
+"        <p>\n"
+"          <t t-out=\"partner.salutation\"/>\n"
+"        </p>\n"
+"        <p>\n"
+"    We could not collect your monthly sponsorship payment: your card was declined. It may have expired or been replaced.\n"
+"</p>\n"
+"        <p>\n"
+"    You can update your card in a minute using the secure link below. Any outstanding amount will be collected right away and your sponsorship will continue without interruption.\n"
+"</p>\n"
+"        <div style=\"margin:20px auto; text-align: center;\">\n"
+"          <a t-att-href=\"group._my2_update_card_url()\" style=\"padding: 12px 18px; font-size: 12px;      line-height: 18px; color: #FFFFFF; border-color:#0054A6; text-decoration: none; display: inline-block; margin-bottom: 0px; font-weight: 400; text-align: center; vertical-align: middle; cursor: pointer; white-space: nowrap; background-image: none; background-color: #0054A6; border: 1px solid #0054A6; border-radius:3px\" title=\"\">\n"
+"        Update my card\n"
+"    </a>\n"
+"        </div>\n"
+"        <p>\n"
+"    If you have already updated your card, you can safely ignore this email.\n"
+"</p>\n"
+"        <p>\n"
+"    Thank you for your faithful support!\n"
+"</p>\n"
+"        <p>\n"
+"          <t t-out=\"object.user_id.signature\"/>\n"
+"        </p>\n"
+"      "
+msgstr ""
+"<div>\n"
+"          <t t-set=\"partner\" t-value=\"object.partner_id\"/>\n"
+"          <t t-set=\"group\" t-value=\"object.get_objects()[:1].group_id\"/>\n"
+"        </div>\n"
+"        <p>\n"
+"          <t t-out=\"partner.salutation\"/>\n"
+"        </p>\n"
+"        <p>\n"
+"    Vi kunne ikke trekke din månedlige fadderskapsbetaling: kortet ditt ble avvist. Det kan ha utløpt eller ha blitt erstattet.\n"
+"</p>\n"
+"        <p>\n"
+"    Du kan oppdatere kortet ditt på ett minutt via den sikre lenken nedenfor. Eventuelt utestående beløp trekkes med en gang, og fadderskapet ditt fortsetter uten avbrudd.\n"
+"</p>\n"
+"        <div style=\"margin:20px auto; text-align: center;\">\n"
+"          <a t-att-href=\"group._my2_update_card_url()\" style=\"padding: 12px 18px; font-size: 12px;      line-height: 18px; color: #FFFFFF; border-color:#0054A6; text-decoration: none; display: inline-block; margin-bottom: 0px; font-weight: 400; text-align: center; vertical-align: middle; cursor: pointer; white-space: nowrap; background-image: none; background-color: #0054A6; border: 1px solid #0054A6; border-radius:3px\" title=\"\">\n"
+"        Oppdater kortet mitt\n"
+"    </a>\n"
+"        </div>\n"
+"        <p>\n"
+"    Hvis du allerede har oppdatert kortet ditt, kan du se bort fra denne e-posten.\n"
+"</p>\n"
+"        <p>\n"
+"    Takk for din trofaste støtte!\n"
+"</p>\n"
+"        <p>\n"
+"          <t t-out=\"object.user_id.signature\"/>\n"
+"        </p>\n"
+"      "
+
+#. module: my_compassion_nordic
+#: model:mail.template,body_html:my_compassion_nordic.mail_portal_invitation
+msgid ""
+"<div>\n"
+"          <t t-set=\"partner\" t-value=\"object.partner_id\"/>\n"
+"        </div>\n"
+"        <p>\n"
+"          <t t-out=\"partner.salutation\"/>\n"
+"        </p>\n"
+"        <p>\n"
+"    Thank you for becoming a sponsor! Your sponsorship is now confirmed.\n"
+"</p>\n"
+"        <p>\n"
+"    Create your personal MyCompassion account to write to your sponsored child, follow their story and manage your sponsorship online.\n"
+"</p>\n"
+"        <div style=\"margin:20px auto; text-align: center;\">\n"
+"          <a t-att-href=\"partner._get_signup_url()\" style=\"padding: 12px 18px; font-size: 12px;      line-height: 18px; color: #FFFFFF; border-color:#0054A6; text-decoration: none; display: inline-block; margin-bottom: 0px; font-weight: 400; text-align: center; vertical-align: middle; cursor: pointer; white-space: nowrap; background-image: none; background-color: #0054A6; border: 1px solid #0054A6; border-radius:3px\" title=\"\">\n"
+"        Create my account\n"
+"    </a>\n"
+"        </div>\n"
+"        <p>\n"
+"    If you did not expect this, you can safely ignore this email.\n"
+"</p>\n"
+"        <p>\n"
+"    Best regards\n"
+"</p>\n"
+"        <p>\n"
+"          <t t-out=\"object.user_id.signature\"/>\n"
+"        </p>\n"
+"      "
+msgstr ""
+"<div>\n"
+"          <t t-set=\"partner\" t-value=\"object.partner_id\"/>\n"
+"        </div>\n"
+"        <p>\n"
+"          <t t-out=\"partner.salutation\"/>\n"
+"        </p>\n"
+"        <p>\n"
+"    Takk for at du har blitt fadder! Fadderskapet ditt er nå bekreftet.\n"
+"</p>\n"
+"        <p>\n"
+"    Opprett din personlige MyCompassion-konto for å skrive til fadderbarnet ditt, følge barnets historie og administrere fadderskapet ditt på nett.\n"
+"</p>\n"
+"        <div style=\"margin:20px auto; text-align: center;\">\n"
+"          <a t-att-href=\"partner._get_signup_url()\" style=\"padding: 12px 18px; font-size: 12px;      line-height: 18px; color: #FFFFFF; border-color:#0054A6; text-decoration: none; display: inline-block; margin-bottom: 0px; font-weight: 400; text-align: center; vertical-align: middle; cursor: pointer; white-space: nowrap; background-image: none; background-color: #0054A6; border: 1px solid #0054A6; border-radius:3px\" title=\"\">\n"
+"        Opprett kontoen min\n"
+"    </a>\n"
+"        </div>\n"
+"        <p>\n"
+"    Hvis du ikke ventet denne e-posten, kan du se bort fra den.\n"
+"</p>\n"
+"        <p>\n"
+"    Med vennlig hilsen\n"
+"</p>\n"
+"        <p>\n"
+"          <t t-out=\"object.user_id.signature\"/>\n"
+"        </p>\n"
+"      "
+
+#. module: my_compassion_nordic
+#: model:mail.template,subject:my_compassion_nordic.mail_digital_payment_fixit_final
+msgid "Reminder: your sponsorship payment is still outstanding"
+msgstr "Påminnelse: fadderskapsbetalingen din er fortsatt utestående"
+
+#. module: my_compassion_nordic
+#: model:mail.template,subject:my_compassion_nordic.mail_digital_payment_fixit_first
+msgid "We could not process your sponsorship payment"
+msgstr "Vi kunne ikke gjennomføre fadderskapsbetalingen din"
+
+#. module: my_compassion_nordic
+#: model:mail.template,subject:my_compassion_nordic.mail_portal_invitation
+msgid "Welcome! Create your MyCompassion account"
+msgstr "Velkommen! Opprett din MyCompassion-konto"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_payment_provider__adyen_auto_rescue_enabled
+msgid "Auto Rescue"
+msgstr "Auto Rescue"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,help:my_compassion_nordic.field_payment_transaction__my2_rescue_reference
+msgid "Adyen Auto Rescue identifier of a refused charge the provider retries on its own schedule."
+msgstr "Adyen Auto Rescue-identifikator for en avvist belastning som leverandøren prøver på nytt etter sin egen plan."
+
+#. module: my_compassion_nordic
+#: model:mail.template,name:my_compassion_nordic.mail_digital_payment_fixit_final
+msgid "Digital payment fix-it (final notice)"
+msgstr "Digital betaling ordne opp (siste varsel)"
+
+#. module: my_compassion_nordic
+#: model:mail.template,name:my_compassion_nordic.mail_digital_payment_fixit_first
+msgid "Digital payment fix-it (first notice)"
+msgstr "Digital betaling ordne opp (første varsel)"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,help:my_compassion_nordic.field_payment_provider__adyen_auto_rescue_enabled
+msgid "Let Adyen retry refused off-session charges on its own schedule. Only enable this once Adyen has switched the feature on for this merchant account."
+msgstr "La Adyen prøve avviste belastninger på nytt etter sin egen plan. Aktiver dette først når Adyen har slått på funksjonen for denne handelskontoen."
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_payment_provider__adyen_max_days_to_rescue
+msgid "Max Days To Rescue"
+msgstr "Maks antall dager for redning"
+
+#. module: my_compassion_nordic
+#: model:mail.template,name:my_compassion_nordic.mail_portal_invitation
+msgid "MyCompassion account invitation"
+msgstr "Invitasjon til MyCompassion-konto"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/payment_transaction.py:0
+msgid "No transaction found matching reference %s."
+msgstr "Ingen transaksjon funnet som samsvarer med referanse %s."
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_payment_transaction__my2_rescue_reference
+msgid "Rescue Reference"
+msgstr "Redningsreferanse"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields.selection,name:my_compassion_nordic.selection__payment_transaction__my2_rescue_state__failed
+msgid "Rescue Failed"
+msgstr "Redning mislyktes"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields.selection,name:my_compassion_nordic.selection__payment_transaction__my2_rescue_state__scheduled
+msgid "Rescue Scheduled"
+msgstr "Redning planlagt"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_payment_transaction__my2_rescue_state
+msgid "Rescue State"
+msgstr "Redningsstatus"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields.selection,name:my_compassion_nordic.selection__payment_transaction__my2_rescue_state__succeeded
+msgid "Rescue Succeeded"
+msgstr "Redning lyktes"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/payment_transaction.py:0
+msgid "The payment was refused (%s); the provider scheduled automatic retries."
+msgstr "Betalingen ble avvist (%s). Leverandøren har planlagt automatiske nye forsøk."
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/payment_transaction.py:0
+msgid "The provider gave up retrying the payment: %s"
+msgstr "Leverandøren ga opp å prøve betalingen på nytt: %s"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,help:my_compassion_nordic.field_payment_provider__adyen_max_days_to_rescue
+msgid "How long Adyen keeps retrying a refused charge before it reports a final failure."
+msgstr "Hvor lenge Adyen fortsetter å prøve en avvist belastning før et endelig mislykket resultat rapporteres."

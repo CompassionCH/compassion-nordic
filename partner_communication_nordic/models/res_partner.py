@@ -41,6 +41,15 @@ class ResPartner(models.Model):
         self.ensure_one()
         return self._get_salutation_sv_SE()
 
+    def _get_salutation_fi_FI(self):
+        self.ensure_one()
+        res = "Hei"
+        if self.firstname:
+            res += f" {self.firstname},"
+        else:
+            res += ","
+        return res
+
     @api.model_create_multi
     def create(self, vals_list):
         # Blacklist partners by default
