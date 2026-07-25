@@ -39,10 +39,29 @@ class TestAdyenMultiCompany(DigitalSeamCase):
         invoice_a.line_ids.contract_id.group_id.payment_mode_id.write(
             {"payment_provider_id": adyen_a.id}
         )
-        # the opt-in ships off, so turn it on to read the per-company context
-        self.env["ir.config_parameter"].sudo().set_param(
-            "my_compassion_nordic.auto_rescue_enabled", "True"
+        # company B collects through Adyen too, on its own merchant account.
+        # Adyen enables Auto Rescue per merchant account, so B must be able
+        # to stay out while A is in.
+        # Values here are dummy strings.
+        adyen_b = self.env["payment.provider"].create(
+            {
+                "name": "Multi Co Adyen B",
+                "code": "adyen",
+                "company_id": company_b.id,
+                "state": "test",
+                "adyen_merchant_account": "MultiCoECOMB",
+                "adyen_api_key": "multi-co-api-key-b",
+                "adyen_client_key": "multi-co-client-key-b",
+                "adyen_hmac_key": "4d554c5449434f4d554c5449434f4d56",
+                "adyen_api_url_prefix": "checkout-test",
+            }
         )
+        invoice_b.line_ids.contract_id.group_id.payment_mode_id.write(
+            {"payment_provider_id": adyen_b.id}
+        )
+        # only A's merchant account has the feature switched on
+        adyen_a.adyen_auto_rescue_enabled = True
+        self.assertFalse(adyen_b.adyen_auto_rescue_enabled)
         Group = self.env["recurring.contract.group"]
         ctx_a = Group._digital_charge_context(invoice_a)
         ctx_b = Group._digital_charge_context(invoice_b)
@@ -51,5 +70,5 @@ class TestAdyenMultiCompany(DigitalSeamCase):
         self.assertEqual(
             ctx_a["my2_auto_rescue"]["merchantOrderReference"], invoice_a.name
         )
-        # company B keeps its plain provider: no opt-in bleeds across
+        # company B runs the same provider code and is still left out
         self.assertEqual(ctx_b, {})

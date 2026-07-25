@@ -208,3 +208,86 @@ msgstr "Vi kunne ikke gennemføre din fadderskabsbetaling"
 #: model:mail.template,subject:my_compassion_nordic.mail_portal_invitation
 msgid "Welcome! Create your MyCompassion account"
 msgstr "Velkommen! Opret din MyCompassion-konto"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_payment_provider__adyen_auto_rescue_enabled
+msgid "Auto Rescue"
+msgstr "Auto Rescue"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,help:my_compassion_nordic.field_payment_transaction__my2_rescue_reference
+msgid "Adyen Auto Rescue identifier of a refused charge the provider retries on its own schedule."
+msgstr "Adyen Auto Rescue-identifikator for en afvist debitering, som udbyderen forsøger igen efter sin egen plan."
+
+#. module: my_compassion_nordic
+#: model:mail.template,name:my_compassion_nordic.mail_digital_payment_fixit_final
+msgid "Digital payment fix-it (final notice)"
+msgstr "Digital betaling ret op (sidste rykker)"
+
+#. module: my_compassion_nordic
+#: model:mail.template,name:my_compassion_nordic.mail_digital_payment_fixit_first
+msgid "Digital payment fix-it (first notice)"
+msgstr "Digital betaling ret op (første rykker)"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,help:my_compassion_nordic.field_payment_provider__adyen_auto_rescue_enabled
+msgid "Let Adyen retry refused off-session charges on its own schedule. Only enable this once Adyen has switched the feature on for this merchant account."
+msgstr "Lad Adyen forsøge afviste debiteringer igen efter sin egen plan. Aktivér først dette, når Adyen har slået funktionen til for denne forretningskonto."
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_payment_provider__adyen_max_days_to_rescue
+msgid "Max Days To Rescue"
+msgstr "Maks antal dage til redning"
+
+#. module: my_compassion_nordic
+#: model:mail.template,name:my_compassion_nordic.mail_portal_invitation
+msgid "MyCompassion account invitation"
+msgstr "Invitation til MyCompassion-konto"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/payment_transaction.py:0
+msgid "No transaction found matching reference %s."
+msgstr "Ingen transaktion fundet der matcher reference %s."
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_payment_transaction__my2_rescue_reference
+msgid "Rescue Reference"
+msgstr "Redningsreference"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields.selection,name:my_compassion_nordic.selection__payment_transaction__my2_rescue_state__failed
+msgid "Rescue Failed"
+msgstr "Redning mislykkedes"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields.selection,name:my_compassion_nordic.selection__payment_transaction__my2_rescue_state__scheduled
+msgid "Rescue Scheduled"
+msgstr "Redning planlagt"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_payment_transaction__my2_rescue_state
+msgid "Rescue State"
+msgstr "Redningsstatus"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields.selection,name:my_compassion_nordic.selection__payment_transaction__my2_rescue_state__succeeded
+msgid "Rescue Succeeded"
+msgstr "Redning lykkedes"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/payment_transaction.py:0
+msgid "The payment was refused (%s); the provider scheduled automatic retries."
+msgstr "Betalingen blev afvist (%s). Udbyderen har planlagt automatiske nye forsøg."
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/payment_transaction.py:0
+msgid "The provider gave up retrying the payment: %s"
+msgstr "Udbyderen opgav at forsøge betalingen igen: %s"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,help:my_compassion_nordic.field_payment_provider__adyen_max_days_to_rescue
+msgid "How long Adyen keeps retrying a refused charge before it reports a final failure."
+msgstr "Hvor længe Adyen bliver ved med at forsøge en afvist debitering, før et endeligt mislykket resultat rapporteres."

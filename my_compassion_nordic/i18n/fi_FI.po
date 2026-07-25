@@ -208,3 +208,86 @@ msgstr "Emme voineet käsitellä kummiusmaksuasi"
 #: model:mail.template,subject:my_compassion_nordic.mail_portal_invitation
 msgid "Welcome! Create your MyCompassion account"
 msgstr "Tervetuloa! Luo MyCompassion-tilisi"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_payment_provider__adyen_auto_rescue_enabled
+msgid "Auto Rescue"
+msgstr "Auto Rescue"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,help:my_compassion_nordic.field_payment_transaction__my2_rescue_reference
+msgid "Adyen Auto Rescue identifier of a refused charge the provider retries on its own schedule."
+msgstr "Adyen Auto Rescue -tunniste hylätylle veloitukselle, jota palveluntarjoaja yrittää uudelleen omassa aikataulussaan."
+
+#. module: my_compassion_nordic
+#: model:mail.template,name:my_compassion_nordic.mail_digital_payment_fixit_final
+msgid "Digital payment fix-it (final notice)"
+msgstr "Digitaalinen maksu korjaa (viimeinen muistutus)"
+
+#. module: my_compassion_nordic
+#: model:mail.template,name:my_compassion_nordic.mail_digital_payment_fixit_first
+msgid "Digital payment fix-it (first notice)"
+msgstr "Digitaalinen maksu korjaa (ensimmäinen muistutus)"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,help:my_compassion_nordic.field_payment_provider__adyen_auto_rescue_enabled
+msgid "Let Adyen retry refused off-session charges on its own schedule. Only enable this once Adyen has switched the feature on for this merchant account."
+msgstr "Anna Adyenin yrittää hylättyjä veloituksia uudelleen omassa aikataulussaan. Ota tämä käyttöön vasta kun Adyen on kytkenyt ominaisuuden päälle tälle kauppiastilille."
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_payment_provider__adyen_max_days_to_rescue
+msgid "Max Days To Rescue"
+msgstr "Enimmäispäivät pelastukseen"
+
+#. module: my_compassion_nordic
+#: model:mail.template,name:my_compassion_nordic.mail_portal_invitation
+msgid "MyCompassion account invitation"
+msgstr "Kutsu MyCompassion-tilille"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/payment_transaction.py:0
+msgid "No transaction found matching reference %s."
+msgstr "Viitettä %s vastaavaa tapahtumaa ei löytynyt."
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_payment_transaction__my2_rescue_reference
+msgid "Rescue Reference"
+msgstr "Pelastusviite"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields.selection,name:my_compassion_nordic.selection__payment_transaction__my2_rescue_state__failed
+msgid "Rescue Failed"
+msgstr "Pelastus epäonnistui"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields.selection,name:my_compassion_nordic.selection__payment_transaction__my2_rescue_state__scheduled
+msgid "Rescue Scheduled"
+msgstr "Pelastus ajoitettu"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_payment_transaction__my2_rescue_state
+msgid "Rescue State"
+msgstr "Pelastuksen tila"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields.selection,name:my_compassion_nordic.selection__payment_transaction__my2_rescue_state__succeeded
+msgid "Rescue Succeeded"
+msgstr "Pelastus onnistui"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/payment_transaction.py:0
+msgid "The payment was refused (%s); the provider scheduled automatic retries."
+msgstr "Maksu hylättiin (%s). Palveluntarjoaja on ajoittanut automaattiset uudelleenyritykset."
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/payment_transaction.py:0
+msgid "The provider gave up retrying the payment: %s"
+msgstr "Palveluntarjoaja luopui maksun uudelleenyrittämisestä: %s"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,help:my_compassion_nordic.field_payment_provider__adyen_max_days_to_rescue
+msgid "How long Adyen keeps retrying a refused charge before it reports a final failure."
+msgstr "Kuinka kauan Adyen jatkaa hylätyn veloituksen yrittämistä ennen kuin se ilmoittaa lopullisesta epäonnistumisesta."

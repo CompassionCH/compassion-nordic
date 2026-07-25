@@ -223,28 +223,27 @@ class TestAdyenRescue(DigitalSeamCase):
         # the chargeable fixture uses a non-Adyen provider: no opt-in
         _contract, invoice, _token = self._make_chargeable_invoice()
         Group = self.env["recurring.contract.group"]
-        params = self.env["ir.config_parameter"].sudo()
         self.assertEqual(Group._digital_charge_context(invoice), {})
-        # re-point the mode to an Adyen provider. With no parameter set at
-        # all there is still no opt-in: the feature stays off until Adyen
-        # enables it on the merchant account.
+        # re-point the mode to an Adyen provider. A fresh provider ships
+        # with the opt-in off, so the feature stays off until Adyen enables
+        # it on the merchant account.
         adyen = self._make_adyen_provider()
         invoice.line_ids.contract_id.group_id.payment_mode_id.write(
             {"payment_provider_id": adyen.id}
         )
-        params.search(
-            [("key", "=", "my_compassion_nordic.auto_rescue_enabled")]
-        ).unlink()
+        self.assertFalse(adyen.adyen_auto_rescue_enabled)
         self.assertEqual(Group._digital_charge_context(invoice), {})
-        # turning the parameter on is what opts the charges in
-        params.set_param("my_compassion_nordic.auto_rescue_enabled", "True")
+        # ticking the box on the provider is what opts its charges in
+        adyen.adyen_auto_rescue_enabled = True
         context = Group._digital_charge_context(invoice)
         self.assertEqual(context["my2_auto_rescue"]["maxDaysToRescue"], 21)
         self.assertEqual(
             context["my2_auto_rescue"]["merchantOrderReference"], invoice.name
         )
-        params.set_param("my_compassion_nordic.max_days_to_rescue", "10")
+        adyen.adyen_max_days_to_rescue = 10
         context = Group._digital_charge_context(invoice)
         self.assertEqual(context["my2_auto_rescue"]["maxDaysToRescue"], 10)
-        params.set_param("my_compassion_nordic.auto_rescue_enabled", "False")
+        # the pending sweeper waits out the whole rescue window plus grace
+        self.assertEqual(Group._my2_pending_charge_timeout_days(adyen), 17)
+        adyen.adyen_auto_rescue_enabled = False
         self.assertEqual(Group._digital_charge_context(invoice), {})

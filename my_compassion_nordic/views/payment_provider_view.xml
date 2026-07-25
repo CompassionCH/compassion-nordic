@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+  <record id="payment_provider_form_auto_rescue" model="ir.ui.view">
+    <field name="name">payment.provider.form.auto.rescue</field>
+    <field name="model">payment.provider</field>
+    <field name="inherit_id" ref="payment.payment_provider_form" />
+    <field name="arch" type="xml">
+      <xpath expr="//page[@name='configuration']" position="inside">
+        <group
+          string="Auto Rescue"
+          name="my2_auto_rescue"
+          invisible="code != 'adyen'"
+        >
+          <field name="adyen_auto_rescue_enabled" />
+          <field
+            name="adyen_max_days_to_rescue"
+            invisible="not adyen_auto_rescue_enabled"
+          />
+        </group>
+      </xpath>
+    </field>
+  </record>
+</odoo>

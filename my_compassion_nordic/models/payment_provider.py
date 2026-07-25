@@ -1,8 +1,21 @@
-from odoo import models
+from odoo import fields, models
 
 
 class PaymentProvider(models.Model):
     _inherit = "payment.provider"
+
+    adyen_auto_rescue_enabled = fields.Boolean(
+        string="Auto Rescue",
+        help="Let Adyen retry refused off-session charges on its own"
+        " schedule. Only enable this once Adyen has switched the feature on"
+        " for this merchant account.",
+    )
+    adyen_max_days_to_rescue = fields.Integer(
+        string="Max Days To Rescue",
+        default=21,
+        help="How long Adyen keeps retrying a refused charge before it"
+        " reports a final failure.",
+    )
 
     def _adyen_make_request(
         self, endpoint, endpoint_param=None, payload=None, method="POST",
@@ -11,14 +24,16 @@ class PaymentProvider(models.Model):
         """Opt a payment request into Adyen Auto Rescue.
 
         The off-session charge engine delegates retries of refused charges
-        to Adyen (no Odoo-side retry schedule exists). It signals this with
-        the ``my2_auto_rescue`` context key; any other caller of the Adyen
-        API - checkout drop-in, donations, refunds - is unaffected.
+        to Adyen. No Odoo-side retry schedule exists. It signals this with
+        the ``my2_auto_rescue`` context key. Any other caller of the Adyen
+        API is unaffected. That covers the checkout drop-in, donations and
+        refunds.
         """
         rescue = self.env.context.get("my2_auto_rescue")
         if rescue and endpoint == "/payments" and payload is not None:
-            # autoRescue/maxDaysToRescue are additionalData entries (string
-            # values); the Checkout API rejects them as top-level fields
+            # autoRescue and maxDaysToRescue are additionalData entries with
+            # string values. The Checkout API rejects them as top-level
+            # fields.
             payload = {
                 **payload,
                 "additionalData": {
