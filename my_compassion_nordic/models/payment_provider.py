@@ -1,8 +1,26 @@
-from odoo import fields, models
+from odoo import api, fields, models
+
+from ..hooks import DIGITAL_MODE_NAMES, _ensure_digital_modes
 
 
 class PaymentProvider(models.Model):
     _inherit = "payment.provider"
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Give a new digital provider its payment mode right away.
+
+        Countries add their provider records after module install, usually
+        by duplicating one in the UI. Without this the mode would only
+        appear on the next module upgrade. The pass runs as superuser and
+        only on the new records, a provider admin does not always hold the
+        accounting rights that payment mode creation requires.
+        """
+        providers = super().create(vals_list)
+        digital = providers.filtered(lambda p: p.code in DIGITAL_MODE_NAMES)
+        if digital:
+            _ensure_digital_modes(self.env(su=True), digital.sudo())
+        return providers
 
     adyen_auto_rescue_enabled = fields.Boolean(
         string="Auto Rescue",
@@ -18,7 +36,11 @@ class PaymentProvider(models.Model):
     )
 
     def _adyen_make_request(
-        self, endpoint, endpoint_param=None, payload=None, method="POST",
+        self,
+        endpoint,
+        endpoint_param=None,
+        payload=None,
+        method="POST",
         idempotency_key=None,
     ):
         """Opt a payment request into Adyen Auto Rescue.
