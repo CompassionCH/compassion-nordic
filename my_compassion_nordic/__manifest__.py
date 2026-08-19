@@ -28,7 +28,7 @@
 {
     "name": "MyCompassion Nordic",
     "summary": "Nordic data & customisation for the my_compassion sponsor portal",
-    "version": "18.0.1.0.0",
+    "version": "18.0.1.1.0",
     "license": "AGPL-3",
     "author": "Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
@@ -36,6 +36,7 @@
     "depends": [
         "my_compassion",
         "payment_adyen",
+        "payment_stripe",
         "partner_communication",
         "sponsorship_compassion",
     ],

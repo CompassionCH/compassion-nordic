@@ -1,6 +1,23 @@
+##############################################################################
+#
+#    Copyright (C) 2026 Compassion CH (http://www.compassion.ch)
+#    @author: Noé Berdoz <nberdoz@compassion.ch>
+#
+#    The licence is in the file __manifest__.py
+#
+##############################################################################
+"""Adyen Auto Rescue hooks of the off-session charge engine.
+
+Everything in this file is Adyen-specific despite the generic model name.
+It opts eligible charges into provider-side retries and stretches the
+pending timeout to Adyen's rescue window. Charges through any other
+provider, Stripe included, fall through every branch untouched and use
+the base engine's dunning flow instead.
+"""
+
 from odoo import api, models
 
-from ..hooks import PROVIDER_CODE
+from ..hooks import ADYEN_CODE
 
 
 class ContractGroup(models.Model):
@@ -18,7 +35,7 @@ class ContractGroup(models.Model):
         provider = (
             invoice.line_ids.contract_id.group_id.payment_mode_id.payment_provider_id
         )
-        if provider.code != PROVIDER_CODE or not provider.adyen_auto_rescue_enabled:
+        if provider.code != ADYEN_CODE or not provider.adyen_auto_rescue_enabled:
             return context
         return {
             **context,
@@ -34,6 +51,6 @@ class ContractGroup(models.Model):
 
         The extra days cover a late webhook.
         """
-        if provider.code == PROVIDER_CODE and provider.adyen_auto_rescue_enabled:
+        if provider.code == ADYEN_CODE and provider.adyen_auto_rescue_enabled:
             return provider.adyen_max_days_to_rescue + 7
         return super()._my2_pending_charge_timeout_days(provider)
