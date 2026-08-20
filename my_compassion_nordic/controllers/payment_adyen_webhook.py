@@ -42,9 +42,11 @@ class MyCompassionAdyenController(AdyenController):
                 pprint.pformat(notification_data),
             )
             try:
-                tx_sudo = request.env[
-                    "payment.transaction"
-                ].sudo()._get_tx_from_notification_data("adyen", notification_data)
+                tx_sudo = (
+                    request.env["payment.transaction"]
+                    .sudo()
+                    ._get_tx_from_notification_data("adyen", notification_data)
+                )
             except ValidationError:
                 _logger.warning(
                     "unable to find the transaction of the rescue outcome;"
@@ -56,7 +58,6 @@ class MyCompassionAdyenController(AdyenController):
                 tx_sudo._my2_process_autorescue(notification_data)
             except ValidationError:
                 _logger.exception(
-                    "unable to process the rescue outcome;"
-                    " skipping to acknowledge"
+                    "unable to process the rescue outcome;" " skipping to acknowledge"
                 )
         return res

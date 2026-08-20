@@ -47,9 +47,7 @@ class PaymentTransaction(models.Model):
                     + _("No transaction found matching reference %s.", reference)
                 )
             return tx
-        return super()._get_tx_from_notification_data(
-            provider_code, notification_data
-        )
+        return super()._get_tx_from_notification_data(provider_code, notification_data)
 
     def _my2_process_autorescue(self, notification_data):
         """Settle a charge from the terminal outcome of the provider's
@@ -80,9 +78,7 @@ class PaymentTransaction(models.Model):
                         " payment post-processing cron will retry it.",
                         self.reference,
                     )
-                    self.env.ref(
-                        "payment.cron_post_process_payment_tx"
-                    )._trigger()
+                    self.env.ref("payment.cron_post_process_payment_tx")._trigger()
         elif self.my2_rescue_state == "failed":
             # webhooks are delivered at least once: this failure is
             # already settled, a duplicate must not re-trigger dunning
@@ -96,13 +92,9 @@ class PaymentTransaction(models.Model):
         else:
             reason = notification_data.get("reason") or ""
             self.my2_rescue_state = "failed"
-            self._set_error(
-                _("The provider gave up retrying the payment: %s", reason)
-            )
+            self._set_error(_("The provider gave up retrying the payment: %s", reason))
             for invoice in self.invoice_ids:
-                invoice.line_ids.contract_id._on_digital_charge_failed(
-                    invoice, reason
-                )
+                invoice.line_ids.contract_id._on_digital_charge_failed(invoice, reason)
 
     def _process_notification_data(self, notification_data):
         """Keep refused-but-rescued Adyen charges alive.
@@ -113,9 +105,10 @@ class PaymentTransaction(models.Model):
         it stays pending, holding the one-charge-per-invoice guard closed,
         until the terminal AUTORESCUE webhook settles the case.
         """
-        if self.provider_code == "adyen" and notification_data.get(
-            "resultCode"
-        ) == "Refused":
+        if (
+            self.provider_code == "adyen"
+            and notification_data.get("resultCode") == "Refused"
+        ):
             additional_data = notification_data.get("additionalData") or {}
             rescue_scheduled = (
                 str(additional_data.get("retry.rescueScheduled")).lower() == "true"
