@@ -29,7 +29,7 @@
 # pylint: disable=C8101
 {
     "name": "Compassion Nordic Wordpress API",
-    "version": "18.0.1.0.1",
+    "version": "18.0.1.0.2",
     "category": "Other",
     "author": "Compassion CH",
     "license": "AGPL-3",
@@ -37,7 +37,7 @@
     "depends": [
         "child_nordic",
         "compassion_nordic_accounting",
-        "sbc_compassion",  # compassion-modules
+        "my_compassion",  # compassion-website
         "thankyou_letters",
         "account_offbalance_sponsorship",  # compassion-accounting
         "fastapi",  # OCA/rest-framework

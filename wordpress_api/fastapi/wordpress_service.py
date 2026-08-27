@@ -41,6 +41,8 @@ class WordpressService(AbstractModel):
                 ("hold_channel", "=", "web"),
                 ("hold_type", "=", HoldType.E_COMMERCE_HOLD.value),
                 ("hold_expiration", ">=", fields.Datetime.now()),
+                ("website_reservation_id", "=", False),
+                ("is_published", "=", True),
             ]
         )
         children = (
@@ -52,6 +54,8 @@ class WordpressService(AbstractModel):
                     ("hold_channel", "=", "web"),
                     ("hold_type", "=", HoldType.E_COMMERCE_HOLD.value),
                     ("hold_expiration", ">=", fields.Datetime.now()),
+                    ("website_reservation_id", "=", False),
+                    ("is_published", "=", True),
                 ],
                 limit=limit,
                 offset=offset,
