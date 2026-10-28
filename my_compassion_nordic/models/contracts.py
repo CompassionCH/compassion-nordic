@@ -92,8 +92,8 @@ class RecurringContract(models.Model):
         - The payer still carries the placeholder (Stripe sent no name): the
           form's name is the payer's, as on every other site.
         - The form keeps the payer's name (_same_person): written on the
-          payer, which corrects a split, a missing surname or the accents a
-          card name lacks.
+          payer, which corrects a split, the accents a card name lacks, or a
+          card name of a single word.
         - Another name: that person becomes the contract's correspondent,
           with the phone number. The payer keeps their name and gets only
           the identity number, and sees the sponsorship in their portal with
@@ -149,15 +149,19 @@ class RecurringContract(models.Model):
         sponsorship = self.sudo()
         letter_writer = self.env["res.partner"].sudo().browse(letter_writer_id)
         if not sponsorship.gmc_commitment_id and not letter_writer.global_id:
-            letter_writer.upsert_constituent().process_messages()
+            messages = letter_writer.upsert_constituent()
+            messages.process_messages()
             if not letter_writer.global_id:
                 raise UserError(
                     _(
                         "GMC did not register %(letter_writer)s, the letter writer"
                         " of sponsorship %(sponsorship)s: they are not its"
-                        " correspondent yet.",
+                        " correspondent yet. %(reason)s",
                         letter_writer=letter_writer.display_name,
                         sponsorship=sponsorship.display_name,
+                        reason="; ".join(
+                            filter(None, messages.mapped("failure_reason"))
+                        ),
                     )
                 )
         sponsorship.correspondent_id = letter_writer
@@ -189,37 +193,42 @@ class RecurringContract(models.Model):
         )
 
 
-# Letters a card name spells without their diacritic and NFKD cannot split.
-_PLAIN_LETTERS = str.maketrans({"ø": "o", "æ": "ae", "ß": "ss"})
+# Letters NFKD cannot split from their diacritic.
+_PLAIN_LETTERS = str.maketrans({"ø": "o", "æ": "ae", "ß": "ss", "-": " "})
+# How a card spells the Nordic letters it lacks: Sørensen as SOERENSEN,
+# Åsa as AASA, Ærø as AEROE. Folded on both sides, so either spelling of a
+# name compares equal.
+_DIGRAPHS = (("aa", "a"), ("ae", "a"), ("oe", "o"), ("ue", "u"))
 
 
 def _name_words(firstname, lastname):
-    """A name's words, compared without case, spacing or diacritics."""
+    """A name's words, compared without case, spacing, hyphens or
+    diacritics, and with the card spellings of Nordic letters folded."""
     name = f"{firstname or ''} {lastname or ''}".casefold().translate(_PLAIN_LETTERS)
     plain = "".join(
         char
         for char in unicodedata.normalize("NFKD", name)
         if not unicodedata.combining(char)
     )
+    for digraph, letter in _DIGRAPHS:
+        plain = plain.replace(digraph, letter)
     return plain.split()
 
 
 def _same_person(payer_firstname, payer_lastname, firstname, lastname):
     """Whether the name typed on the details form is the payer's own.
 
-    Every word of the payer's name is in it, in any order and possibly with
-    more: a card name is often only part of the name (no surname, no middle
-    name), and the sponsor completing it or splitting it differently is not
-    naming someone else. Anything else is another person, as the form asks
-    for.
+    The same words, in any order, so a different split or restored accents
+    are the same person. Beyond that, only a card name of a single word may
+    be completed, and only when it stays the first name ("Pekka" ->
+    "Pekka Virtanen"): a longer name that merely contains the payer's
+    ("Johan Svensson" -> "Karl Johan Svensson") is as likely a son or a
+    namesake, whom the form asks to be entered as the letter writer.
     """
     payer_words = _name_words(payer_firstname, payer_lastname)
     words = _name_words(firstname, lastname)
     if not payer_words or not words:
         return False
-    remaining = list(words)
-    for word in payer_words:
-        if word not in remaining:
-            return False
-        remaining.remove(word)
-    return True
+    if sorted(payer_words) == sorted(words):
+        return True
+    return len(payer_words) == 1 and words[0] == payer_words[0]

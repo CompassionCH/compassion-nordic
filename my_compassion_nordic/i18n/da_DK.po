@@ -413,16 +413,6 @@ msgstr ""
 "personnummer."
 
 #. module: my_compassion_nordic
-#. odoo-python
-#: code:addons/my_compassion_nordic/models/contracts.py:0
-msgid ""
-"GMC did not register %(letter_writer)s, the letter writer of sponsorship "
-"%(sponsorship)s: they are not its correspondent yet."
-msgstr ""
-"GMC registrerede ikke %(letter_writer)s, brevskriveren for sponsoratet "
-"%(sponsorship)s: vedkommende er endnu ikke korrespondent."
-
-#. module: my_compassion_nordic
 #: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
 msgid ""
 "Optional, and always the payer's own number, even when someone else writes "
@@ -458,3 +448,13 @@ msgstr ""
 "brevene. Vi bruger det kun til at indberette din gave til Skatteverket, så "
 "du får dit skattefradrag. Når vi har det, indberettes gaven automatisk, og "
 "det kan ikke fravælges."
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/contracts.py:0
+msgid ""
+"GMC did not register %(letter_writer)s, the letter writer of sponsorship "
+"%(sponsorship)s: they are not its correspondent yet. %(reason)s"
+msgstr ""
+"GMC registrerede ikke %(letter_writer)s, brevskriveren for sponsoratet "
+"%(sponsorship)s: vedkommende er endnu ikke korrespondent. %(reason)s"

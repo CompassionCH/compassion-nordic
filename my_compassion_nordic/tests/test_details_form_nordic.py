@@ -189,6 +189,41 @@ class TestDetailsFormNordic(HttpCase, DigitalSeamCase):
         self.assertFalse(self.env["res.partner"].search([]) - partners_before)
         self.assertEqual(self.signup.correspondent_id, self.payer)
 
+    def test_a_namesake_is_the_letter_writer(self):
+        """A son carrying his father's name is not the father: the longer
+        name only completes a card name of a single word."""
+        self._name_from_stripe("Johan", "Svensson")
+        partners_before = self.env["res.partner"].search([])
+
+        self._submit(firstname="Karl Johan", lastname="Svensson")
+
+        self.assertEqual(
+            (self.payer.firstname, self.payer.lastname), ("Johan", "Svensson")
+        )
+        letter_writer = self.env["res.partner"].search([]) - partners_before
+        self.assertEqual(letter_writer.name, "Karl Johan Svensson")
+
+    def test_card_spellings_are_the_same_person(self):
+        for stripe, typed in (
+            (("JENS", "SOERENSEN"), ("Jens", "Sørensen")),
+            (("Anna-Karin", "Berg"), ("Anna Karin", "Berg")),
+        ):
+            with self.subTest(typed=typed):
+                self.payer.write(
+                    {
+                        "firstname": False,
+                        "lastname": self.env["res.partner"].MY2_PLACEHOLDER_NAME,
+                        "my2_name_placeholder": True,
+                    }
+                )
+                self.signup.my2_details_awaited_partner = self.payer.id
+                self._name_from_stripe(*stripe)
+
+                self._submit(firstname=typed[0], lastname=typed[1])
+
+                self.assertEqual((self.payer.firstname, self.payer.lastname), typed)
+                self.assertEqual(self.signup.correspondent_id, self.payer)
+
     def test_restoring_the_accents_is_the_same_person(self):
         self._name_from_stripe("ASA", "OSTERGAARD")
 
