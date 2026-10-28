@@ -85,13 +85,19 @@ paymentForm.include({
       return;
     }
     const createElements = this.stripeJS.elements.bind(this.stripeJS);
-    this.stripeJS.elements = (elementsOptions) => {
-      const elements = createElements(elementsOptions);
-      const create = elements.create.bind(elements);
-      elements.create = (type, options) =>
-        create(type, type === "payment" ? withBillingName(options) : options);
-      return elements;
-    };
+    // Stripe.js exposes elements as a getter without a setter: assigning
+    // it throws, so the property is redefined on the instance instead.
+    Object.defineProperty(this.stripeJS, "elements", {
+      configurable: true,
+      writable: true,
+      value: (elementsOptions) => {
+        const elements = createElements(elementsOptions);
+        const create = elements.create.bind(elements);
+        elements.create = (type, options) =>
+          create(type, type === "payment" ? withBillingName(options) : options);
+        return elements;
+      },
+    });
     this.stripeJS.my2AsksBillingName = true;
   },
 });
