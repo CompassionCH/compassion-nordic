@@ -12,14 +12,23 @@ import paymentForm from "@payment/js/payment_form";
  * @returns {Object}
  */
 function withBillingName(options = {}) {
+  // The billing details may also be the string "auto" or "never" for every
+  // field: only an object form has per-field settings to keep.
+  const billingDetails = options.fields?.billingDetails;
   return {
     ...options,
     fields: {
       ...options.fields,
-      billingDetails: { ...options.fields?.billingDetails, name: "always" },
+      billingDetails: {
+        ...(typeof billingDetails === "object" ? billingDetails : {}),
+        name: "always",
+      },
     },
   };
 }
+
+// Stripe instances whose elements factory already adds the name field.
+const stripeInstancesAskingName = new WeakSet();
 
 paymentForm.include({
   /**
@@ -57,7 +66,10 @@ paymentForm.include({
 
   /**
    * Wrap the Stripe instance core is about to use, once, when the
-   * selected option's inline form asks for the payer's name.
+   * selected option's inline form asks for the payer's name. The wrapper
+   * then serves every later Elements group of that instance, which is
+   * right because the flag depends on the partner, the same for every
+   * option of the page.
    *
    * @private
    * @returns {void}
@@ -81,12 +93,12 @@ paymentForm.include({
       values.publishable_key,
       new StripeOptions()._prepareStripeOptions(container.dataset),
     );
-    if (this.stripeJS.my2AsksBillingName) {
+    if (stripeInstancesAskingName.has(this.stripeJS)) {
       return;
     }
     const createElements = this.stripeJS.elements.bind(this.stripeJS);
-    // Stripe.js exposes elements as a getter without a setter: assigning
-    // it throws, so the property is redefined on the instance instead.
+    // Stripe.js exposes elements as a getter without a setter, so the
+    // wrapper is defined as an own data property.
     Object.defineProperty(this.stripeJS, "elements", {
       configurable: true,
       writable: true,
@@ -98,6 +110,6 @@ paymentForm.include({
         return elements;
       },
     });
-    this.stripeJS.my2AsksBillingName = true;
+    stripeInstancesAskingName.add(this.stripeJS);
   },
 });
