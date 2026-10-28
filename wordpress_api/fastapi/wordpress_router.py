@@ -9,6 +9,7 @@ from odoo.addons.fastapi.dependencies import odoo_env
 from odoo.addons.sponsorship_compassion.models.res_partner import ResPartner
 
 from .wordpress_pydantic_models import (
+    ChildAvailabilityModel,
     LetterPostModel,
     PeterChildListModel,
     SupporterInfoModel,
@@ -116,6 +117,27 @@ def get_consigned_children(
     """
     lang = LANG_MAPPING.get(language_code.value, "en_US")
     return env["wordpress.service"].get_consigned_children(lang, limit, offset)
+
+
+# ruff: noqa: B008
+@router.get("/consignment/{global_id}", dependencies=[Depends(_validate_api_key)])
+def get_child_availability(
+    global_id: Annotated[
+        str,
+        Path(
+            description="The unique identifier for the child. "
+            "This ID is obtained from the `key` field for each child object returned "
+            "by the `GET /consignment` endpoint."
+        ),
+    ],
+    env: odoo_env = Depends(odoo_env),
+) -> ChildAvailabilityModel:
+    """
+    ### Checks the availability of a single child.
+    Returns `available` (can be sponsored), `reserved` (reserved on MyCompassion),
+    `sponsored` (no longer available) or `not_found`.
+    """
+    return env["wordpress.service"].get_child_availability(global_id)
 
 
 # ruff: noqa: B008

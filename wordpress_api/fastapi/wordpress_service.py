@@ -13,6 +13,8 @@ from odoo.addons.sponsorship_compassion.models.res_partner import ResPartner
 from .wordpress_pydantic_models import (
     AvailableChildModel,
     BeneficiaryModel,
+    ChildAvailabilityModel,
+    ChildAvailabilityStatus,
     ConsignedChildListModel,
     LetterPostModel,
     PeterChildListModel,
@@ -28,6 +30,16 @@ class WordpressService(AbstractModel):
     _name = "wordpress.service"
     _description = "WordPress Service"
 
+    def _consignment_domain(self) -> list:
+        return [
+            ("state", "=", "N"),
+            ("hold_channel", "=", "web"),
+            ("hold_type", "=", HoldType.E_COMMERCE_HOLD.value),
+            ("hold_expiration", ">=", fields.Datetime.now()),
+            ("website_reservation_id", "=", False),
+            ("is_published", "=", True),
+        ]
+
     def get_consigned_children(
         self, lang: str, limit: int = 0, offset: int = 0
     ) -> PeterChildListModel:
@@ -35,28 +47,12 @@ class WordpressService(AbstractModel):
         Fetch consigned children from the database and
         format them for the WordPress API.
         """
-        count = self.env["compassion.child"].search_count(
-            [
-                ("state", "=", "N"),
-                ("hold_channel", "=", "web"),
-                ("hold_type", "=", HoldType.E_COMMERCE_HOLD.value),
-                ("hold_expiration", ">=", fields.Datetime.now()),
-                ("website_reservation_id", "=", False),
-                ("is_published", "=", True),
-            ]
-        )
+        count = self.env["compassion.child"].search_count(self._consignment_domain())
         children = (
             self.env["compassion.child"]
             .with_context(lang=lang)
             .search(
-                [
-                    ("state", "=", "N"),
-                    ("hold_channel", "=", "web"),
-                    ("hold_type", "=", HoldType.E_COMMERCE_HOLD.value),
-                    ("hold_expiration", ">=", fields.Datetime.now()),
-                    ("website_reservation_id", "=", False),
-                    ("is_published", "=", True),
-                ],
+                self._consignment_domain(),
                 limit=limit,
                 offset=offset,
             )
@@ -87,6 +83,32 @@ class WordpressService(AbstractModel):
                 children=[AvailableChildModel(**vals) for vals in data],
             )
         )
+
+    def get_child_availability(self, global_id: str) -> ChildAvailabilityModel:
+        """
+        Tell if a child is still available for sponsorship, reserved on
+        MyCompassion, sponsored (i.e. no longer available) or unknown.
+        """
+        child = (
+            self.env["compassion.child"]
+            .with_context(active_test=False)
+            .search([("global_id", "=", global_id)], limit=1)
+        )
+        if not child:
+            status = ChildAvailabilityStatus.NOT_FOUND
+        elif child.sponsor_id:
+            # Checked first: the MyCompassion reservation is only cleared
+            # by a delayed job, so it is still set right after sponsorship.
+            status = ChildAvailabilityStatus.SPONSORED
+        elif child.website_reservation_id:
+            status = ChildAvailabilityStatus.RESERVED
+        elif self.env["compassion.child"].search_count(
+            self._consignment_domain() + [("id", "=", child.id)]
+        ):
+            status = ChildAvailabilityStatus.AVAILABLE
+        else:
+            status = ChildAvailabilityStatus.SPONSORED
+        return ChildAvailabilityModel(key=global_id, status=status)
 
     def wordpress_sponsor_child(self, child: CompassionChild):
         child.hold_id.write(
