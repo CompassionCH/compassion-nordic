@@ -1,4 +1,9 @@
-from odoo import models
+import unicodedata
+
+from odoo import _, models
+from odoo.exceptions import UserError
+
+from odoo.addons.payment import utils as payment_utils
 
 from .res_partner import SSN_FORMATS
 
@@ -81,31 +86,42 @@ class RecurringContract(models.Model):
         writes to the child, and the form says to enter someone else's name
         when they do.
 
+        - Stripe reported a name the payer does not carry yet (the payment
+          is only authorised, or post-processing has not run): it is applied
+          first, so the payer is who Stripe charged before anything below.
         - The payer still carries the placeholder (Stripe sent no name): the
           form's name is the payer's, as on every other site.
-        - The form keeps the payer's full name, maybe split differently: the
-          same person, so the corrected split is written on the payer.
+        - The form keeps the payer's name (_same_person): written on the
+          payer, which corrects a split, a missing surname or the accents a
+          card name lacks.
         - Another name: that person becomes the contract's correspondent,
           with the phone number. The payer keeps their name and gets only
-          the identity number. The correspondent change syncs with GMC, so
-          it runs as a queue job (_my2_assign_letter_writer): a GMC failure
-          must never turn the sponsor's submission into an error page.
+          the identity number, and sees the sponsorship in their portal with
+          its letters, which they may write (portal_sponsorships
+          "all_info"): the letter writer has no email nor account. The
+          correspondent change syncs with GMC, so it runs as a queue job
+          (_my2_assign_letter_writer): a GMC failure must never turn the
+          sponsor's submission into an error page.
         """
         self.ensure_one()
         payer = self.partner_id.sudo()
         firstname = values.get("firstname") or ""
         lastname = values.get("lastname") or ""
+        stripe_name = payer.my2_name_placeholder and self._my2_cardholder_name()
+        if stripe_name:
+            payer._my2_replace_placeholder_name(
+                *payment_utils.split_partner_name(stripe_name)
+            )
         if payer.my2_name_placeholder:
             return super()._my2_apply_details(values)
-        if _full_name(firstname, lastname) == _full_name(
-            payer.firstname, payer.lastname
-        ):
+        if _same_person(payer.firstname, payer.lastname, firstname, lastname):
             if (payer.firstname or "", payer.lastname or "") != (firstname, lastname):
                 payer.write(
                     {"firstname": firstname or False, "lastname": lastname or False}
                 )
             return super()._my2_apply_details(values)
         letter_writer = self._my2_create_letter_writer(values)
+        payer.portal_sponsorships = "all_info"
         self.sudo().with_delay_sh(
             "_my2_assign_letter_writer",
             letter_writer.id,
@@ -122,7 +138,9 @@ class RecurringContract(models.Model):
         Through the ordinary write, which updates the commitment at GMC once
         the sponsorship has one. Before that, GMC still has to know the
         letter writer when the pending sponsorship upsert names them, hence
-        the constituent upsert first.
+        the constituent upsert first. A failed upsert does not raise, so the
+        job checks it got a GMC id and fails otherwise: the correspondent is
+        left as it was, and staff see the failed job.
 
         Elevated: queued from the public details form, so the job runs as
         the public user.
@@ -132,6 +150,16 @@ class RecurringContract(models.Model):
         letter_writer = self.env["res.partner"].sudo().browse(letter_writer_id)
         if not sponsorship.gmc_commitment_id and not letter_writer.global_id:
             letter_writer.upsert_constituent().process_messages()
+            if not letter_writer.global_id:
+                raise UserError(
+                    _(
+                        "GMC did not register %(letter_writer)s, the letter writer"
+                        " of sponsorship %(sponsorship)s: they are not its"
+                        " correspondent yet.",
+                        letter_writer=letter_writer.display_name,
+                        sponsorship=sponsorship.display_name,
+                    )
+                )
         sponsorship.correspondent_id = letter_writer
 
     def _my2_create_letter_writer(self, values):
@@ -161,6 +189,37 @@ class RecurringContract(models.Model):
         )
 
 
-def _full_name(firstname, lastname):
-    """A name as one comparable string: case and spacing do not matter."""
-    return " ".join(f"{firstname or ''} {lastname or ''}".split()).casefold()
+# Letters a card name spells without their diacritic and NFKD cannot split.
+_PLAIN_LETTERS = str.maketrans({"ø": "o", "æ": "ae", "ß": "ss"})
+
+
+def _name_words(firstname, lastname):
+    """A name's words, compared without case, spacing or diacritics."""
+    name = f"{firstname or ''} {lastname or ''}".casefold().translate(_PLAIN_LETTERS)
+    plain = "".join(
+        char
+        for char in unicodedata.normalize("NFKD", name)
+        if not unicodedata.combining(char)
+    )
+    return plain.split()
+
+
+def _same_person(payer_firstname, payer_lastname, firstname, lastname):
+    """Whether the name typed on the details form is the payer's own.
+
+    Every word of the payer's name is in it, in any order and possibly with
+    more: a card name is often only part of the name (no surname, no middle
+    name), and the sponsor completing it or splitting it differently is not
+    naming someone else. Anything else is another person, as the form asks
+    for.
+    """
+    payer_words = _name_words(payer_firstname, payer_lastname)
+    words = _name_words(firstname, lastname)
+    if not payer_words or not words:
+        return False
+    remaining = list(words)
+    for word in payer_words:
+        if word not in remaining:
+            return False
+        remaining.remove(word)
+    return True

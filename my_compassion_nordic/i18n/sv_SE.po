@@ -359,37 +359,6 @@ msgstr ""
 "Om brevskrivningen ska skötas av någon annan, fyll i det namnet i stället."
 
 #. module: my_compassion_nordic
-#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
-msgid ""
-"Optional. We only use it to report your gift to Skatteetaten, so you get "
-"your tax deduction."
-msgstr ""
-"Valfritt. Vi använder det bara för att rapportera din gåva till "
-"Skatteetaten, så att du får ditt skatteavdrag."
-
-#. module: my_compassion_nordic
-#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
-msgid ""
-"Optional. We only use it to report your gift to Skattestyrelsen, so you get "
-"your tax deduction. Tell us before the end of the year if you would rather "
-"we did not report it."
-msgstr ""
-"Valfritt. Vi använder det bara för att rapportera din gåva till "
-"Skattestyrelsen, så att du får ditt skatteavdrag. Meddela oss före årets "
-"slut om du hellre vill att vi inte rapporterar den."
-
-#. module: my_compassion_nordic
-#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
-msgid ""
-"Optional. We only use it to report your gift to Skatteverket, so you get "
-"your tax deduction. Once we have it, the report is made automatically and "
-"cannot be declined."
-msgstr ""
-"Valfritt. Vi använder det bara för att rapportera din gåva till "
-"Skatteverket, så att du får din skattereduktion. När vi har det rapporteras "
-"gåvan automatiskt och det går inte att avstå."
-
-#. module: my_compassion_nordic
 #: model:ir.model,name:my_compassion_nordic.model_payment_provider
 msgid "Payment Provider"
 msgstr ""
@@ -444,3 +413,50 @@ msgstr ""
 "Det är inte ett giltigt svenskt personnummer. Kontrollera det eller lämna "
 "fältet tomt: vi kan bara rapportera din gåva till Skatteverket med ett "
 "svenskt personnummer."
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/contracts.py:0
+msgid ""
+"GMC did not register %(letter_writer)s, the letter writer of sponsorship "
+"%(sponsorship)s: they are not its correspondent yet."
+msgstr ""
+"GMC registrerade inte %(letter_writer)s, brevskrivaren för fadderskapet "
+"%(sponsorship)s: hen är ännu inte dess korrespondent."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
+msgid ""
+"Optional, and always the payer's own number, even when someone else writes "
+"the letters. We only use it to report your gift to Skatteetaten, so you get "
+"your tax deduction."
+msgstr ""
+"Valfritt, och alltid betalarens eget nummer, även om någon annan skriver "
+"breven. Vi använder det bara för att rapportera din gåva till Skatteetaten, "
+"så att du får ditt skatteavdrag."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
+msgid ""
+"Optional, and always the payer's own number, even when someone else writes "
+"the letters. We only use it to report your gift to Skattestyrelsen, so you "
+"get your tax deduction. Tell us before the end of the year if you would "
+"rather we did not report it."
+msgstr ""
+"Valfritt, och alltid betalarens eget nummer, även om någon annan skriver "
+"breven. Vi använder det bara för att rapportera din gåva till "
+"Skattestyrelsen, så att du får ditt skatteavdrag. Meddela oss före årets "
+"slut om du hellre vill att vi inte rapporterar den."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
+msgid ""
+"Optional, and always the payer's own number, even when someone else writes "
+"the letters. We only use it to report your gift to Skatteverket, so you get "
+"your tax deduction. Once we have it, the report is made automatically and "
+"cannot be declined."
+msgstr ""
+"Valfritt, och alltid betalarens eget nummer, även om någon annan skriver "
+"breven. Vi använder det bara för att rapportera din gåva till Skatteverket, "
+"så att du får din skattereduktion. När vi har det rapporteras gåvan "
+"automatiskt och det går inte att avstå."

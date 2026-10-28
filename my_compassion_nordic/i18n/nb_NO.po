@@ -357,37 +357,6 @@ msgid "If someone else will write the letters, enter their name instead."
 msgstr "Hvis noen andre skal skrive brevene, skriv inn navnet deres i stedet."
 
 #. module: my_compassion_nordic
-#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
-msgid ""
-"Optional. We only use it to report your gift to Skatteetaten, so you get "
-"your tax deduction."
-msgstr ""
-"Valgfritt. Vi bruker det bare til å rapportere gaven din til Skatteetaten, "
-"slik at du får skattefradrag."
-
-#. module: my_compassion_nordic
-#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
-msgid ""
-"Optional. We only use it to report your gift to Skattestyrelsen, so you get "
-"your tax deduction. Tell us before the end of the year if you would rather "
-"we did not report it."
-msgstr ""
-"Valgfritt. Vi bruker det bare til å rapportere gaven din til "
-"Skattestyrelsen, slik at du får skattefradrag. Gi oss beskjed før årets "
-"slutt hvis du heller vil at vi ikke rapporterer den."
-
-#. module: my_compassion_nordic
-#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
-msgid ""
-"Optional. We only use it to report your gift to Skatteverket, so you get "
-"your tax deduction. Once we have it, the report is made automatically and "
-"cannot be declined."
-msgstr ""
-"Valgfritt. Vi bruker det bare til å rapportere gaven din til Skatteverket, "
-"slik at du får skattefradrag. Når vi har det, rapporteres gaven automatisk, "
-"og det kan ikke velges bort."
-
-#. module: my_compassion_nordic
 #: model:ir.model,name:my_compassion_nordic.model_payment_provider
 msgid "Payment Provider"
 msgstr ""
@@ -442,3 +411,50 @@ msgstr ""
 "Det er ikke et gyldig svensk personnummer. Sjekk det, eller la feltet stå "
 "tomt: vi kan bare rapportere gaven din til Skatteverket med et svensk "
 "personnummer."
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/contracts.py:0
+msgid ""
+"GMC did not register %(letter_writer)s, the letter writer of sponsorship "
+"%(sponsorship)s: they are not its correspondent yet."
+msgstr ""
+"GMC registrerte ikke %(letter_writer)s, brevskriveren for fadderskapet "
+"%(sponsorship)s: vedkommende er ennå ikke korrespondent."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
+msgid ""
+"Optional, and always the payer's own number, even when someone else writes "
+"the letters. We only use it to report your gift to Skatteetaten, so you get "
+"your tax deduction."
+msgstr ""
+"Valgfritt, og alltid betalerens eget nummer, også når noen andre skriver "
+"brevene. Vi bruker det bare til å rapportere gaven din til Skatteetaten, "
+"slik at du får skattefradrag."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
+msgid ""
+"Optional, and always the payer's own number, even when someone else writes "
+"the letters. We only use it to report your gift to Skattestyrelsen, so you "
+"get your tax deduction. Tell us before the end of the year if you would "
+"rather we did not report it."
+msgstr ""
+"Valgfritt, og alltid betalerens eget nummer, også når noen andre skriver "
+"brevene. Vi bruker det bare til å rapportere gaven din til Skattestyrelsen, "
+"slik at du får skattefradrag. Gi oss beskjed før årets slutt hvis du heller "
+"vil at vi ikke rapporterer den."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
+msgid ""
+"Optional, and always the payer's own number, even when someone else writes "
+"the letters. We only use it to report your gift to Skatteverket, so you get "
+"your tax deduction. Once we have it, the report is made automatically and "
+"cannot be declined."
+msgstr ""
+"Valgfritt, og alltid betalerens eget nummer, også når noen andre skriver "
+"brevene. Vi bruker det bare til å rapportere gaven din til Skatteverket, "
+"slik at du får skattefradrag. Når vi har det, rapporteres gaven automatisk, "
+"og det kan ikke velges bort."

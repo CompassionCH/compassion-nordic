@@ -357,37 +357,6 @@ msgstr ""
 "Hvis en anden skal skrive brevene, så skriv vedkommendes navn i stedet."
 
 #. module: my_compassion_nordic
-#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
-msgid ""
-"Optional. We only use it to report your gift to Skatteetaten, so you get "
-"your tax deduction."
-msgstr ""
-"Valgfrit. Vi bruger det kun til at indberette din gave til Skatteetaten, så "
-"du får dit skattefradrag."
-
-#. module: my_compassion_nordic
-#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
-msgid ""
-"Optional. We only use it to report your gift to Skattestyrelsen, so you get "
-"your tax deduction. Tell us before the end of the year if you would rather "
-"we did not report it."
-msgstr ""
-"Valgfrit. Vi bruger det kun til at indberette din gave til Skattestyrelsen, "
-"så du får dit skattefradrag. Giv os besked inden årets udgang, hvis du "
-"hellere vil have, at vi ikke indberetter den."
-
-#. module: my_compassion_nordic
-#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
-msgid ""
-"Optional. We only use it to report your gift to Skatteverket, so you get "
-"your tax deduction. Once we have it, the report is made automatically and "
-"cannot be declined."
-msgstr ""
-"Valgfrit. Vi bruger det kun til at indberette din gave til Skatteverket, så "
-"du får dit skattefradrag. Når vi har det, indberettes gaven automatisk, og "
-"det kan ikke fravælges."
-
-#. module: my_compassion_nordic
 #: model:ir.model,name:my_compassion_nordic.model_payment_provider
 msgid "Payment Provider"
 msgstr ""
@@ -442,3 +411,50 @@ msgstr ""
 "Det er ikke et gyldigt svensk personnummer. Kontrollér det, eller lad feltet"
 " stå tomt: vi kan kun indberette din gave til Skatteverket med et svensk "
 "personnummer."
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/contracts.py:0
+msgid ""
+"GMC did not register %(letter_writer)s, the letter writer of sponsorship "
+"%(sponsorship)s: they are not its correspondent yet."
+msgstr ""
+"GMC registrerede ikke %(letter_writer)s, brevskriveren for sponsoratet "
+"%(sponsorship)s: vedkommende er endnu ikke korrespondent."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
+msgid ""
+"Optional, and always the payer's own number, even when someone else writes "
+"the letters. We only use it to report your gift to Skatteetaten, so you get "
+"your tax deduction."
+msgstr ""
+"Valgfrit, og altid betalerens eget nummer, også når en anden skriver "
+"brevene. Vi bruger det kun til at indberette din gave til Skatteetaten, så "
+"du får dit skattefradrag."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
+msgid ""
+"Optional, and always the payer's own number, even when someone else writes "
+"the letters. We only use it to report your gift to Skattestyrelsen, so you "
+"get your tax deduction. Tell us before the end of the year if you would "
+"rather we did not report it."
+msgstr ""
+"Valgfrit, og altid betalerens eget nummer, også når en anden skriver "
+"brevene. Vi bruger det kun til at indberette din gave til Skattestyrelsen, "
+"så du får dit skattefradrag. Giv os besked inden årets udgang, hvis du "
+"hellere vil have, at vi ikke indberetter den."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
+msgid ""
+"Optional, and always the payer's own number, even when someone else writes "
+"the letters. We only use it to report your gift to Skatteverket, so you get "
+"your tax deduction. Once we have it, the report is made automatically and "
+"cannot be declined."
+msgstr ""
+"Valgfrit, og altid betalerens eget nummer, også når en anden skriver "
+"brevene. Vi bruger det kun til at indberette din gave til Skatteverket, så "
+"du får dit skattefradrag. Når vi har det, indberettes gaven automatisk, og "
+"det kan ikke fravælges."

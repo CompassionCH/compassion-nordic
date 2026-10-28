@@ -73,13 +73,13 @@ Nordic version of the post-payment sponsor details form.
           <div class="body-small text-low-black mt-1">
             <t
               t-if="ssn_country == 'SE'"
-            >Optional. We only use it to report your gift to Skatteverket, so you get your tax deduction. Once we have it, the report is made automatically and cannot be declined.</t>
+            >Optional, and always the payer's own number, even when someone else writes the letters. We only use it to report your gift to Skatteverket, so you get your tax deduction. Once we have it, the report is made automatically and cannot be declined.</t>
             <t
               t-elif="ssn_country == 'NO'"
-            >Optional. We only use it to report your gift to Skatteetaten, so you get your tax deduction.</t>
+            >Optional, and always the payer's own number, even when someone else writes the letters. We only use it to report your gift to Skatteetaten, so you get your tax deduction.</t>
             <t
               t-else=""
-            >Optional. We only use it to report your gift to Skattestyrelsen, so you get your tax deduction. Tell us before the end of the year if you would rather we did not report it.</t>
+            >Optional, and always the payer's own number, even when someone else writes the letters. We only use it to report your gift to Skattestyrelsen, so you get your tax deduction. Tell us before the end of the year if you would rather we did not report it.</t>
           </div>
         </t>
       </t>
