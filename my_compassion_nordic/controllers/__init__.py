@@ -1,1 +1,1 @@
-from . import payment_adyen_webhook
+from . import my2_sponsorships, payment_adyen_webhook
