@@ -14,6 +14,13 @@ class LetterLanguageCode(str, Enum):
     DANISH = "Danish"
 
 
+class ChildAvailabilityStatus(str, Enum):
+    AVAILABLE = "available"
+    RESERVED = "reserved"
+    SPONSORED = "sponsored"
+    NOT_FOUND = "not_found"
+
+
 class RegionEnum(str, Enum):
     AFRICA = "Africa"
     ASIA = "Asia"
@@ -117,3 +124,13 @@ class ConsignedChildListModel(BaseModel):
 
 class PeterChildListModel(PascalCaseModel):
     child_list: ConsignedChildListModel
+
+
+class ChildAvailabilityModel(BaseModel):
+    key: str = Field(description="The global ID of the child that was requested.")
+    status: ChildAvailabilityStatus = Field(
+        description="`available`: the child can be sponsored. \n\n"
+        "`reserved`: the child is currently reserved on MyCompassion. \n\n"
+        "`sponsored`: the child is no longer available. \n\n"
+        "`not_found`: no child exists with this key."
+    )
