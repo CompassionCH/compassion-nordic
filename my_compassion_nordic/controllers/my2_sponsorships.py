@@ -7,8 +7,8 @@ from odoo.addons.my_compassion.controllers.my2_sponsorships import (
 
 class MyCompassionNewSponsorshipNordic(MyCompassionNewSponsorshipController):
     """The Nordic entities ask one more thing on the post-payment details
-    form: the sponsor's national identity number, which is what lets the
-    gift be reported to their tax authority so they get their deduction.
+    form: the payer's national identity number, which is what lets the gift
+    be reported to their tax authority so they get their deduction.
 
     Optional throughout. No Nordic country makes the number a condition of
     donating, and the statutory reporting duty that makes collecting it
@@ -24,26 +24,35 @@ class MyCompassionNewSponsorshipNordic(MyCompassionNewSponsorshipController):
 
     @classmethod
     def _details_extra_error(cls, values, sponsorship):
-        """Reject only what is not a national identity number at all.
+        """Refuse a number that is not one of the company's country.
 
-        A number belonging to another Nordic country is stored as it is: a
-        Swede sponsoring on the Norwegian site is ordinary, and losing their
-        personnummer over it would help nobody. Only a value matching no
-        Nordic format is refused, because that is what a typo looks like -
-        and even then the sponsor can clear the optional field and carry on.
+        Nothing else could go into its tax report, whether it is a typo or
+        another Nordic country's number. The field stays optional: the
+        message says the sponsor may clear it and carry on.
         """
         error = super()._details_extra_error(values, sponsorship)
         if error:
             return error
-        ssn = (values.get("social_sec_nr") or "").strip()
+        ssn = values.get("social_sec_nr")
         if not ssn or not sponsorship._my2_collects_ssn():
             return ""
-        outcome, _code = sponsorship.env["res.partner"]._my2_check_ssn(
-            ssn, sponsorship._my2_ssn_country_code()
-        )
-        if outcome == "invalid":
+        country_code = sponsorship._my2_ssn_country_code()
+        if sponsorship.env["res.partner"]._my2_normalize_ssn(ssn, country_code):
+            return ""
+        if country_code == "SE":
             return _(
-                "That does not look like a valid national identity number."
-                " Please check it, or leave the field empty - it is optional."
+                "That is not a valid Swedish personnummer. Please check it, or"
+                " leave the field empty: we can only report your gift to"
+                " Skatteverket with a Swedish personnummer."
             )
-        return ""
+        if country_code == "NO":
+            return _(
+                "That is not a valid Norwegian fødselsnummer or D-nummer."
+                " Please check it, or leave the field empty: we can only report"
+                " your gift to Skatteetaten with a Norwegian number."
+            )
+        return _(
+            "That is not a valid Danish CPR-nummer. Please check it, or leave"
+            " the field empty: we can only report your gift to Skattestyrelsen"
+            " with a Danish CPR-nummer."
+        )

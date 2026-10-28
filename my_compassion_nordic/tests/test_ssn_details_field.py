@@ -17,9 +17,9 @@ DK_VALID = "211062-5629"
 class TestSsnDetailsField(TransactionCase):
     """The national identity number of the post-payment details form.
 
-    Optional everywhere, never a reason a sponsor cannot finish, and stored
-    even when it belongs to another Nordic country than the one whose tax
-    authority would receive the report.
+    Optional everywhere, never a reason a sponsor cannot finish, and only
+    ever stored as a valid number of the country whose tax authority
+    receives the report, in the form that report uses.
     """
 
     @classmethod
@@ -28,54 +28,84 @@ class TestSsnDetailsField(TransactionCase):
         cls.partner_model = cls.env["res.partner"]
 
     def _company(self, country_code, collect=True):
-        country = self.env["res.country"].search(
-            [("code", "=", country_code)], limit=1
-        )
+        country = self.env["res.country"].search([("code", "=", country_code)], limit=1)
         return self.env["res.company"].create(
             {
-                "name": f"SSN Test {country_code}",
+                "name": f"SSN Test {country_code} {'on' if collect else 'off'}",
                 "country_id": country.id,
                 "my2_collect_ssn": collect,
             }
         )
 
-    # === Classification ===
+    def _signup(self, country_code, collect=True):
+        return self.env["recurring.contract"].new(
+            {"company_id": self._company(country_code, collect=collect).id}
+        )
 
-    def test_own_country_number_is_ok(self):
-        for code, ssn in (("SE", SE_VALID), ("NO", NO_VALID), ("DK", DK_VALID)):
-            with self.subTest(country=code):
-                outcome, matched = self.partner_model._my2_check_ssn(ssn, code)
-                self.assertEqual(outcome, "ok")
-                self.assertEqual(matched, code)
+    # === Normalisation ===
 
-    def test_other_nordic_number_is_foreign_not_invalid(self):
-        """A Swede sponsoring on the Norwegian site. Their personnummer is
-        no use to Skatteetaten, but it is still their number and is kept."""
-        outcome, matched = self.partner_model._my2_check_ssn(SE_VALID, "NO")
-        self.assertEqual(outcome, "foreign")
-        self.assertEqual(matched, "SE")
+    def test_swedish_number_takes_the_twelve_digit_form(self):
+        """KU65 wants twelve digits; the tax export drops the dash."""
+        for typed in (
+            "811218-9876",
+            "8112189876",
+            "198112189876",
+            "19811218-9876",
+            "811218 9876",
+        ):
+            with self.subTest(typed=typed):
+                self.assertEqual(
+                    self.partner_model._my2_normalize_ssn(typed, "SE"),
+                    "19811218-9876",
+                )
 
-    def test_garbage_is_invalid(self):
-        for value in ("81121898", "not-a-number", "0000000000"):
-            with self.subTest(value=value):
-                outcome, _matched = self.partner_model._my2_check_ssn(value, "SE")
-                self.assertEqual(outcome, "invalid")
+    def test_swedish_centenarian_keeps_their_century(self):
+        self.assertEqual(
+            self.partner_model._my2_normalize_ssn("811218+9876", "SE"),
+            "18811218-9876",
+        )
 
-    def test_company_without_reporting_country_accepts_any_nordic(self):
-        """The shared Norden parent company has no report of its own to
-        file, so there is nothing for a number to be foreign to."""
-        outcome, _matched = self.partner_model._my2_check_ssn(SE_VALID, "SC")
-        self.assertEqual(outcome, "ok")
+    def test_norwegian_and_danish_numbers_are_compacted(self):
+        self.assertEqual(
+            self.partner_model._my2_normalize_ssn(f" {NO_VALID} ", "NO"), NO_VALID
+        )
+        self.assertEqual(
+            self.partner_model._my2_normalize_ssn(DK_VALID, "DK"), "2110625629"
+        )
+
+    def test_only_the_reporting_countrys_number_is_accepted(self):
+        """A Swede's personnummer on the Norwegian site could never go into
+        Skatteetaten's report."""
+        for ssn, country_code in (
+            (SE_VALID, "NO"),
+            (NO_VALID, "SE"),
+            (SE_VALID, "DK"),
+            (DK_VALID, "SE"),
+        ):
+            with self.subTest(ssn=ssn, country=country_code):
+                self.assertEqual(
+                    self.partner_model._my2_normalize_ssn(ssn, country_code), ""
+                )
+
+    def test_garbage_and_unknown_countries_are_refused(self):
+        for value, country_code in (
+            ("81121898", "SE"),
+            ("8112189875", "SE"),
+            ("not-a-number", "NO"),
+            ("", "SE"),
+            (SE_VALID, "SC"),
+            (SE_VALID, "FI"),
+        ):
+            with self.subTest(value=value, country=country_code):
+                self.assertEqual(
+                    self.partner_model._my2_normalize_ssn(value, country_code), ""
+                )
 
     # === The form's error path ===
 
     def _error_for(self, ssn, country_code, collect=True):
-        company = self._company(country_code, collect=collect)
-        sponsorship = self.env["recurring.contract"].new(
-            {"company_id": company.id}
-        )
         return MyCompassionNewSponsorshipNordic._details_extra_error(
-            {"social_sec_nr": ssn}, sponsorship
+            {"social_sec_nr": ssn}, self._signup(country_code, collect=collect)
         )
 
     def test_empty_ssn_is_never_an_error(self):
@@ -83,47 +113,74 @@ class TestSsnDetailsField(TransactionCase):
         report, which the sponsor is free to forgo."""
         self.assertEqual(self._error_for("", "SE"), "")
 
-    def test_foreign_ssn_is_never_an_error(self):
-        self.assertEqual(self._error_for(SE_VALID, "NO"), "")
+    def test_own_country_ssn_is_accepted(self):
+        for ssn, country_code in (
+            (SE_VALID, "SE"),
+            (NO_VALID, "NO"),
+            (DK_VALID, "DK"),
+        ):
+            with self.subTest(country=country_code):
+                self.assertEqual(self._error_for(ssn, country_code), "")
 
-    def test_invalid_ssn_is_an_error(self):
-        self.assertTrue(self._error_for("81121898", "SE"))
+    def test_other_countrys_ssn_is_an_error_naming_the_authority(self):
+        self.assertIn("Skatteetaten", self._error_for(SE_VALID, "NO"))
+        self.assertIn("Skatteverket", self._error_for("81121898", "SE"))
+        self.assertIn("Skattestyrelsen", self._error_for(SE_VALID, "DK"))
 
-    def test_invalid_ssn_ignored_when_company_does_not_collect(self):
+    def test_ssn_ignored_when_company_does_not_collect(self):
         self.assertEqual(self._error_for("81121898", "SE", collect=False), "")
+
+    def test_flag_on_a_country_without_a_format_collects_nothing(self):
+        """Switching the flag on for a company the form has no number
+        format for must not make the field refuse every value."""
+        signup = self._signup("SC")
+        self.assertFalse(signup._my2_collects_ssn())
+
+    # === What reaches the partner ===
+
+    def test_partner_vals_hold_the_normalised_number(self):
+        signup = self._signup("SE")
+        self.assertEqual(
+            signup._my2_details_extra_partner_vals({"social_sec_nr": "8112189876"}),
+            {"social_sec_nr": "19811218-9876"},
+        )
+
+    def test_partner_vals_skip_an_empty_or_uncollected_number(self):
+        self.assertEqual(
+            self._signup("SE")._my2_details_extra_partner_vals({"social_sec_nr": ""}),
+            {},
+        )
+        self.assertEqual(
+            self._signup("SE", collect=False)._my2_details_extra_partner_vals(
+                {"social_sec_nr": SE_VALID}
+            ),
+            {},
+        )
+
+    def test_number_is_staff_only(self):
+        """Portal record rules let a sponsor read other partners, so the
+        number must not be readable by portal users at all."""
+        field = self.partner_model._fields["social_sec_nr"]
+        self.assertEqual(field.groups, "base.group_user")
 
     # === Seeding ===
 
     def test_seed_turns_the_flag_on_only_for_reporting_countries(self):
-        """Both directions. Asserting only the positive would have missed
-        the real bug: a ("country_id.code", "in", ...) domain does not
-        filter res.company at all, so every company was seeded on -
-        including the Norden parent, whose country is Seychelles."""
+        """Both directions: a company outside the reporting countries, such
+        as the shared Norden parent, is explicitly off."""
+        sweden = self._company("SE", collect=False)
+        seychelles = self._company("SC", collect=True)
+
         self.env["res.company"]._my2_seed_collect_ssn()
+
+        self.assertTrue(sweden.my2_collect_ssn)
+        self.assertFalse(seychelles.my2_collect_ssn)
         for company in self.env["res.company"].search([]):
             with self.subTest(company=company.name):
                 self.assertEqual(
                     company.my2_collect_ssn,
                     company.country_id.code in SSN_REPORTING_COUNTRIES,
                 )
-
-    def test_country_code_domain_does_not_filter_companies(self):
-        """Guards the reason the seeder filters in Python. If this ever
-        starts filtering, the workaround can go - until then, a domain here
-        silently matches everything."""
-        all_companies = self.env["res.company"].search([])
-        by_domain = self.env["res.company"].search(
-            [("country_id.code", "in", list(SSN_REPORTING_COUNTRIES))]
-        )
-        non_reporting = all_companies.filtered(
-            lambda c: c.country_id.code not in SSN_REPORTING_COUNTRIES
-        )
-        if non_reporting:
-            self.assertTrue(
-                by_domain & non_reporting,
-                "the domain now filters - drop the Python filter in"
-                " _my2_seed_collect_ssn",
-            )
 
     def test_finland_is_not_a_reporting_country(self):
         """Finland's donation deduction covers gifts to universities only,

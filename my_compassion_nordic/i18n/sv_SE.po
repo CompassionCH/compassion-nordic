@@ -211,13 +211,18 @@ msgstr "Välkommen! Skapa ditt MyCompassion-konto"
 
 #. module: my_compassion_nordic
 #: model:ir.model.fields,field_description:my_compassion_nordic.field_payment_provider__adyen_auto_rescue_enabled
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.payment_provider_form_auto_rescue
 msgid "Auto Rescue"
 msgstr "Auto Rescue"
 
 #. module: my_compassion_nordic
 #: model:ir.model.fields,help:my_compassion_nordic.field_payment_transaction__my2_rescue_reference
-msgid "Adyen Auto Rescue identifier of a refused charge the provider retries on its own schedule."
-msgstr "Adyen Auto Rescue-identifierare för en nekad debitering som leverantören försöker igen enligt sitt eget schema."
+msgid ""
+"Adyen Auto Rescue identifier of a refused charge the provider retries on its"
+" own schedule."
+msgstr ""
+"Adyen Auto Rescue-identifierare för en nekad debitering som leverantören "
+"försöker igen enligt sitt eget schema."
 
 #. module: my_compassion_nordic
 #: model:mail.template,name:my_compassion_nordic.mail_digital_payment_fixit_final
@@ -231,8 +236,13 @@ msgstr "Digital betalning åtgärda (första påminnelsen)"
 
 #. module: my_compassion_nordic
 #: model:ir.model.fields,help:my_compassion_nordic.field_payment_provider__adyen_auto_rescue_enabled
-msgid "Let Adyen retry refused off-session charges on its own schedule. Only enable this once Adyen has switched the feature on for this merchant account."
-msgstr "Låt Adyen göra nya försök på nekade debiteringar enligt sitt eget schema. Aktivera detta först när Adyen har slagit på funktionen för detta handelskonto."
+msgid ""
+"Let Adyen retry refused off-session charges on its own schedule. Only enable"
+" this once Adyen has switched the feature on for this merchant account."
+msgstr ""
+"Låt Adyen göra nya försök på nekade debiteringar enligt sitt eget schema. "
+"Aktivera detta först när Adyen har slagit på funktionen för detta "
+"handelskonto."
 
 #. module: my_compassion_nordic
 #: model:ir.model.fields,field_description:my_compassion_nordic.field_payment_provider__adyen_max_days_to_rescue
@@ -278,8 +288,11 @@ msgstr "Räddning lyckades"
 #. module: my_compassion_nordic
 #. odoo-python
 #: code:addons/my_compassion_nordic/models/payment_transaction.py:0
-msgid "The payment was refused (%s); the provider scheduled automatic retries."
-msgstr "Betalningen nekades (%s). Leverantören har schemalagt automatiska nya försök."
+msgid ""
+"The payment was refused (%s); the provider scheduled automatic retries."
+msgstr ""
+"Betalningen nekades (%s). Leverantören har schemalagt automatiska nya "
+"försök."
 
 #. module: my_compassion_nordic
 #. odoo-python
@@ -289,5 +302,145 @@ msgstr "Leverantören slutade försöka med betalningen: %s"
 
 #. module: my_compassion_nordic
 #: model:ir.model.fields,help:my_compassion_nordic.field_payment_provider__adyen_max_days_to_rescue
-msgid "How long Adyen keeps retrying a refused charge before it reports a final failure."
-msgstr "Hur länge Adyen fortsätter försöka med en nekad debitering innan ett slutgiltigt misslyckande rapporteras."
+msgid ""
+"How long Adyen keeps retrying a refused charge before it reports a final "
+"failure."
+msgstr ""
+"Hur länge Adyen fortsätter försöka med en nekad debitering innan ett "
+"slutgiltigt misslyckande rapporteras."
+
+#. module: my_compassion_nordic
+#: model:ir.model,name:my_compassion_nordic.model_recurring_contract_group
+msgid "A group of contracts"
+msgstr ""
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,help:my_compassion_nordic.field_res_company__my2_collect_ssn
+msgid ""
+"Ask sponsors of this company's website for their national identity number on"
+" the post-payment details form, so their gift can be reported to the tax "
+"authority and they get their deduction. Off for a company whose country runs"
+" no such scheme: the number would then have no purpose, and no lawful basis."
+msgstr ""
+"Be sponsorer på företagets webbplats om deras personnummer i formuläret "
+"efter betalningen, så att gåvan kan rapporteras till skattemyndigheten och "
+"de får sin skattereduktion. Av för ett företag vars land saknar en sådan "
+"ordning: numret skulle då inte ha något syfte och ingen rättslig grund."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
+msgid "CPR-nummer (for gift reporting to Skattestyrelsen)"
+msgstr "CPR-nummer (för gåvorapportering till Skattestyrelsen)"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_res_company__my2_collect_ssn
+msgid "Collect social security number"
+msgstr "Samla in personnummer"
+
+#. module: my_compassion_nordic
+#: model:ir.model,name:my_compassion_nordic.model_res_company
+msgid "Companies"
+msgstr ""
+
+#. module: my_compassion_nordic
+#: model:ir.model,name:my_compassion_nordic.model_res_partner
+msgid "Contact"
+msgstr ""
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
+msgid "Fødselsnummer (for gift reporting to Skatteetaten)"
+msgstr "Fødselsnummer (för gåvorapportering till Skatteetaten)"
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_form_nordic
+msgid "If someone else will write the letters, enter their name instead."
+msgstr ""
+"Om brevskrivningen ska skötas av någon annan, fyll i det namnet i stället."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
+msgid ""
+"Optional. We only use it to report your gift to Skatteetaten, so you get "
+"your tax deduction."
+msgstr ""
+"Valfritt. Vi använder det bara för att rapportera din gåva till "
+"Skatteetaten, så att du får ditt skatteavdrag."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
+msgid ""
+"Optional. We only use it to report your gift to Skattestyrelsen, so you get "
+"your tax deduction. Tell us before the end of the year if you would rather "
+"we did not report it."
+msgstr ""
+"Valfritt. Vi använder det bara för att rapportera din gåva till "
+"Skattestyrelsen, så att du får ditt skatteavdrag. Meddela oss före årets "
+"slut om du hellre vill att vi inte rapporterar den."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
+msgid ""
+"Optional. We only use it to report your gift to Skatteverket, so you get "
+"your tax deduction. Once we have it, the report is made automatically and "
+"cannot be declined."
+msgstr ""
+"Valfritt. Vi använder det bara för att rapportera din gåva till "
+"Skatteverket, så att du får din skattereduktion. När vi har det rapporteras "
+"gåvan automatiskt och det går inte att avstå."
+
+#. module: my_compassion_nordic
+#: model:ir.model,name:my_compassion_nordic.model_payment_provider
+msgid "Payment Provider"
+msgstr ""
+
+#. module: my_compassion_nordic
+#: model:ir.model,name:my_compassion_nordic.model_payment_transaction
+msgid "Payment Transaction"
+msgstr ""
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_ssn
+msgid "Personnummer (for gift reporting to Skatteverket)"
+msgstr "Personnummer (för gåvorapportering till Skatteverket)"
+
+#. module: my_compassion_nordic
+#: model:ir.model,name:my_compassion_nordic.model_recurring_contract
+msgid "Recurring contract"
+msgstr ""
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/controllers/my2_sponsorships.py:0
+msgid ""
+"That is not a valid Danish CPR-nummer. Please check it, or leave the field "
+"empty: we can only report your gift to Skattestyrelsen with a Danish CPR-"
+"nummer."
+msgstr ""
+"Det är inte ett giltigt danskt CPR-nummer. Kontrollera det eller lämna "
+"fältet tomt: vi kan bara rapportera din gåva till Skattestyrelsen med ett "
+"danskt CPR-nummer."
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/controllers/my2_sponsorships.py:0
+msgid ""
+"That is not a valid Norwegian fødselsnummer or D-nummer. Please check it, or"
+" leave the field empty: we can only report your gift to Skatteetaten with a "
+"Norwegian number."
+msgstr ""
+"Det är inte ett giltigt norskt fødselsnummer eller D-nummer. Kontrollera det"
+" eller lämna fältet tomt: vi kan bara rapportera din gåva till Skatteetaten "
+"med ett norskt nummer."
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/controllers/my2_sponsorships.py:0
+msgid ""
+"That is not a valid Swedish personnummer. Please check it, or leave the "
+"field empty: we can only report your gift to Skatteverket with a Swedish "
+"personnummer."
+msgstr ""
+"Det är inte ett giltigt svenskt personnummer. Kontrollera det eller lämna "
+"fältet tomt: vi kan bara rapportera din gåva till Skatteverket med ett "
+"svenskt personnummer."

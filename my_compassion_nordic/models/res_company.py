@@ -14,8 +14,8 @@ from odoo import api, fields, models
 # universities only, so a Finnish entity would have no report to file and
 # therefore no lawful purpose for a henkilotunnus under tietosuojalaki 29 §.
 # An expansion to Tax-Administration-named associations has been proposed but
-# is not in force; when it is, and when the entity holds its naming, turning
-# the flag on is all this needs.
+# is not in force; when it is, and when the entity holds its naming, Finland
+# needs adding here and its henkilotunnus format to SSN_FORMATS (res_partner).
 SSN_REPORTING_COUNTRIES = ("SE", "NO", "DK")
 
 
@@ -35,21 +35,19 @@ class ResCompany(models.Model):
     def _my2_seed_collect_ssn(self):
         """Set the flag from each company's country.
 
-        Keyed on the country code rather than on a data ref: Nordic companies
-        were created through the UI in production and carry no xmlid.
+        Run at install and by the 18.0.1.2.0 migration; afterwards the flag
+        is staff's to change on the company form. Keyed on the country code
+        rather than on a data ref: Nordic companies were created through the
+        UI in production and carry no xmlid. The search goes through the
+        company's partner because res.company.country_id is a non-stored
+        compute that cannot be searched.
 
-        Filtered in Python, not by domain. res.company.country_id is related
-        through partner_id, and a ("country_id.code", "in", ...) domain does
-        not filter on it at all - it silently matches every company, which
-        would turn the flag on for the shared Norden parent whose country is
-        neither Nordic nor a reporting one.
-
-        Both directions are written: this runs once per install/upgrade, and
-        a company that gains or loses a reporting country should follow.
+        Both directions are written, so a company outside the reporting
+        countries (the shared Norden parent) is explicitly off.
         """
         companies = self.sudo().search([])
-        reporting = companies.filtered(
-            lambda c: c.country_id.code in SSN_REPORTING_COUNTRIES
+        reporting = companies.search(
+            [("partner_id.country_id.code", "in", SSN_REPORTING_COUNTRIES)]
         )
         reporting.my2_collect_ssn = True
         (companies - reporting).my2_collect_ssn = False

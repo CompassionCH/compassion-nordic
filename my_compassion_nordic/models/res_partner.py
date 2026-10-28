@@ -2,53 +2,51 @@ from stdnum.dk import cpr
 from stdnum.no import fodselsnummer
 from stdnum.se import personnummer
 
-from odoo import models
+from odoo import api, models
 
-# The validator of each country's national identity number, by country code.
-# Only the countries that have a gift report to file are here - see
-# SSN_REPORTING_COUNTRIES in res_company.
+
+def _swedish_personnummer(number):
+    """YYYYMMDD-NNNN, the form Skatteverket's KU65 wants once the dash is
+    dropped (twelve digits). A ten-digit number gets its century from the
+    birth date stdnum reads in it, which honours the "+" of a centenarian."""
+    digits = personnummer.compact(number).replace("-", "").replace("+", "")
+    if len(digits) == 10:
+        century = personnummer.get_birth_date(number).year // 100
+        digits = f"{century}{digits}"
+    return f"{digits[:8]}-{digits[8:]}"
+
+
+# The national identity number of each country whose tax authority receives
+# a gift report, keyed by country code: (validator, normaliser). Only the
+# countries listed in SSN_REPORTING_COUNTRIES (res_company) belong here.
 #
-# Finland is absent for the same reason it is absent there. Note that
-# compassion_nordic_accounting's own SSN_CONTRY_FMT_LIST lists
-# stdnum.fi.veronumero for Finland, which is the construction-industry tax
-# number rather than a personal identity code; nothing here depends on it.
-SSN_VALIDATORS = {
-    "SE": personnummer,
-    "NO": fodselsnummer,
-    "DK": cpr,
+# The normalised forms are the ones already on file for each country, which
+# the tax exports read: SE twelve digits with a dash, NO eleven digits, DK
+# ten digits. A Danish CPR-nummer has no checksum since 2007, so its
+# validation is only length and a plausible birth date.
+SSN_FORMATS = {
+    "SE": (personnummer, _swedish_personnummer),
+    "NO": (fodselsnummer, fodselsnummer.compact),
+    "DK": (cpr, cpr.compact),
 }
 
 
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
-    def _my2_check_ssn(self, ssn, country_code):
-        """Classify a national identity number typed on the public form.
+    @api.model
+    def _my2_normalize_ssn(self, ssn, country_code):
+        """A national identity number typed on the public details form, in
+        the form country_code's tax report uses, or "" when it is not a
+        valid number of that country.
 
-        Three outcomes, because the form has three things to do with them:
-
-        - ("ok", code): valid for country_code, or - when the company has no
-          reporting country of its own - valid for one of the others.
-        - ("foreign", code): valid, but for a different Nordic country than
-          the one filing the report. A Swede sponsoring on the Norwegian site
-          is an ordinary thing to do, and their personnummer is worth keeping
-          even though Skatteetaten cannot use it, so this is a notice rather
-          than an error.
-        - ("invalid", ""): matches no Nordic format at all, which is what a
-          typo looks like.
-
-        Never raises, and "empty" is never asked about here: the field is
-        optional, so the caller drops an empty value before it gets this far.
+        Only the reporting country's own format is accepted. A Swede's
+        personnummer typed on the Norwegian site could never go into
+        Skatteetaten's report, and the tax exports do not check which
+        country a stored number belongs to.
         """
         ssn = (ssn or "").strip()
-        if not ssn:
-            return "invalid", ""
-        own = SSN_VALIDATORS.get(country_code)
-        if own is not None and own.is_valid(ssn):
-            return "ok", country_code
-        for code, validator in SSN_VALIDATORS.items():
-            if code != country_code and validator.is_valid(ssn):
-                # No reporting country of its own (the shared Norden parent
-                # company) means nothing to be foreign to.
-                return ("foreign" if own is not None else "ok"), code
-        return "invalid", ""
+        validator, normalize = SSN_FORMATS.get(country_code, (None, None))
+        if not ssn or validator is None or not validator.is_valid(ssn):
+            return ""
+        return normalize(ssn)

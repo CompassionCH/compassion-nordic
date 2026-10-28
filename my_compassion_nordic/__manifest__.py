@@ -49,6 +49,11 @@
         "views/res_company_view.xml",
         "views/my2_new_sponsorship_details.xml",
     ],
+    "assets": {
+        "web.assets_frontend": [
+            "my_compassion_nordic/static/src/js/stripe_payment_form.esm.js",
+        ],
+    },
     "post_init_hook": "post_init_hook",
     "installable": True,
 }
