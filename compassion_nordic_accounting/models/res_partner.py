@@ -31,7 +31,12 @@ VAT_COUNTRY_FMT_LIST = [se_org, no_org, cvr, alv]
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
-    social_sec_nr = fields.Char(string="Social security number")
+    # Staff only: portal record rules let a sponsor read other partners
+    # (their commercial entity's contacts, churches), and a national
+    # identity number must never travel with them.
+    social_sec_nr = fields.Char(
+        string="Social security number", groups="base.group_user"
+    )
 
     @api.depends("social_sec_nr")
     def _compute_sec_nr(self):

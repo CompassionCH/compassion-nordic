@@ -1,3 +1,5 @@
+import json
+
 from odoo import api, fields, models
 
 from ..hooks import DIGITAL_MODE_NAMES, _ensure_digital_modes
@@ -72,3 +74,39 @@ class PaymentProvider(models.Model):
             method=method,
             idempotency_key=idempotency_key,
         )
+
+    def _stripe_get_inline_form_values(
+        self,
+        amount,
+        currency,
+        partner_id,
+        is_validation,
+        payment_method_sudo=None,
+        **kwargs,
+    ):
+        """Have Stripe ask a fast-checkout payer for their name.
+
+        Core fills the Payment Element's defaultValues.billingDetails from
+        partner.name, which for a fast-checkout sponsor is the "(pending)"
+        placeholder: Stripe would show it as the payer's name, or send it
+        back unseen. It is blanked, and my2_ask_billing_name tells the
+        payment form script (stripe_payment_form.esm.js) to make the Element
+        collect the name for every payment method, cards included - Stripe
+        asks it only for some on its own. The name Stripe reports is what
+        then fills in the post-payment details form.
+        """
+        values = super()._stripe_get_inline_form_values(
+            amount,
+            currency,
+            partner_id,
+            is_validation,
+            payment_method_sudo=payment_method_sudo,
+            **kwargs,
+        )
+        partner = self.env["res.partner"].sudo().browse(partner_id).exists()
+        if not partner.my2_name_placeholder:
+            return values
+        parsed = json.loads(values)
+        parsed["billing_details"]["name"] = ""
+        parsed["my2_ask_billing_name"] = True
+        return json.dumps(parsed)

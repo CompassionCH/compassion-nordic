@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+Nordic version of the post-payment sponsor details form.
+
+    A required step of the signup (recurring.contract._my2_details_mandatory):
+    no "do this later", and no optional address. Its name fields are prefilled
+    from what Stripe reported and stay editable, because the name typed here
+    is the letter writer's, who may not be the payer (see
+    recurring.contract._my2_apply_details).
+
+    Between the name and the phone number it asks the payer's national
+    identity number, so the gift can be reported to their tax authority and
+    they get their deduction:
+
+    - Sweden: personnummer, for Skatteverket's KU65.
+    - Norway: fodselsnummer or D-nummer, for Skatteetaten's gaver til
+      frivillige organisasjoner.
+    - Denmark: CPR-nummer, for skatteindberetningsloven § 26.
+
+    Optional, and stated as such. The reporting duty is what makes collecting
+    a national identity number lawful in each of the three countries, and it
+    is purpose-bound: a sponsor who does not want the deduction leaves the
+    field empty and nothing stops them.
+
+    Injected data (added to the base form's, see my_compassion):
+    - details_prefill['social_sec_nr']: what the sponsor typed, when the form
+      came back with an error. Never a number already on file.
+    - sponsorship ('recurring.contract'): whose company decides both whether
+      the field renders at all and which country's number it takes.
+-->
+<odoo>
+  <template
+    id="my2_new_sponsorship_details_form_nordic"
+    inherit_id="my_compassion.my2_new_sponsorship_details_form"
+    name="New Sponsorship Details - Nordic Form"
+    priority="99"
+  >
+    <xpath expr="//div[hasclass('h4')]/following-sibling::div[1]" position="after">
+      <div class="mb-3 text-center body-small text-low-black">
+        If someone else will write the letters, enter their name instead.
+      </div>
+    </xpath>
+    <xpath expr="//details" position="replace" />
+  </template>
+  <template
+    id="my2_new_sponsorship_details_ssn"
+    inherit_id="my_compassion.my2_new_sponsorship_details_extra_fields"
+    name="New Sponsorship Details - National Identity Number"
+  >
+    <xpath expr="." position="inside">
+      <t t-if="sponsorship._my2_collects_ssn()">
+        <t t-set="ssn_country" t-value="sponsorship._my2_ssn_country_code()" />
+        <t t-call="theme_compassion_2025.FormFieldComponent">
+          <t t-set="top_class" t-value="'my-3'" />
+          <t t-set="label">
+            <t
+              t-if="ssn_country == 'SE'"
+            >Personnummer (for gift reporting to Skatteverket)</t>
+            <t
+              t-elif="ssn_country == 'NO'"
+            >Fødselsnummer (for gift reporting to Skatteetaten)</t>
+            <t t-else="">CPR-nummer (for gift reporting to Skattestyrelsen)</t>
+          </t>
+          <t t-set="input_id" t-value="'details_social_sec_nr'" />
+          <input
+            id="details_social_sec_nr"
+            type="text"
+            name="social_sec_nr"
+            class="form-control"
+            autocomplete="off"
+            t-att-value="details_prefill.get('social_sec_nr')"
+          />
+          <div class="body-small text-low-black mt-1">
+            <t
+              t-if="ssn_country == 'SE'"
+            >Optional, and always the payer's own number, even when someone else writes the letters. We only use it to report your gift to Skatteverket, so you get your tax deduction. Once we have it, the report is made automatically and cannot be declined.</t>
+            <t
+              t-elif="ssn_country == 'NO'"
+            >Optional, and always the payer's own number, even when someone else writes the letters. We only use it to report your gift to Skatteetaten, so you get your tax deduction.</t>
+            <t
+              t-else=""
+            >Optional, and always the payer's own number, even when someone else writes the letters. We only use it to report your gift to Skattestyrelsen, so you get your tax deduction. Tell us before the end of the year if you would rather we did not report it.</t>
+          </div>
+        </t>
+      </t>
+    </xpath>
+  </template>
+</odoo>

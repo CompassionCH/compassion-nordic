@@ -3,4 +3,6 @@ from . import (
     contracts,
     payment_provider,
     payment_transaction,
+    res_company,
+    res_partner,
 )
