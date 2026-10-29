@@ -38,8 +38,9 @@ paymentForm.include({
    * (payment.provider._stripe_get_inline_form_values). Core builds the
    * element options inside its own _prepareInlineForm, so the Elements
    * group it is about to create is wrapped to add the option to the
-   * payment element. Should anything here fail, core's form is left as it
-   * is: the details form after payment asks the name anyway.
+   * payment element. Should the wrapping or the option fail, here or when
+   * core creates the elements, core's form is left as it is: the details
+   * form after payment asks the name anyway.
    *
    * @override method from @payment_stripe/js/payment_form
    */
@@ -104,9 +105,25 @@ paymentForm.include({
       writable: true,
       value: (elementsOptions) => {
         const elements = createElements(elementsOptions);
-        const create = elements.create.bind(elements);
-        elements.create = (type, options) =>
-          create(type, type === "payment" ? withBillingName(options) : options);
+        // This runs later, inside core's own calls, out of reach of the
+        // catch in _prepareInlineForm: should the patch or the option fail,
+        // core gets the plain group and its own options instead.
+        try {
+          const create = elements.create.bind(elements);
+          elements.create = (type, options) => {
+            if (type !== "payment") {
+              return create(type, options);
+            }
+            try {
+              return create(type, withBillingName(options));
+            } catch (error) {
+              console.warn("Stripe refused to ask for the payer name", error);
+              return create(type, options);
+            }
+          };
+        } catch (error) {
+          console.warn("Could not make Stripe ask for the payer name", error);
+        }
         return elements;
       },
     });
