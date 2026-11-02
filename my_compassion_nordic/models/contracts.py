@@ -1,11 +1,20 @@
+import logging
 import unicodedata
 
-from odoo import _, models
-from odoo.exceptions import UserError
+from psycopg2 import OperationalError
+
+from odoo import SUPERUSER_ID, models
+from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 
 from odoo.addons.payment import utils as payment_utils
 
 from .res_partner import SSN_FORMATS
+
+_logger = logging.getLogger(__name__)
+
+
+class LetterWriterNotRegistered(Exception):
+    """GMC did not register the letter writer. The message is its reason."""
 
 
 class RecurringContract(models.Model):
@@ -139,32 +148,116 @@ class RecurringContract(models.Model):
         the sponsorship has one. Before that, GMC still has to know the
         letter writer when the pending sponsorship upsert names them, hence
         the constituent upsert first. A failed upsert does not raise, so the
-        job checks it got a GMC id and fails otherwise: the correspondent is
-        left as it was, and staff see the failed job.
+        job checks it got a GMC id.
+
+        Whatever stops it, a GMC refusal or a call that fails on the way,
+        leaves the correspondent as it was and gives staff a to-do on the
+        sponsorship (_my2_flag_letter_writer). The job then ends normally
+        rather than failing: a failed job is rolled back, to-do included, and
+        staff do not watch the job queue. A concurrent update is raised only
+        when OCA queue_job runs the job, because it tries the job again. The
+        replacement job runner does not, so staff hear of that one too.
 
         Elevated: queued from the public details form, so the job runs as
         the public user.
         """
         self.ensure_one()
         sponsorship = self.sudo()
-        letter_writer = self.env["res.partner"].sudo().browse(letter_writer_id)
-        if not sponsorship.gmc_commitment_id and not letter_writer.global_id:
-            messages = letter_writer.upsert_constituent()
-            messages.process_messages()
-            if not letter_writer.global_id:
-                raise UserError(
-                    _(
-                        "GMC did not register %(letter_writer)s, the letter writer"
-                        " of sponsorship %(sponsorship)s: they are not its"
-                        " correspondent yet. %(reason)s",
-                        letter_writer=letter_writer.display_name,
-                        sponsorship=sponsorship.display_name,
-                        reason="; ".join(
-                            filter(None, messages.mapped("failure_reason"))
-                        ),
-                    )
-                )
-        sponsorship.correspondent_id = letter_writer
+        letter_writer = self.env["res.partner"].sudo().browse(letter_writer_id).exists()
+        if not letter_writer:
+            # Staff merged or deleted the contact before the job ran.
+            return "The letter writer no longer exists."
+        try:
+            with self.env.cr.savepoint():
+                if not sponsorship.gmc_commitment_id and not letter_writer.global_id:
+                    messages = letter_writer.upsert_constituent()
+                    messages.process_messages()
+                    if not letter_writer.global_id:
+                        raise LetterWriterNotRegistered(
+                            "; ".join(filter(None, messages.mapped("failure_reason")))
+                        )
+                sponsorship.correspondent_id = letter_writer
+        except Exception as error:
+            if (
+                isinstance(error, OperationalError)
+                and error.pgcode in PG_CONCURRENCY_ERRORS_TO_RETRY
+                and "queue.job" in self.env
+            ):
+                raise
+            _logger.warning(
+                "Letter writer %s is not the correspondent of sponsorship %s.",
+                letter_writer.id,
+                sponsorship.id,
+                exc_info=True,
+            )
+            sponsorship._my2_flag_letter_writer(letter_writer, error)
+            return f"Not assigned, staff have a to-do: {error!r}"
+        return True
+
+    def _my2_flag_letter_writer(self, letter_writer, error):
+        """Give staff a to-do on this sponsorship: its letter writer could not
+        be made its correspondent, so letters still go to the payer.
+
+        Written in the language of the user it is assigned to. Created as
+        OdooBot, like the to-dos of scheduled actions: the job runs as the
+        public user, who would otherwise sign the email that tells staff
+        about it.
+        """
+        self.ensure_one()
+        responsible = self._my2_letter_writer_responsible()
+        todo = self.with_user(SUPERUSER_ID).with_context(lang=responsible.lang)
+        if isinstance(error, LetterWriterNotRegistered):
+            reason = todo.env._(
+                "GMC did not register the letter writer. %(reason)s",
+                reason=str(error),
+            )
+        else:
+            reason = str(error) or type(error).__name__
+        todo.activity_schedule(
+            "mail.mail_activity_data_todo",
+            summary=todo.env._("Letter writer not assigned"),
+            note=todo.env._(
+                "%(letter_writer)s, named on the signup form as the person who"
+                " writes to the child, could not be made the correspondent of"
+                " this sponsorship. The payer stays its correspondent until"
+                " you make the change. %(reason)s",
+                letter_writer=letter_writer._get_html_link(),
+                reason=reason,
+            ),
+            user_id=responsible.id,
+        )
+
+    def _my2_letter_writer_responsible(self):
+        """Who gets the to-do about a letter writer GMC did not take: the
+        letter responsible of the Compassion settings, or the first active
+        administrator when none is set or that user is archived."""
+        users = self.env["res.users"].sudo()
+        responsible_id = (
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("sbc_compassion.letter_responsible")
+            or ""
+        )
+        responsible = users.browse(
+            int(responsible_id) if responsible_id.isdigit() else 0
+        ).exists()
+        if responsible.active:
+            return responsible
+        administrator = users.search(
+            [
+                ("groups_id", "=", self.env.ref("base.group_system").id),
+                ("share", "=", False),
+            ],
+            order="id",
+            limit=1,
+        )
+        _logger.warning(
+            "No active letter responsible in the Compassion settings: the"
+            " to-do about the letter writer of sponsorship %s goes to %s.",
+            self.id,
+            administrator.login,
+        )
+        return administrator
 
     def _my2_create_letter_writer(self, values):
         """The correspondent the details form names, as a new contact.

@@ -1,12 +1,15 @@
 import re
 from unittest.mock import patch
 
+from psycopg2 import OperationalError, errorcodes
+
 from odoo.exceptions import UserError
 from odoo.tests import tagged
-from odoo.tests.common import HttpCase
+from odoo.tests.common import HttpCase, new_test_user
 
 from odoo.addons.my_compassion.tests.common import DigitalSeamCase
 
+CONTRACTS_LOGGER = "odoo.addons.my_compassion_nordic.models.contracts"
 CSRF_RE = re.compile(r'name="csrf_token"\s+value="([^"]+)"')
 SE_VALID = "811218-9876"
 
@@ -330,12 +333,167 @@ class TestDetailsFormNordic(HttpCase, DigitalSeamCase):
         change.assert_called_once()
         self.assertEqual(self.signup.correspondent_id, letter_writer)
 
-    def test_letter_writer_job_fails_when_gmc_does_not_register_them(self):
-        """The pending sponsorship upsert would name a correspondent GMC
-        does not know: the job fails instead, and nothing changes."""
-        letter_writer = self._letter_writer()
+    def _letter_responsible(self):
+        user = new_test_user(self.env, login="t3465-letters", groups="base.group_user")
+        self.env["ir.config_parameter"].sudo().set_param(
+            "sbc_compassion.letter_responsible", str(user.id)
+        )
+        return user
 
-        with self._gmc_upsert(registers=False), self.assertRaises(UserError):
+    def _letter_writer_todo(self):
+        todos = self.signup.activity_ids.filtered(
+            lambda a: a.activity_type_id == self.env.ref("mail.mail_activity_data_todo")
+        )
+        self.assertEqual(len(todos), 1)
+        return todos
+
+    def test_letter_writer_job_flags_staff_when_gmc_does_not_register_them(self):
+        """The pending sponsorship upsert would name a correspondent GMC
+        does not know: nothing changes, and the letter responsible gets a
+        to-do in their own language rather than a failed job nobody
+        watches."""
+        for lang in ("sv_SE", "nb_NO"):
+            self.env["res.lang"]._activate_lang(lang)
+        letter_writer = self._letter_writer()
+        responsible = self._letter_responsible()
+        responsible.lang = "sv_SE"
+        public = self.env.ref("base.public_user")
+
+        with (
+            self._gmc_upsert(registers=False),
+            self.assertLogs(CONTRACTS_LOGGER, level="WARNING"),
+        ):
+            result = (
+                self.signup.with_user(public)
+                .with_context(lang="nb_NO")
+                ._my2_assign_letter_writer(letter_writer.id)
+            )
+
+        self.assertEqual(self.signup.correspondent_id, self.payer)
+        todo = self._letter_writer_todo()
+        self.assertEqual(todo.user_id, responsible)
+        self.assertEqual(todo.create_uid, self.env.ref("base.user_root"))
+        self.assertEqual(todo.summary, "Brevskrivaren inte tilldelad")
+        self.assertIn(letter_writer.name, todo.note)
+        self.assertIn("GMC registrerade inte brevskrivaren.", todo.note)
+        self.assertIn("Not assigned", result)
+
+    def test_letter_writer_job_flags_staff_on_a_concurrent_update(self):
+        """The replacement job runner never tries a job again, so a
+        concurrent update is reported like any other failure."""
+        if "queue.job" in self.env:
+            self.skipTest("OCA queue_job tries the job again instead")
+
+        class ConcurrentUpdate(OperationalError):
+            pgcode = errorcodes.SERIALIZATION_FAILURE
+
+        # the job tells this error apart by its code
+        self.assertEqual(ConcurrentUpdate().pgcode, errorcodes.SERIALIZATION_FAILURE)
+        letter_writer = self._letter_writer()
+        self._letter_responsible()
+
+        with (
+            patch.object(
+                type(self.env["res.partner"]),
+                "upsert_constituent",
+                side_effect=ConcurrentUpdate("could not serialize access"),
+            ),
+            self.assertLogs(CONTRACTS_LOGGER, level="WARNING"),
+        ):
             self.signup._my2_assign_letter_writer(letter_writer.id)
 
         self.assertEqual(self.signup.correspondent_id, self.payer)
+        self.assertIn("could not serialize access", self._letter_writer_todo().note)
+
+    def test_letter_writer_job_flags_staff_when_gmc_refuses_the_change(self):
+        """Once GMC has the sponsorship, a refused correspondent change is
+        undone and reported the same way, with the visitor's input and
+        GMC's answer escaped."""
+        letter_writer = self.env["res.partner"].create(
+            {"firstname": "<b>Erik</b>", "lastname": "Svensson"}
+        )
+        responsible = self._letter_responsible()
+        self.signup.gmc_commitment_id = "T3465-COMMITMENT"
+        public = self.env.ref("base.public_user")
+        contract_class = type(self.env["recurring.contract"])
+
+        with (
+            patch.object(
+                contract_class,
+                "_change_correspondent",
+                side_effect=UserError("Refused: <img src=x onerror=alert(1)>"),
+            ),
+            self.assertLogs(CONTRACTS_LOGGER, level="WARNING"),
+        ):
+            result = (
+                self.signup.with_user(public)
+                .with_context(no_upsert=False)
+                ._my2_assign_letter_writer(letter_writer.id)
+            )
+
+        self.assertEqual(self.signup.correspondent_id, self.payer)
+        todo = self._letter_writer_todo()
+        self.assertEqual(todo.user_id, responsible)
+        self.assertIn("Refused: &lt;img", todo.note)
+        self.assertNotIn("<img", todo.note)
+        self.assertIn("&lt;b&gt;Erik&lt;/b&gt;", todo.note)
+        self.assertNotIn("<b>", todo.note)
+        self.assertIn("Not assigned", result)
+
+    def test_letter_writer_todo_goes_to_an_administrator_by_default(self):
+        """With the letter responsible archived, an active administrator
+        still gets the to-do."""
+        archived = self._letter_responsible()
+        archived.active = False
+
+        with (
+            self._gmc_upsert(registers=False),
+            self.assertLogs(CONTRACTS_LOGGER, level="WARNING") as logs,
+        ):
+            self.signup._my2_assign_letter_writer(self._letter_writer().id)
+
+        administrator = self._letter_writer_todo().user_id
+        self.assertTrue(administrator.active)
+        self.assertTrue(administrator._is_system())
+        self.assertTrue(any("No active letter responsible" in m for m in logs.output))
+
+    def test_letter_writer_todo_survives_the_job_runner(self):
+        """Run by the job runner, as on the Nordic database: a GMC call that
+        crashes still ends the job as done, and its to-do is kept."""
+        if "queue.job" in self.env:
+            self.skipTest("OCA queue_job runs the jobs on this database")
+        letter_writer = self._letter_writer()
+        responsible = self._letter_responsible()
+        public = self.env.ref("base.public_user")
+        job = (
+            self.signup.with_user(public)
+            .sudo()
+            .with_delay_sh("_my2_assign_letter_writer", letter_writer.id)
+        )
+        # the request that queued the job is committed before the runner,
+        # which reads through a cursor of its own
+        self.env.flush_all()
+        job_class = type(self.env["queue.job.replacement"])
+        search = job_class.search
+
+        def only_this_job(model, domain, *args, **kwargs):
+            # never run the database's own pending jobs
+            return search(model, [*domain, ("id", "=", job.id)], *args, **kwargs)
+
+        with (
+            patch.object(job_class, "search", only_this_job),
+            patch.object(
+                type(self.env["res.partner"]),
+                "upsert_constituent",
+                side_effect=TimeoutError("Connect token server"),
+            ),
+            self.assertLogs(CONTRACTS_LOGGER, level="WARNING"),
+        ):
+            self.env["queue.job.replacement"].sudo().cron_run_jobs()
+
+        self.env.invalidate_all()
+        self.assertEqual(job.state, "done")
+        self.assertEqual(self.signup.correspondent_id, self.payer)
+        todo = self._letter_writer_todo()
+        self.assertEqual(todo.user_id, responsible)
+        self.assertIn("Connect token server", todo.note)

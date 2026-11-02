@@ -452,9 +452,24 @@ msgstr ""
 #. module: my_compassion_nordic
 #. odoo-python
 #: code:addons/my_compassion_nordic/models/contracts.py:0
+msgid "GMC did not register the letter writer. %(reason)s"
+msgstr "GMC registrerte ikke brevskriveren. %(reason)s"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/contracts.py:0
+msgid "Letter writer not assigned"
+msgstr "Brevskriveren ikke tildelt"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/contracts.py:0
 msgid ""
-"GMC did not register %(letter_writer)s, the letter writer of sponsorship "
-"%(sponsorship)s: they are not its correspondent yet. %(reason)s"
+"%(letter_writer)s, named on the signup form as the person who writes to the "
+"child, could not be made the correspondent of this sponsorship. The payer "
+"stays its correspondent until you make the change. %(reason)s"
 msgstr ""
-"GMC registrerte ikke %(letter_writer)s, brevskriveren for fadderskapet "
-"%(sponsorship)s: vedkommende er ennå ikke korrespondent. %(reason)s"
+"%(letter_writer)s, som ble oppgitt i registreringsskjemaet som den som "
+"skriver til barnet, kunne ikke gjøres til korrespondent for dette "
+"fadderskapet. Betaleren forblir korrespondent til du gjør endringen. "
+"%(reason)s"
