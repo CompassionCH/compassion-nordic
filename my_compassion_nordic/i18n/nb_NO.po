@@ -473,3 +473,13 @@ msgstr ""
 "skriver til barnet, kunne ikke gjøres til korrespondent for dette "
 "fadderskapet. Betaleren forblir korrespondent til du gjør endringen. "
 "%(reason)s"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/contracts.py:0
+msgid ""
+"%(note)s No one was given a to-do: set the user under \"Letter translation "
+"check unsuccessful\" in the Compassion settings."
+msgstr ""
+"%(note)s Ingen ble tildelt en oppgave: angi brukeren under \"Letter "
+"translation check unsuccessful\" i Compassion-innstillingene."

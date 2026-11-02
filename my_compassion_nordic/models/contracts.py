@@ -151,9 +151,9 @@ class RecurringContract(models.Model):
         job checks it got a GMC id.
 
         Whatever stops it, a GMC refusal or a call that fails on the way,
-        leaves the correspondent as it was and gives staff a to-do on the
-        sponsorship (_my2_flag_letter_writer). The job then ends normally
-        rather than failing: a failed job is rolled back, to-do included, and
+        leaves the correspondent as it was and tells staff on the sponsorship
+        (_my2_flag_letter_writer). The job then ends normally rather than
+        failing: a failed job is rolled back, what tells staff included, and
         staff do not watch the job queue. A concurrent update is raised only
         when OCA queue_job runs the job, because it tries the job again. The
         replacement job runner does not, so staff hear of that one too.
@@ -191,73 +191,87 @@ class RecurringContract(models.Model):
                 exc_info=True,
             )
             sponsorship._my2_flag_letter_writer(letter_writer, error)
-            return f"Not assigned, staff have a to-do: {error!r}"
+            return f"Not assigned: {error!r}"
         return True
 
     def _my2_flag_letter_writer(self, letter_writer, error):
-        """Give staff a to-do on this sponsorship: its letter writer could not
-        be made its correspondent, so letters still go to the payer.
+        """Tell staff on this sponsorship that its letter writer could not be
+        made its correspondent, so letters still go to the payer.
 
-        Written in the language of the user it is assigned to. Created as
-        OdooBot, like the to-dos of scheduled actions: the job runs as the
-        public user, who would otherwise sign the email that tells staff
-        about it.
+        A to-do for the letter responsible of the Compassion settings, in
+        their language. With no active one, the note goes in the
+        sponsorship's chatter with a line naming the setting, in the language
+        of the sponsorship's company, and an error is logged. No one else
+        gets the to-do: the administrators are not the staff who handle
+        sponsorships.
+
+        Written as OdooBot, like the to-dos of scheduled actions: the job
+        runs as the public user, who would otherwise sign the to-do's email
+        or author the note.
         """
         self.ensure_one()
         responsible = self._my2_letter_writer_responsible()
-        todo = self.with_user(SUPERUSER_ID).with_context(lang=responsible.lang)
+        # an inactive language gives False: the text is then in English
+        lang = self.env["res.lang"]._get_code(
+            responsible.lang or self.company_id.sudo().partner_id.lang
+        )
+        flag = self.with_user(SUPERUSER_ID).with_context(lang=lang or "en_US")
         if isinstance(error, LetterWriterNotRegistered):
-            reason = todo.env._(
+            reason = flag.env._(
                 "GMC did not register the letter writer. %(reason)s",
                 reason=str(error),
             )
         else:
             reason = str(error) or type(error).__name__
-        todo.activity_schedule(
-            "mail.mail_activity_data_todo",
-            summary=todo.env._("Letter writer not assigned"),
-            note=todo.env._(
-                "%(letter_writer)s, named on the signup form as the person who"
-                " writes to the child, could not be made the correspondent of"
-                " this sponsorship. The payer stays its correspondent until"
-                " you make the change. %(reason)s",
-                letter_writer=letter_writer._get_html_link(),
-                reason=reason,
+        note = flag.env._(
+            "%(letter_writer)s, named on the signup form as the person who"
+            " writes to the child, could not be made the correspondent of"
+            " this sponsorship. The payer stays its correspondent until"
+            " you make the change. %(reason)s",
+            letter_writer=letter_writer._get_html_link(),
+            reason=reason,
+        )
+        if responsible:
+            flag.activity_schedule(
+                "mail.mail_activity_data_todo",
+                summary=flag.env._("Letter writer not assigned"),
+                note=note,
+                user_id=responsible.id,
+            )
+            return
+        _logger.error(
+            "No active letter responsible (sbc_compassion.letter_responsible):"
+            " the letter writer of sponsorship %s is noted in its chatter, and"
+            " no one has a to-do.",
+            self.id,
+        )
+        flag.message_post(
+            body=flag.env._(
+                "%(note)s No one was given a to-do: set the user under"
+                ' "Letter translation check unsuccessful" in the Compassion'
+                " settings.",
+                note=note,
             ),
-            user_id=responsible.id,
+            subtype_xmlid="mail.mt_note",
         )
 
     def _my2_letter_writer_responsible(self):
         """Who gets the to-do about a letter writer GMC did not take: the
-        letter responsible of the Compassion settings, or the first active
-        administrator when none is set or that user is archived."""
-        users = self.env["res.users"].sudo()
+        letter responsible of the Compassion settings, when one is set and
+        active. No user otherwise."""
         responsible_id = (
             self.env["ir.config_parameter"]
             .sudo()
             .get_param("sbc_compassion.letter_responsible")
             or ""
         )
-        responsible = users.browse(
-            int(responsible_id) if responsible_id.isdigit() else 0
-        ).exists()
-        if responsible.active:
-            return responsible
-        administrator = users.search(
-            [
-                ("groups_id", "=", self.env.ref("base.group_system").id),
-                ("share", "=", False),
-            ],
-            order="id",
-            limit=1,
+        responsible = (
+            self.env["res.users"]
+            .sudo()
+            .browse(int(responsible_id) if responsible_id.isdigit() else 0)
+            .exists()
         )
-        _logger.warning(
-            "No active letter responsible in the Compassion settings: the"
-            " to-do about the letter writer of sponsorship %s goes to %s.",
-            self.id,
-            administrator.login,
-        )
-        return administrator
+        return responsible.filtered("active")
 
     def _my2_create_letter_writer(self, values):
         """The correspondent the details form names, as a new contact.

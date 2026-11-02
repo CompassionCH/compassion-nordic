@@ -472,3 +472,13 @@ msgstr ""
 "%(letter_writer)s, som blev angivet i tilmeldingsformularen som den, der "
 "skriver til barnet, kunne ikke gøres til korrespondent for dette sponsorat. "
 "Betaleren forbliver korrespondent, indtil du foretager ændringen. %(reason)s"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/contracts.py:0
+msgid ""
+"%(note)s No one was given a to-do: set the user under \"Letter translation "
+"check unsuccessful\" in the Compassion settings."
+msgstr ""
+"%(note)s Ingen blev tildelt en opgave: angiv brugeren under \"Letter "
+"translation check unsuccessful\" i Compassion-indstillingerne."

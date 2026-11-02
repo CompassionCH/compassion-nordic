@@ -440,22 +440,68 @@ class TestDetailsFormNordic(HttpCase, DigitalSeamCase):
         self.assertNotIn("<b>", todo.note)
         self.assertIn("Not assigned", result)
 
-    def test_letter_writer_todo_goes_to_an_administrator_by_default(self):
-        """With the letter responsible archived, an active administrator
-        still gets the to-do."""
+    def test_letter_writer_noted_in_chatter_without_a_responsible(self):
+        """With no active letter responsible, no one gets the to-do: the
+        administrators are not the staff who handle sponsorships. The
+        sponsorship's chatter says it instead, in its company's language,
+        with the visitor's input escaped, and the log says the setting is
+        missing."""
+        self.env["res.lang"]._activate_lang("sv_SE")
+        self.signup.company_id.partner_id.lang = "sv_SE"
         archived = self._letter_responsible()
         archived.active = False
-
-        with (
-            self._gmc_upsert(registers=False),
-            self.assertLogs(CONTRACTS_LOGGER, level="WARNING") as logs,
+        deleted = (
+            self.env["res.users"]
+            .with_context(active_test=False)
+            .search([], order="id desc", limit=1)
+            .id
+            + 1
+        )
+        public = self.env.ref("base.public_user")
+        todo_type = self.env.ref("mail.mail_activity_data_todo")
+        for case, responsible in (
+            ("unset", False),
+            ("archived", str(archived.id)),
+            ("deleted", str(deleted)),
+            ("not-a-number", "abc"),
         ):
-            self.signup._my2_assign_letter_writer(self._letter_writer().id)
+            with self.subTest(case):
+                self.env["ir.config_parameter"].sudo().set_param(
+                    "sbc_compassion.letter_responsible", responsible
+                )
+                letter_writer = self.env["res.partner"].create(
+                    {"firstname": "<b>Erik</b>", "lastname": f"Svensson-{case}"}
+                )
 
-        administrator = self._letter_writer_todo().user_id
-        self.assertTrue(administrator.active)
-        self.assertTrue(administrator._is_system())
-        self.assertTrue(any("No active letter responsible" in m for m in logs.output))
+                with (
+                    self._gmc_upsert(registers=False),
+                    self.assertLogs(CONTRACTS_LOGGER, level="ERROR") as logs,
+                ):
+                    self.signup.with_user(public)._my2_assign_letter_writer(
+                        letter_writer.id
+                    )
+
+                self.assertEqual(self.signup.correspondent_id, self.payer)
+                self.assertFalse(
+                    self.signup.activity_ids.filtered(
+                        lambda a: a.activity_type_id == todo_type
+                    )
+                )
+                notes = self.signup.message_ids.filtered(
+                    lambda m, case=case: f"Svensson-{case}" in (m.body or "")
+                )
+                self.assertEqual(len(notes), 1)
+                self.assertEqual(notes.subtype_id, self.env.ref("mail.mt_note"))
+                self.assertEqual(notes.author_id, self.env.ref("base.partner_root"))
+                self.assertFalse(notes.notification_ids)
+                self.assertIn("GMC registrerade inte brevskrivaren.", notes.body)
+                self.assertIn("Ingen tilldelades någon uppgift", notes.body)
+                self.assertIn("&lt;b&gt;Erik&lt;/b&gt;", notes.body)
+                self.assertNotIn("<b>", notes.body)
+                self.assertNotIn("&amp;lt;", notes.body)
+                self.assertTrue(
+                    any("No active letter responsible" in m for m in logs.output)
+                )
 
     def test_letter_writer_todo_survives_the_job_runner(self):
         """Run by the job runner, as on the Nordic database: a GMC call that
