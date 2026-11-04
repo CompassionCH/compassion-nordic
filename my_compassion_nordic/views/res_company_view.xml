@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+  <!-- The SSN flag, so turning a country's collection on or off is a
+       settings change rather than a deploy. -->
+  <record id="view_company_form_my2_ssn" model="ir.ui.view">
+    <field name="name">res.company.form.my2.ssn</field>
+    <field name="model">res.company</field>
+    <field name="inherit_id" ref="base.view_company_form" />
+    <field name="arch" type="xml">
+      <field name="country_id" position="after">
+        <field name="my2_collect_ssn" />
+      </field>
+    </field>
+  </record>
+</odoo>

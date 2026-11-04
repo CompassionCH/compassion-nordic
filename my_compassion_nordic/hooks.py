@@ -56,3 +56,4 @@ def _ensure_digital_modes(env, providers=None):
 
 def post_init_hook(env):
     _ensure_digital_modes(env)
+    env["res.company"]._my2_seed_collect_ssn()
