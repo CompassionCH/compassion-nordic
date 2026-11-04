@@ -41,6 +41,7 @@
     "data": [
         "data/ir.advanced.translation.csv",
         "data/res.lang.compassion.csv",
+        "views/childpack_report.xml",
         "views/compassion_child.xml",
         "views/compassion_project.xml",
     ],

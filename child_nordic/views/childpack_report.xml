@@ -1,0 +1,16 @@
+<odoo>
+    <!-- T3372 The text printed on the pre-printed CIF front page was too high -->
+    <template
+    id="childpack_style_nordic"
+    inherit_id="child_compassion.childpack_style"
+  >
+        <xpath expr="//style" position="inside">
+            .summary {
+                top: 182mm;
+            }
+            .summary_field.name {
+                top: 2mm;
+            }
+        </xpath>
+    </template>
+</odoo>
