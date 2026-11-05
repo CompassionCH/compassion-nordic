@@ -42,13 +42,7 @@ class ResPartner(models.Model):
         return self._get_salutation_sv_SE()
 
     def _get_salutation_fi_FI(self):
-        self.ensure_one()
-        res = "Hei"
-        if self.firstname:
-            res += f" {self.firstname},"
-        else:
-            res += ","
-        return res
+        return self._get_salutation_en_US()
 
     @api.model_create_multi
     def create(self, vals_list):
