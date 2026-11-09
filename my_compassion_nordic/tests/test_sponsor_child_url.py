@@ -1,7 +1,7 @@
 from odoo.tests import TransactionCase, tagged
 from odoo.tests.common import HttpCase, new_test_user
 
-from ..hooks import _seed_sponsor_child_urls
+from ..hooks import _seed_website_settings
 from ..models.website import SPONSOR_CHILD_URLS
 
 SPONSOR_URL = "https://sponsor.example.org/start/"
@@ -54,7 +54,8 @@ class TestSponsorChildLinks(HttpCase):
 @tagged("post_install", "-at_install")
 class TestSponsorChildUrlSeed(TransactionCase):
     """The URL is filled from the country of the website's company, only
-    where it is empty."""
+    where it is empty. Every MyCompassion website mixes the countries of its
+    list of children."""
 
     def _website(self, country_code, url=False):
         country = self.env["res.country"].search([("code", "=", country_code)])
@@ -91,5 +92,15 @@ class TestSponsorChildUrlSeed(TransactionCase):
     def test_hook_leaves_other_websites_alone(self):
         website = self._website("SE")
         self.assertFalse(website.is_my_compassion)
-        _seed_sponsor_child_urls(self.env)
+        _seed_website_settings(self.env)
         self.assertFalse(website.sponsor_child_url)
+        self.assertEqual(website.my2_child_list_order, "waiting")
+
+    def test_hook_mixes_countries_on_my_compassion_websites(self):
+        websites = self._website("SE") | self._website("FI")
+        websites.write({"is_my_compassion": True})
+        self.assertEqual(set(websites.mapped("my2_child_list_order")), {"waiting"})
+        _seed_website_settings(self.env)
+        self.assertEqual(
+            set(websites.mapped("my2_child_list_order")), {"mix_countries"}
+        )
