@@ -357,6 +357,17 @@ msgstr ""
 "Hvis en anden skal skrive brevene, så skriv vedkommendes navn i stedet."
 
 #. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_thank_you_page_nordic
+msgid "Thank you for becoming the sponsor of"
+msgstr "Tak fordi du er blevet fadder for"
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_form_nordic
+msgid "Please fill in your details so we can manage your new sponsorship."
+msgstr ""
+"Udfyld venligst dine oplysninger, så vi kan administrere dit nye fadderskab."
+
+#. module: my_compassion_nordic
 #: model:ir.model.fields,help:my_compassion_nordic.field_res_config_settings__sponsor_child_url
 #: model_terms:ir.ui.view,arch_db:my_compassion_nordic.res_config_settings_view_form_my2_sponsor_child_url
 msgid ""

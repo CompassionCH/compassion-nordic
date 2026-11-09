@@ -8,6 +8,9 @@ Nordic version of the post-payment sponsor details form.
     is the letter writer's, who may not be the payer (see
     recurring.contract._my2_apply_details).
 
+    It has no heading of its own: the page title above it thanks the
+    sponsor, and the form opens on a line saying what the details are for.
+
     Between the name and the phone number it asks the payer's national
     identity number, so the gift can be reported to their tax authority and
     they get their deduction:
@@ -29,17 +32,42 @@ Nordic version of the post-payment sponsor details form.
       the field renders at all and which country's number it takes.
 -->
 <odoo>
+  <!-- While the form shows, the title of the thank-you page says the
+       sponsorship has begun, and the form below asks for the details. -->
+  <template
+    id="my2_new_sponsorship_thank_you_page_nordic"
+    inherit_id="my_compassion.my2_new_sponsorship_thank_you_page"
+    name="New Sponsorship Thank You Page - Nordic Title"
+  >
+    <xpath
+      expr="//t[@t-if='details_token']/preceding-sibling::div[1]//t[@t-set='title_content']"
+      position="after"
+    >
+      <t t-if="details_token" t-set="title_content">Thank you for becoming the sponsor of&#160;<t
+          t-out="sponsorship.child_id.preferred_name"
+        /></t>
+    </xpath>
+  </template>
   <template
     id="my2_new_sponsorship_details_form_nordic"
     inherit_id="my_compassion.my2_new_sponsorship_details_form"
     name="New Sponsorship Details - Nordic Form"
     priority="99"
   >
-    <xpath expr="//div[hasclass('h4')]/following-sibling::div[1]" position="after">
+    <!-- The page title above the form already thanks the sponsor (see
+         my2_new_sponsorship_thank_you_page_nordic), so the form opens on
+         what it is for. Its own heading and intro are the first two
+         elements after the hidden inputs; the intro is replaced first,
+         while it is still the second. -->
+    <xpath expr="//input[@name='details_token']/following-sibling::*[2]" position="replace">
+      <div class="mb-1 text-center body-small text-low-black">
+        Please fill in your details so we can manage your new sponsorship.
+      </div>
       <div class="mb-3 text-center body-small text-low-black">
         If someone else will write the letters, enter their name instead.
       </div>
     </xpath>
+    <xpath expr="//input[@name='details_token']/following-sibling::*[1]" position="replace" />
     <xpath expr="//details" position="replace" />
   </template>
   <template

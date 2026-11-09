@@ -8,4 +8,5 @@ from . import (
     test_ssn_details_field,
     test_stripe_billing_name,
     test_stripe_checkout_form,
+    test_thank_you_details_copy,
 )
