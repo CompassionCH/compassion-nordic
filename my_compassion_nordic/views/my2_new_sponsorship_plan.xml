@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+Nordic plan choice of the new-sponsorship checkout.
+
+    In place of the optional "Sponsorship plus" checkbox, two required radio
+    buttons, neither checked until the sponsor picks one: the sponsorship
+    alone, or with the Plus contribution (product fund_gen), each named
+    after its product and priced by the website's pricelist. The link below
+    them opens the explanation of the Plus.
+
+    Both radios post "sponsorship_plus": "0" for the sponsorship alone, "1"
+    for the Plus (see new.sponsorship.wizard.update in this module).
+
+    Injected data (from the base step rendering):
+    - wizard ('new.sponsorship.wizard'): sponsorship_plan checks the radio
+      already picked, and _my2_plan_choice supplies the copy.
+    - website: whose products, pricelist and currency the copy shows.
+-->
+<odoo>
+  <template
+    id="my2_new_sponsorship_wizard_sponsorship_plus_nordic"
+    inherit_id="my_compassion.my2_new_sponsorship_wizard_sponsorship_plus"
+    name="New Sponsorship Wizard Sponsorship Plus - Nordic Plan Choice"
+    priority="99"
+  >
+    <xpath
+      expr="//div[@id='sponsorship-plus-info-modal']/preceding-sibling::div[1]"
+      position="replace"
+    >
+      <t t-set="plan_choice" t-value="wizard._my2_plan_choice(website)" />
+      <fieldset class="my-3">
+        <t t-foreach="plan_choice['options']" t-as="plan">
+          <label
+            t-att-for="plan['input_id']"
+            t-attf-class="d-flex align-items-center p-3 rounded rounded-lg bg-light-blue border border-mid-grey #{'mt-2' if plan_index else ''}"
+          >
+            <input
+              type="radio"
+              t-att-id="plan['input_id']"
+              name="sponsorship_plus"
+              t-att-value="plan['value']"
+              class="form-check-input mt-0 me-3 flex-shrink-0"
+              t-att-checked="plan['checked']"
+              required=""
+            />
+            <span class="very-tiny-text">
+              <span class="text-dark-blue bold" t-out="plan['name']" />
+              <span class="text-core-blue" t-out="plan['price']" />
+            </span>
+          </label>
+        </t>
+        <a
+          href="#"
+          class="d-inline-block mt-2 very-tiny-text bold text-core-blue"
+          data-bs-toggle="modal"
+          data-bs-target="#sponsorship-plus-info-modal"
+          t-out="plan_choice['question']"
+        />
+      </fieldset>
+    </xpath>
+    <xpath expr="//div[@id='sponsorship-plus-info-modal-title']" position="attributes">
+      <attribute name="t-out">plan_choice['question']</attribute>
+    </xpath>
+    <xpath
+      expr="//div[@id='sponsorship-plus-info-modal-title']/following-sibling::div[1]"
+      position="replace"
+    >
+      <div class="body-small">
+        <p t-out="plan_choice['contribution']" />
+        <p>This money can be used for all of Compassion's programmes, wherever it is needed most.</p>
+        <p
+          class="mb-0"
+        >It can be, for example, clean water, sanitation facilities, disaster relief, health programmes for mothers and babies, or registered children who have not yet found a sponsor.</p>
+      </div>
+    </xpath>
+  </template>
+</odoo>
