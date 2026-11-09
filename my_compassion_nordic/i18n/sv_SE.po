@@ -359,6 +359,18 @@ msgstr ""
 "Om brevskrivningen ska skötas av någon annan, fyll i det namnet i stället."
 
 #. module: my_compassion_nordic
+#: model:ir.model.fields,help:my_compassion_nordic.field_res_config_settings__sponsor_child_url
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.res_config_settings_view_form_my2_sponsor_child_url
+msgid ""
+"Page of the public website where MyCompassion sends a sponsor who wants to "
+"sponsor another child. When empty, the sponsor stays in MyCompassion, on its"
+" list of children waiting for a sponsor."
+msgstr ""
+"Sida på den publika webbplatsen dit MyCompassion skickar en fadder som vill "
+"bli fadder till ytterligare ett barn. Om fältet är tomt stannar faddern i "
+"MyCompassion, på listan över barn som väntar på en fadder."
+
+#. module: my_compassion_nordic
 #: model:ir.model,name:my_compassion_nordic.model_payment_provider
 msgid "Payment Provider"
 msgstr ""
@@ -377,6 +389,12 @@ msgstr "Personnummer (för gåvorapportering till Skatteverket)"
 #: model:ir.model,name:my_compassion_nordic.model_recurring_contract
 msgid "Recurring contract"
 msgstr ""
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_res_config_settings__sponsor_child_url
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.res_config_settings_view_form_my2_sponsor_child_url
+msgid "Sponsor a child link"
+msgstr "Länk för att bli fadder"
 
 #. module: my_compassion_nordic
 #. odoo-python

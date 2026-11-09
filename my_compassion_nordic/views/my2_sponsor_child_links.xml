@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+The two links that start a new sponsorship from MyCompassion lead to the
+website's "Sponsor a child link" setting, the country's public website. When
+the setting is empty they lead to MyCompassion's own list of children.
+-->
+<odoo>
+  <!-- "New sponsorship" button below the sponsor's children -->
+  <template id="my2_children_page_sponsor_child_url" inherit_id="my_compassion.my2_children_page">
+    <xpath
+      expr="//t[@t-set='href'][@t-value=&quot;'/my2/sponsorships'&quot;]"
+      position="attributes"
+    >
+      <attribute name="t-value">request.website.sponsor_child_url or '/my2/sponsorships'</attribute>
+    </xpath>
+  </template>
+  <!-- "Become a sponsor" dashboard tile, shown to a partner who sponsors no child -->
+  <template
+    id="dashboard_sponsorship_vignette_sponsor_child_url"
+    inherit_id="my_compassion.dashboard_sponsorship_vignette"
+  >
+    <xpath
+      expr="//t[@t-else='']/t[@t-set='href'][@t-value=&quot;'/my2/sponsorships'&quot;]"
+      position="attributes"
+    >
+      <attribute name="t-value">request.website.sponsor_child_url or '/my2/sponsorships'</attribute>
+    </xpath>
+  </template>
+</odoo>

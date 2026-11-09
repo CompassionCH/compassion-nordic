@@ -4,5 +4,7 @@ from . import (
     payment_provider,
     payment_transaction,
     res_company,
+    res_config_settings,
     res_partner,
+    website,
 )

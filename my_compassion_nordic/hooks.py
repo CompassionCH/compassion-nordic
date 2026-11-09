@@ -54,6 +54,14 @@ def _ensure_digital_modes(env, providers=None):
     return modes
 
 
+def _seed_sponsor_child_urls(env):
+    """Point each MyCompassion website's "sponsor a child" links at its
+    country's public website, where its setting is still empty."""
+    websites = env["website"].search([("is_my_compassion", "=", True)])
+    return websites._my2_seed_sponsor_child_url()
+
+
 def post_init_hook(env):
     _ensure_digital_modes(env)
     env["res.company"]._my2_seed_collect_ssn()
+    _seed_sponsor_child_urls(env)
