@@ -10,14 +10,32 @@
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
-from odoo import _, models
+from stdnum.se import orgnr as se_orgnr
+from stdnum.se import personnummer
+from stdnum.se import vat as se_vat
+
+from odoo import _, fields, models
 from odoo.exceptions import ValidationError
 
-MIN_AMOUNT = 200  # Minimum amount threshold for Sweden tax reporting (per day)
+# Skatteverket reporting thresholds (KU65). An occasion is one day: all the
+# donor's income lines of that day are added up before the threshold applies.
+INDIVIDUAL_MIN_PER_OCCASION = 200
+INDIVIDUAL_MIN_PER_YEAR = 2000
+# From income year 2026; smaller company gifts never add up to it.
+COMPANY_MIN_PER_OCCASION = 2000
 
 
 class GenerateTaxWizard(models.TransientModel):
     _inherit = "generate.tax.wizard"
+
+    se_donor_type = fields.Selection(
+        [("individual", "Individuals"), ("company", "Companies")],
+        string="Donors",
+        default="individual",
+        required=True,
+        help="Skatteverket accepts both in one file; they are generated "
+        "separately to check and send them independently.",
+    )
 
     def generate_tax(self):
         self._del_old_entry()
@@ -27,17 +45,25 @@ class GenerateTaxWizard(models.TransientModel):
         if not company.company_registry:
             raise ValidationError(_("The Company should have a Tax ID"))
 
-        # Get aggregated amounts with minimum threshold of 200 per day
-        # For Sweden, we consider only income greater than kr 200 per day
-        grouped_amounts = self._get_paid_invoices_aggregated(
-            groupby_fields=["partner_id", "date:day"], min_amount=MIN_AMOUNT
-        )
+        if self.se_donor_type == "company":
+            grouped_amounts = self._get_paid_invoices_aggregated(
+                groupby_fields=["partner_id", "date:day"],
+                min_amount=COMPANY_MIN_PER_OCCASION,
+            )
+            filename_prefix = "Tax_companies"
+        else:
+            grouped_amounts = {
+                partner_id: amount
+                for partner_id, amount in self._get_paid_invoices_aggregated(
+                    groupby_fields=["partner_id", "date:day"],
+                    min_amount=INDIVIDUAL_MIN_PER_OCCASION,
+                ).items()
+                if amount >= INDIVIDUAL_MIN_PER_YEAR
+            }
+            filename_prefix = "Tax"
 
-        # Build XML structure for Sweden
         skatteverket = self._build_sweden_xml(company, grouped_amounts)
-
-        # Create and download attachment
-        return self._create_and_download_attachment(skatteverket)
+        return self._create_and_download_attachment(skatteverket, filename_prefix)
 
     def _build_sweden_xml(self, company, grouped_amounts):
         """Build Sweden-specific XML structure for tax file.
@@ -113,13 +139,13 @@ class GenerateTaxWizard(models.TransientModel):
 
         # Add partner entries
         for partner_id, amount in grouped_amounts.items():
-            if amount < MIN_AMOUNT:
-                continue  # Skip amounts below threshold
+            if amount <= 0:
+                continue
             partner = self.env["res.partner"].browse(partner_id)
-            is_taxable, identifier = self._get_partner_tax_identifier(partner, amount)
+            identifier = self._se_tax_identifier(partner, amount)
 
             # If the partner is eligible we put it in the file
-            if is_taxable:
+            if identifier:
                 blankett = ET.SubElement(skatteverket, "ku:Blankett", nummer="2314")
                 arendeinformation = ET.SubElement(blankett, "ku:Arendeinformation")
                 self._populate_xml_elements(
@@ -158,6 +184,65 @@ class GenerateTaxWizard(models.TransientModel):
                 )
 
         return skatteverket
+
+    def _se_tax_identifier(self, partner, amount):
+        """Field 215 of the donor matching the selected donor type, logging
+        why a donor is left out.
+
+        :return: the identifier, or None when the donor is not reported
+        """
+        if self.se_donor_type == "company":
+            if not partner.is_company:
+                return None
+            identifier = self._se_orgnr_identifier(partner.vat)
+            if not partner.vat:
+                state = "empty_vat"
+            else:
+                state = "valid" if identifier else "invalid_vat"
+            self._log_tax_file_result(partner, amount, state)
+            return identifier
+
+        if partner.is_company:
+            return None
+        ssn = partner.social_sec_nr
+        identifier = self._se_personnummer_identifier(ssn)
+        if not ssn:
+            state = "empty_ssn"
+        elif not identifier:
+            state = "invalid_ssn"
+        elif int(self.tax_year) - personnummer.get_birth_date(ssn).year < 18:
+            state = "under_18"
+            identifier = None
+        else:
+            state = "valid"
+        self._log_tax_file_result(partner, amount, state)
+        return identifier
+
+    @staticmethod
+    def _se_personnummer_identifier(ssn):
+        """YYYYMMDDNNNN: Skatteverket requires the century, which a
+        YYMMDD-NNNN number only gives through its separator."""
+        if not ssn or not personnummer.is_valid(ssn):
+            return None
+        digits = "".join(char for char in ssn if char.isdigit())
+        return f"{personnummer.get_birth_date(ssn).year // 100}{digits[-10:]}"
+
+    @classmethod
+    def _se_orgnr_identifier(cls, vat):
+        """16 followed by the 10-digit organisation number (an SE VAT number is
+        accepted too). A sole trader's organisation number is its owner's
+        personnummer, reported as such."""
+        if not vat:
+            return None
+        if se_vat.is_valid(vat):
+            number = se_vat.compact(vat)[:10]
+        elif se_orgnr.is_valid(vat):
+            number = se_orgnr.compact(vat)
+        else:
+            return None
+        if number[2] in "01":  # month of a personnummer, not an organisation
+            return cls._se_personnummer_identifier(number)
+        return f"16{number}"
 
     @staticmethod
     def _populate_xml_elements_with_faltkod(parent, data_map):

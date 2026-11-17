@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="generate_tax_wizard_sweden" model="ir.ui.view">
+        <field name="name">Generate Tax File: Swedish donor type</field>
+        <field name="model">generate.tax.wizard</field>
+        <field
+            name="inherit_id"
+            ref="compassion_nordic_accounting.generate_tax_wizard"
+        />
+        <field name="arch" type="xml">
+            <field name="xml_version" position="before">
+                <field
+                    name="se_donor_type"
+                    widget="radio"
+                    invisible="not is_sweden"
+                />
+            </field>
+        </field>
+    </record>
+</odoo>

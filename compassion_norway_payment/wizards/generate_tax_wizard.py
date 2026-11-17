@@ -10,6 +10,8 @@
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
+from stdnum.no import orgnr as no_orgnr
+
 from odoo import models
 
 
@@ -99,9 +101,16 @@ class GenerateTaxWizard(models.TransientModel):
             if is_taxable:
                 oppgave = ET.SubElement(leveranse, "oppgave")
                 oppgaveeier = ET.SubElement(oppgave, "oppgaveeier")
+                # The schema has one tag per kind of donor (11 / 9 digits)
+                if partner.is_company:
+                    id_tag, identifier = (
+                        "organisasjonsnummer",
+                        no_orgnr.compact(identifier),
+                    )
+                else:
+                    id_tag = "foedselsnummer"
                 self._populate_xml_elements(
-                    oppgaveeier,
-                    {"foedselsnummer": str(identifier), "navn": partner.name},
+                    oppgaveeier, {id_tag: str(identifier), "navn": partner.name}
                 )
                 self._populate_xml_elements(oppgave, {"beloep": str(int(amount))})
                 total_amount += amount

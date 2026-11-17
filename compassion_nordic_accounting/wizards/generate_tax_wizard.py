@@ -26,7 +26,8 @@ class GenerateTaxWizard(models.TransientModel):
         default=str(datetime.today().year - 1),
         required=True,
     )
-    xml_version = fields.Float("XML version", default=8)
+    # Latest Skatteverket KU schema (Kontrolluppgifter_12.0.xsd, 2026-02-10)
+    xml_version = fields.Float("XML version", default=12)
     is_sweden = fields.Boolean(
         default=lambda s: s.env.company.country_id == s.env.ref("base.se")
     )
@@ -259,16 +260,7 @@ class GenerateTaxWizard(models.TransientModel):
             state = "empty_vat"
         elif not is_valid:
             state = "invalid_vat"
-        # Log the entry in the model made for this
-        self.env["res.partner.tax.file.result"].create(
-            {
-                "partner_id": partner.id,
-                "tax_company_id": self.env.company.id,
-                "tax_year": self.tax_year,
-                "yearly_amount": amount,
-                "state": state,
-            }
-        )
+        self._log_tax_file_result(partner, amount, state)
 
         if state in ["empty_vat", "invalid_vat"]:
             return False
@@ -294,7 +286,14 @@ class GenerateTaxWizard(models.TransientModel):
                 < 18
             ):
                 state = "under_18"
-        # Log the entry in the model made for this
+        self._log_tax_file_result(partner, amount, state)
+
+        if state in ["invalid_ssn", "under_18", "empty_ssn"]:
+            return False
+        return True
+
+    def _log_tax_file_result(self, partner, amount, state):
+        """Record why a donor is (not) in the tax file, for the staff to check."""
         self.env["res.partner.tax.file.result"].create(
             {
                 "partner_id": partner.id,
@@ -304,10 +303,6 @@ class GenerateTaxWizard(models.TransientModel):
                 "state": state,
             }
         )
-
-        if state in ["invalid_ssn", "under_18", "empty_ssn"]:
-            return False
-        return True
 
     def _del_old_entry(self):
         to_del = self.env["res.partner.tax.file.result"].search(

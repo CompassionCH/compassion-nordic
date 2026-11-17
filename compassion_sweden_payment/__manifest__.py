@@ -29,7 +29,7 @@
 {
     "name": "Compassion Sweden Payment",
     "summary": "Create Sweden Direct Debit",
-    "version": "18.0.1.0.0",
+    "version": "18.0.1.1.0",
     "author": "Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
     "license": "AGPL-3",
@@ -38,6 +38,7 @@
     "data": [
         "security/ir.model.access.csv",
         "data/account_payment_method.xml",
+        "views/generate_tax_wizard_view.xml",
     ],
     "installable": True,
 }
