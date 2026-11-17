@@ -11,12 +11,18 @@ import re
 import unittest
 import xml.etree.ElementTree as ET
 from datetime import date
+from unittest.mock import patch
 
 from stdnum import luhn
 
 from odoo import Command
+from odoo.exceptions import ValidationError
 from odoo.tests import TransactionCase, tagged
 
+FIRST_YEAR = (
+    "odoo.addons.compassion_sweden_payment.wizards.generate_tax_wizard"
+    ".COMPANY_FIRST_INCOME_YEAR"
+)
 KU = "{http://xmls.skatteverket.se/se/skatteverket/ai/komponent/infoForBeskattning/%s}"
 
 
@@ -215,7 +221,9 @@ class TestSwedenTaxFile(TransactionCase):
         self.assertFalse(self._state(self.company_ok))
 
     def test_companies(self):
-        attachment, result = self._generate("company")
+        # The tax year is last year: pretend company gifts count from then
+        with patch(FIRST_YEAR, self.year):
+            attachment, result = self._generate("company")
         self.assertTrue(attachment.name.startswith("Tax_companies_"))
         # 16 + organisation number, in the same field as the personnummer
         self.assertEqual(result, {"165560360793": "2500"})
@@ -223,6 +231,13 @@ class TestSwedenTaxFile(TransactionCase):
         self.assertEqual(self._state(self.company_bad), "invalid_vat")
         self.assertFalse(self._state(self.company_small), "Never 2000 in a day")
         self.assertFalse(self._state(self.adult))
+
+    def test_companies_before_first_income_year(self):
+        wizard = self.env["generate.tax.wizard"].create(
+            {"tax_year": str(self.year), "se_donor_type": "company"}
+        )
+        with patch(FIRST_YEAR, self.year + 1), self.assertRaises(ValidationError):
+            wizard.generate_tax()
 
     def test_latest_schema_version(self):
         wizard = self.env["generate.tax.wizard"].create({"tax_year": str(self.year)})

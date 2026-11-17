@@ -21,8 +21,10 @@ from odoo.exceptions import ValidationError
 # donor's income lines of that day are added up before the threshold applies.
 INDIVIDUAL_MIN_PER_OCCASION = 200
 INDIVIDUAL_MIN_PER_YEAR = 2000
-# From income year 2026; smaller company gifts never add up to it.
+# Smaller company gifts never add up to it.
 COMPANY_MIN_PER_OCCASION = 2000
+# Company gifts give a tax reduction (and are reported) from this income year.
+COMPANY_FIRST_INCOME_YEAR = 2026
 
 
 class GenerateTaxWizard(models.TransientModel):
@@ -46,6 +48,13 @@ class GenerateTaxWizard(models.TransientModel):
             raise ValidationError(_("The Company should have a Tax ID"))
 
         if self.se_donor_type == "company":
+            if int(self.tax_year) < COMPANY_FIRST_INCOME_YEAR:
+                raise ValidationError(
+                    _(
+                        "Company gifts are reported from income year %s.",
+                        COMPANY_FIRST_INCOME_YEAR,
+                    )
+                )
             grouped_amounts = self._get_paid_invoices_aggregated(
                 groupby_fields=["partner_id", "date:day"],
                 min_amount=COMPANY_MIN_PER_OCCASION,
