@@ -15,7 +15,7 @@ from stdnum.se import personnummer
 from stdnum.se import vat as se_vat
 
 from odoo import _, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 
 # Skatteverket reporting thresholds (KU65). An occasion is one day: all the
 # donor's income lines of that day are added up before the threshold applies.
@@ -49,7 +49,7 @@ class GenerateTaxWizard(models.TransientModel):
 
         if self.se_donor_type == "company":
             if int(self.tax_year) < COMPANY_FIRST_INCOME_YEAR:
-                raise ValidationError(
+                raise UserError(
                     _(
                         "Company gifts are reported from income year %s.",
                         COMPANY_FIRST_INCOME_YEAR,
@@ -73,6 +73,17 @@ class GenerateTaxWizard(models.TransientModel):
 
         skatteverket = self._build_sweden_xml(company, grouped_amounts)
         return self._create_and_download_attachment(skatteverket, filename_prefix)
+
+    def _del_old_entry(self):
+        # Keep the results of the other donor type's file
+        if self.env.company.country_id.code != "SE":
+            return super()._del_old_entry()
+        self.env["res.partner.tax.file.result"].with_context(active_test=False).search(
+            [
+                ("tax_company_id", "=", self.env.company.id),
+                ("partner_id.is_company", "=", self.se_donor_type == "company"),
+            ]
+        ).sudo().unlink()
 
     def _build_sweden_xml(self, company, grouped_amounts):
         """Build Sweden-specific XML structure for tax file.

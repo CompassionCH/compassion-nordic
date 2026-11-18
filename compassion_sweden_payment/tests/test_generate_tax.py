@@ -16,7 +16,7 @@ from unittest.mock import patch
 from stdnum import luhn
 
 from odoo import Command
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, tagged
 
 FIRST_YEAR = (
@@ -236,7 +236,7 @@ class TestSwedenTaxFile(TransactionCase):
         wizard = self.env["generate.tax.wizard"].create(
             {"tax_year": str(self.year), "se_donor_type": "company"}
         )
-        with patch(FIRST_YEAR, self.year + 1), self.assertRaises(ValidationError):
+        with patch(FIRST_YEAR, self.year + 1), self.assertRaises(UserError):
             wizard.generate_tax()
 
     def test_latest_schema_version(self):
