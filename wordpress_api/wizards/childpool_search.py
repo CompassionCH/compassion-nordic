@@ -23,9 +23,14 @@ class ChildpoolSearch(models.TransientModel):
                             "expiration_date": self.env[
                                 "compassion.hold"
                             ].get_default_hold_expiration(HoldType.E_COMMERCE_HOLD),
+                            "return_action": "view_children",
                         }
                     ]
                 )
             )
-            hold_wizard.send()
+            action = hold_wizard.send()
+            # The WordPress API only lists published children (T3722)
+            self.env["compassion.child"].browse(action["domain"][0][2]).write(
+                {"is_published": True}
+            )
         return True
