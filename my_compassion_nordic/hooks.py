@@ -55,13 +55,10 @@ def _ensure_digital_modes(env, providers=None):
 
 
 def _seed_website_settings(env):
-    """Set the Nordic MyCompassion settings on each MyCompassion website: its
-    "sponsor a child" links lead to its country's public website, where that
-    setting is still empty, and its list of children waiting for a sponsor
-    mixes the countries."""
-    websites = env["website"].search([("is_my_compassion", "=", True)])
-    websites._my2_seed_sponsor_child_url()
-    websites.my2_child_list_order = "mix_countries"
+    """Set the Nordic MyCompassion settings on each MyCompassion website (see
+    website._my2_seed_nordic_settings). A website flagged later gets them
+    when it is flagged."""
+    env["website"].search([("is_my_compassion", "=", True)])._my2_seed_nordic_settings()
 
 
 def post_init_hook(env):

@@ -51,24 +51,30 @@ class TestSponsorChildLinks(HttpCase):
         self.assertLinksFollowSetting("/my2/dashboard")
 
 
+def _website(env, country_code, url=False, **values):
+    """A website of a new company of the country."""
+    country = env["res.country"].search([("code", "=", country_code)])
+    company = env["res.company"].create(
+        {"name": f"Seed Test {country_code}", "country_id": country.id}
+    )
+    return env["website"].create(
+        {
+            "name": f"Seed Test {country_code}",
+            "company_id": company.id,
+            "sponsor_child_url": url,
+            **values,
+        }
+    )
+
+
 @tagged("post_install", "-at_install")
 class TestSponsorChildUrlSeed(TransactionCase):
     """The URL is filled from the country of the website's company, only
     where it is empty. Every MyCompassion website mixes the countries of its
     list of children."""
 
-    def _website(self, country_code, url=False):
-        country = self.env["res.country"].search([("code", "=", country_code)])
-        company = self.env["res.company"].create(
-            {"name": f"Seed Test {country_code}", "country_id": country.id}
-        )
-        return self.env["website"].create(
-            {
-                "name": f"Seed Test {country_code}",
-                "company_id": company.id,
-                "sponsor_child_url": url,
-            }
-        )
+    def _website(self, country_code, url=False, **values):
+        return _website(self.env, country_code, url, **values)
 
     def test_empty_url_is_filled_by_country(self):
         websites = {code: self._website(code) for code in ("SE", "NO", "DK")}
@@ -97,10 +103,66 @@ class TestSponsorChildUrlSeed(TransactionCase):
         self.assertEqual(website.my2_child_list_order, "waiting")
 
     def test_hook_mixes_countries_on_my_compassion_websites(self):
-        websites = self._website("SE") | self._website("FI")
-        websites.write({"is_my_compassion": True})
-        self.assertEqual(set(websites.mapped("my2_child_list_order")), {"waiting"})
+        websites = self._website("SE", is_my_compassion=True) | self._website(
+            "FI", is_my_compassion=True
+        )
+        # as the websites flagged before this module set the order
+        websites.my2_child_list_order = "waiting"
         _seed_website_settings(self.env)
         self.assertEqual(
             set(websites.mapped("my2_child_list_order")), {"mix_countries"}
         )
+
+
+@tagged("post_install", "-at_install")
+class TestNewMyCompassionWebsite(TransactionCase):
+    """A website that becomes a MyCompassion website after install, created
+    flagged or flagged later, gets the Nordic settings on that change only."""
+
+    def _website(self, country_code, url=False, **values):
+        return _website(self.env, country_code, url, **values)
+
+    def assertSeeded(self, website, code):
+        self.assertEqual(website.sponsor_child_url, SPONSOR_CHILD_URLS[code])
+        self.assertEqual(website.my2_child_list_order, "mix_countries")
+
+    def test_created_flagged(self):
+        self.assertSeeded(self._website("NO", is_my_compassion=True), "NO")
+
+    def test_flagged_later(self):
+        website = self._website("DK")
+        self.assertFalse(website.sponsor_child_url)
+        self.assertEqual(website.my2_child_list_order, "waiting")
+        website.is_my_compassion = True
+        self.assertSeeded(website, "DK")
+
+    def test_values_given_with_the_flag_are_kept(self):
+        created = self._website(
+            "NO", url=SPONSOR_URL, is_my_compassion=True, my2_child_list_order="waiting"
+        )
+        flagged = self._website("DK")
+        flagged.write(
+            {
+                "is_my_compassion": True,
+                "sponsor_child_url": SPONSOR_URL,
+                "my2_child_list_order": "waiting",
+            }
+        )
+        for website in created | flagged:
+            self.assertEqual(website.sponsor_child_url, SPONSOR_URL)
+            self.assertEqual(website.my2_child_list_order, "waiting")
+
+    def test_staff_values_survive_later_saves(self):
+        website = self._website("DK", is_my_compassion=True)
+        website.write({"sponsor_child_url": False, "my2_child_list_order": "waiting"})
+        # the settings form writes every field again, the flag among them
+        website.write({"is_my_compassion": True, "name": "Renamed"})
+        self.assertFalse(website.sponsor_child_url)
+        self.assertEqual(website.my2_child_list_order, "waiting")
+
+    def test_country_without_a_public_website_gets_no_url(self):
+        """The order is set on every MyCompassion website of the database;
+        the URL only where the country has a public website to send to."""
+        website = self._website("CH", is_my_compassion=True)
+        self.assertFalse(website.sponsor_child_url)
+        self.assertEqual(website.my2_child_list_order, "mix_countries")
