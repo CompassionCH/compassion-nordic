@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 from odoo import Command, fields
 from odoo.exceptions import ValidationError
 from odoo.tests import tagged
-from odoo.tests.common import new_test_user
+from odoo.tests.common import HttpCase, new_test_user
 
 from odoo.addons.my_compassion.controllers.my2_sponsorships import (
     MyCompassionNewSponsorshipController,
@@ -18,6 +18,8 @@ from odoo.addons.website.tools import MockRequest
 from .test_thank_you_details_copy import _text
 
 RADIO_RE = re.compile(r'<input[^>]*name="sponsorship_plus"[^>]*>')
+CSRF_RE = re.compile(r'name="csrf_token"\s+value="([^"]+)"')
+WIZARD_ID_RE = re.compile(r'name="wizard_id"\s+value="(\d+)"')
 
 # The product names of each site language, as the products carry them.
 PRODUCT_NAMES = {
@@ -26,8 +28,8 @@ PRODUCT_NAMES = {
     "da_DK": ("Fadder", "Fadder Plus"),
 }
 
-# Per site: its language, prices set for the test (sponsorship, Plus
-# contribution), and the copy expected from them.
+# Per country: the language of its site, prices set for the test
+# (sponsorship, Plus contribution), and the copy expected from them.
 SITES = {
     "SE": {
         "lang": "sv_SE",
@@ -77,33 +79,36 @@ SITES = {
 }
 
 
-@tagged("post_install", "-at_install")
-class TestSponsorshipPlanNordic(DigitalSeamCase):
-    """The Nordic checkout asks the sponsor to choose between the
-    sponsorship and the sponsorship Plus: two required radios, neither
-    checked in advance, named after the products and priced by the
-    website's pricelist.
+class PlanChoiceCase(DigitalSeamCase):
+    """The Nordic companies, with both products named per language and
+    priced on the companies' pricelists.
 
-    Runs on the MyCompassion websites of SE, NO and DK that the database
-    has (stage, for one, has Sverige only): a test that needs a given site
-    skips without it, the others use the first site found.
+    Every Nordic database has the companies of SE, NO and DK, so the tests of
+    the model run on them alone. The checkout's theme components only exist
+    on the MyCompassion websites the theme is applied to, so a rendering test
+    runs on each such site of SE, NO and DK, and skips the site the database
+    lacks (stage, for one, has Sverige only): the gap shows in the log.
     """
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # The MyCompassion websites of the Nordic countries: the checkout's
-        # theme components only exist on the websites the theme is applied
-        # to, so the page is rendered on those.
+        cls.companies = {}
+        for company in cls.env["res.company"].search([]):
+            code = company.country_id.code
+            if code in SITES and code not in cls.companies:
+                cls.companies[code] = company
+        if not cls.companies:
+            raise unittest.SkipTest("needs a company of SE, NO or DK")
+        # the country of the tests that work on any of them
+        cls.code = next(code for code in SITES if code in cls.companies)
         cls.websites = {}
-        for website in cls.env["website"].search([("is_my_compassion", "=", True)]):
+        for website in cls.env["website"].search(
+            [("is_my_compassion", "=", True), ("theme_id", "!=", False)]
+        ):
             code = website.company_id.country_id.code
             if code in SITES and code not in cls.websites:
                 cls.websites[code] = website
-        if not cls.websites:
-            raise unittest.SkipTest("needs a MyCompassion website of SE, NO or DK")
-        # the site of the tests that work on any of them
-        cls.code = next(code for code in SITES if code in cls.websites)
         for lang in ("en_US", *PRODUCT_NAMES):
             cls.env["res.lang"]._activate_lang(lang)
         product_model = cls.env["product.template"]
@@ -114,17 +119,16 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
         for lang, (standard, plus) in PRODUCT_NAMES.items():
             cls.sponsorship_product.with_context(lang=lang).name = standard
             cls.plus_product.with_context(lang=lang).name = plus
-        for code, website in cls.websites.items():
-            cls._set_prices(website, *SITES[code]["prices"])
-        cls.child = cls.env["compassion.child"].search([], limit=1)
+        for code, company in cls.companies.items():
+            cls._set_prices(company, *SITES[code]["prices"])
 
     @classmethod
-    def _set_prices(cls, website, amount, extra):
-        """Price both products on every pricelist of the website's company,
-        whichever of them the website picks. A product rule added last wins
+    def _set_prices(cls, company, amount, extra):
+        """Price both products on every pricelist of the company, whichever
+        of them a website or a contract picks. A product rule added last wins
         over the pricelist's own rules for the product."""
         pricelists = cls.env["product.pricelist"].search(
-            [("company_id", "=", website.company_id.id)]
+            [("company_id", "=", company.id)]
         )
         pricelists.item_ids = [
             Command.create(
@@ -141,6 +145,39 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
             )
         ]
 
+    def _site(self, code):
+        """The themed MyCompassion website of the country, else skip."""
+        if code not in self.websites:
+            self.skipTest(f"needs the MyCompassion website of {code}")
+        return self.websites[code]
+
+    def _mode(self, code=None):
+        """A published payment mode of the country's company, without a
+        provider: finishing creates the contract, no payment page."""
+        return self.env["account.payment.mode"].create(
+            {
+                "name": "Plan Choice Mode",
+                "company_id": self.companies[code or self.code].id,
+                "bank_account_link": "variable",
+                "payment_method_id": self.pay_method.id,
+                "payment_order_ok": False,
+                "is_published": True,
+            }
+        )
+
+
+@tagged("post_install", "-at_install")
+class TestSponsorshipPlanNordic(PlanChoiceCase):
+    """The Nordic checkout asks the sponsor to choose between the
+    sponsorship and the sponsorship Plus: two required radios, neither
+    checked in advance, named after the products and priced by the
+    website's pricelist."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.child = cls.env["compassion.child"].search([], limit=1)
+
     def setUp(self):
         super().setUp()
         # child_sponsored drives the GMC hold state, outside of what is
@@ -153,45 +190,26 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-    def _need(self, code):
-        if code not in self.websites:
-            self.skipTest(f"needs the MyCompassion website of {code}")
-
     def _wizard(self, code=None, public=True, **values):
-        code = code or self.code
         user = self.env.ref("base.public_user") if public else self.env.user
         return self.env["new.sponsorship.wizard"].create(
             {
                 "user_id": user.id,
                 "child_id": self.child.id,
-                "company_id": self.websites[code].company_id.id,
+                "company_id": self.companies[code or self.code].id,
                 **values,
             }
         )
 
-    def _render(self, wizard, code=None, lang=None):
-        code = code or self.code
+    def _render(self, wizard, code, lang=None):
         lang = lang or SITES[code]["lang"]
-        website = self.websites[code]
+        website = self._site(code)
         with MockRequest(self.env, website=website, context={"lang": lang}) as request:
             return str(
                 MyCompassionNewSponsorshipController._render_form_content(
                     wizard.with_env(request.env)
                 )
             )
-
-    def _mode(self, code=None):
-        """A published card payment mode of the site's company."""
-        return self.env["account.payment.mode"].create(
-            {
-                "name": "Plan Choice Card",
-                "company_id": self.websites[code or self.code].company_id.id,
-                "bank_account_link": "variable",
-                "payment_method_id": self.pay_method.id,
-                "payment_order_ok": False,
-                "is_published": True,
-            }
-        )
 
     def _checkout(self, email, plan=None, code=None):
         """A public fast checkout, answered as the page posts it."""
@@ -223,8 +241,7 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
     # === The page ===
 
     def test_plans_named_and_priced_per_site(self):
-        for code in self.websites:
-            site = SITES[code]
+        for code, site in SITES.items():
             with self.subTest(site=code):
                 html = self._render(self._wizard(code), code)
                 self.assertRadios(html)
@@ -237,7 +254,6 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
                     self.assertIn(paragraph, text)
 
     def test_english_page_never_shows_the_back_office_names(self):
-        self._need("SE")
         html = self._render(self._wizard("SE"), "SE", lang="en_US")
         text = _text(html)
         self.assertIn("Sponsorship 361 kr/month", text)
@@ -249,17 +265,21 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
             self.assertNotIn(product.with_context(lang="en_US").name, text)
 
     def test_logged_in_payment_step_offers_the_same_choice(self):
-        html = self._render(self._wizard(public=False))
-        self.assertIn('id="payment_method"', html)
-        self.assertRadios(html)
-        self.assertIn(SITES[self.code]["plus"], _text(html))
+        for code, site in SITES.items():
+            with self.subTest(site=code):
+                html = self._render(self._wizard(code, public=False), code)
+                self.assertIn('id="payment_method"', html)
+                self.assertRadios(html)
+                self.assertIn('<legend class="visually-hidden">', html)
+                self.assertIn(site["plus"], _text(html))
 
     def test_a_choice_survives_a_rerender(self):
-        for value in ("0", "1"):
-            with self.subTest(value=value):
-                wizard = self._wizard()
-                wizard.update({"sponsorship_plus": value})
-                self.assertRadios(self._render(wizard), checked=value)
+        for code in SITES:
+            for value in ("0", "1"):
+                with self.subTest(site=code, value=value):
+                    wizard = self._wizard(code)
+                    wizard.update({"sponsorship_plus": value})
+                    self.assertRadios(self._render(wizard, code), checked=value)
 
     # === Reading the radios ===
 
@@ -321,18 +341,41 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
             "fund_gen", sponsorship.contract_line_ids.product_id.mapped("default_code")
         )
 
-    def test_write_and_pray_has_no_plan_to_choose(self):
-        wizard = self._wizard(
-            sponsorship_type="write_and_pray",
-            email="plan-choice-wap@example.org",
-            privacy_consent=True,
-            birthdate=fields.Date.today() - relativedelta(years=20),
-            wap_contribution_amount=15.0,
-        )
-        self.assertNotIn('name="sponsorship_plus"', self._render(wizard))
-        sponsorship = wizard.finish_sponsorship()
-        self.assertEqual(sponsorship.type, "SWP")
-        self.assertEqual(sponsorship.total_amount, 15.0)
+    def test_write_and_pray_is_refused_before_anything_is_written(self):
+        """A posted form can switch the checkout to Write&Pray, which the
+        Nordic countries do not offer."""
+        email = "plan-choice-wap@example.org"
+        for plan in (None, "1"):
+            with self.subTest(plan=plan):
+                wizard = self._wizard(
+                    sponsorship_type="write_and_pray",
+                    email=email,
+                    privacy_consent=True,
+                    birthdate=fields.Date.today() - relativedelta(years=20),
+                    wap_contribution_amount=15.0,
+                )
+                if plan:
+                    wizard.update({"sponsorship_plus": plan})
+                contracts_before = self.env["recurring.contract"].search_count([])
+                with self.assertRaisesRegex(ValidationError, "Write&Pray"):
+                    wizard.finish_sponsorship()
+                self.assertFalse(
+                    self.env["res.partner"].search([("email", "=", email)])
+                )
+                self.assertEqual(
+                    self.env["recurring.contract"].search_count([]), contracts_before
+                )
+
+    def test_write_and_pray_refusal_is_in_the_sponsors_language(self):
+        wizard = self._wizard(sponsorship_type="write_and_pray")
+        for lang, text in (
+            ("sv_SE", "Write&Pray erbjuds inte"),
+            ("nb_NO", "Write&Pray tilbys ikke"),
+            ("da_DK", "Write&Pray tilbydes ikke"),
+        ):
+            with self.subTest(lang=lang):
+                with self.assertRaisesRegex(ValidationError, text):
+                    wizard.with_context(lang=lang).finish_sponsorship()
 
     # === Without the plan choice ===
 
@@ -348,11 +391,14 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
 
     def test_switched_off_the_page_keeps_the_base_checkbox(self):
         self._plan_optional()
-        html = self._render(self._wizard())
-        self.assertNotIn('type="radio" id="sponsorship_plan', html)
-        self.assertIn('id="sponsorship_plus"', html)
-        self.assertIn('id="sponsorship-plus-info-modal"', html)
-        self.assertNotIn(SITES[self.code]["question"], _text(html))
+        for code, site in SITES.items():
+            with self.subTest(site=code):
+                html = self._render(self._wizard(code), code)
+                self.assertNotIn('type="radio" id="sponsorship_plan', html)
+                self.assertNotIn('<legend class="visually-hidden">', html)
+                self.assertIn('id="sponsorship_plus"', html)
+                self.assertIn('id="sponsorship-plus-info-modal"', html)
+                self.assertNotIn(site["question"], _text(html))
 
     def test_switched_off_a_sponsorship_finishes_without_a_plan(self):
         self._plan_optional()
@@ -369,3 +415,88 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
         wizard.update({"sponsorship_plus": "on"})
         self.assertTrue(wizard.sponsorship_plus)
         self.assertFalse(wizard.sponsorship_plan)
+
+
+@tagged("post_install", "-at_install")
+class TestPlanChoiceRoutes(HttpCase, PlanChoiceCase):
+    """The plan check holds over HTTP: a checkout posted without a plan is
+    refused at /submit, and nothing is created."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        code = next((code for code in SITES if code in cls.websites), None)
+        if not code:
+            raise unittest.SkipTest("needs a MyCompassion website of SE, NO or DK")
+        cls.code = code
+        # The test client talks to 127.0.0.1: the website gets that domain,
+        # like the sponsors' requests in production.
+        cls.website = cls.websites[code]
+        cls.website.domain = cls.base_url()
+
+    def setUp(self):
+        super().setUp()
+        # An available, unreserved child: the checkout refuses any other.
+        self.child = self.env["compassion.child"].search([], limit=1)
+        self.child.write(
+            {
+                "state": self.env["compassion.child"]._available_states()[0],
+                "website_reservation_date": False,
+                "website_reservation_id": False,
+            }
+        )
+        # The GMC hold state and messages are outside of what is tested here.
+        for model, method, stub in (
+            ("compassion.child", "child_sponsored", lambda records, sponsor_id: None),
+            ("gmc.message", "_perform_outgoing_action", lambda records: None),
+        ):
+            patcher = patch.object(self.registry[model], method, stub)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def _checkout(self, email, **post):
+        """Start the checkout, post its one step, then /submit."""
+        page = self.url_open(f"/my2/new-sponsorship/{self.child.id}")
+        self.assertEqual(page.status_code, 200)
+        csrf = CSRF_RE.search(page.text).group(1)
+        wizard_id = int(WIZARD_ID_RE.search(page.text).group(1))
+        step = self.make_jsonrpc_request(
+            "/my2/new-sponsorship/step",
+            {
+                "wizard_id": wizard_id,
+                "email": email,
+                "privacy_consent": "true",
+                "payment_method": str(self._mode().id),
+                "action": "next",
+                **post,
+            },
+        )
+        self.assertEqual(step, {"finish": True})
+        return self.url_open(
+            "/my2/new-sponsorship/submit",
+            data={"csrf_token": csrf, "wizard_id": wizard_id},
+            allow_redirects=False,
+        )
+
+    def _contracts(self):
+        return self.env["recurring.contract"].search([("child_id", "=", self.child.id)])
+
+    def test_submit_without_a_plan_is_refused(self):
+        email = "plan-choice-route-none@example.org"
+        before = self._contracts()
+        response = self._checkout(email)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(self._contracts(), before)
+        self.assertFalse(self.env["res.partner"].search([("email", "=", email)]))
+
+    def test_submit_with_a_plan_creates_the_contract(self):
+        before = self._contracts()
+        response = self._checkout(
+            "plan-choice-route-plus@example.org", sponsorship_plus="1"
+        )
+        self.assertEqual(response.status_code, 303, response.text[:500])
+        sponsorship = self._contracts() - before
+        self.assertEqual(len(sponsorship), 1)
+        self.assertIn(
+            "fund_gen", sponsorship.contract_line_ids.product_id.mapped("default_code")
+        )

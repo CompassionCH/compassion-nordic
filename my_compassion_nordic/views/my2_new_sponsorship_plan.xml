@@ -37,6 +37,7 @@ Nordic plan choice of the new-sponsorship checkout.
       />
       <t t-if="not plan_choice">$0</t>
       <fieldset t-else="" class="my-3">
+        <legend class="visually-hidden">Choose your sponsorship</legend>
         <t t-foreach="plan_choice['options']" t-as="plan">
           <label
             t-att-for="plan['input_id']"

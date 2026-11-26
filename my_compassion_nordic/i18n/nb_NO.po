@@ -593,3 +593,14 @@ msgid ""
 msgstr ""
 "%(note)s Ingen ble tildelt en oppgave: angi brukeren under \"Letter "
 "translation check unsuccessful\" i Compassion-innstillingene."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_wizard_sponsorship_plus_nordic
+msgid "Choose your sponsorship"
+msgstr "Velg ditt fadderskap"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/new_sponsorship_wizard.py:0
+msgid "Write&Pray sponsorships are not offered here."
+msgstr "Fadderskap av typen Write&Pray tilbys ikke her."

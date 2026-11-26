@@ -54,14 +54,20 @@ class NewSponsorshipWizard(models.TransientModel):
         return super().update(post)
 
     def finish_sponsorship(self):
-        """Refuse a standard sponsorship whose plan was not chosen.
+        """Refuse a Write&Pray sponsorship, and a sponsorship whose plan was
+        not chosen.
 
         Checked before anything is created, like the base checks of the
-        consent and the payment mode. The radios are required in the page,
-        but a posted form can omit them. Write&Pray offers no plan.
+        consent and the payment mode. The two plans are the whole Nordic
+        offer, which has no Write&Pray, and the radios are required in the
+        page, but a posted form can switch the type or omit the radios.
         """
         self.ensure_one()
-        if self._my2_plan_required() and self.sponsorship_type != "write_and_pray":
+        if self._my2_plan_required():
+            if self.sponsorship_type == "write_and_pray":
+                raise ValidationError(
+                    self.env._("Write&Pray sponsorships are not offered here.")
+                )
             if not self.sponsorship_plan:
                 raise ValidationError(
                     self.env._(
