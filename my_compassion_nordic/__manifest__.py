@@ -28,7 +28,7 @@
 {
     "name": "MyCompassion Nordic",
     "summary": "Nordic data & customisation for the my_compassion sponsor portal",
-    "version": "18.0.1.2.0",
+    "version": "18.0.1.3.0",
     "license": "AGPL-3",
     "author": "Compassion Switzerland",
     "website": "https://github.com/CompassionCH/compassion-nordic",
@@ -48,10 +48,14 @@
         "views/payment_provider_view.xml",
         "views/res_company_view.xml",
         "views/my2_new_sponsorship_details.xml",
+        "views/my2_new_sponsorship_plan.xml",
+        "views/my2_sponsor_child_links.xml",
+        "views/res_config_settings_view.xml",
     ],
     "assets": {
         "web.assets_frontend": [
             "my_compassion_nordic/static/src/js/stripe_payment_form.esm.js",
+            "my_compassion_nordic/static/src/js/sponsorship_plan_choice.esm.js",
         ],
     },
     "post_init_hook": "post_init_hook",

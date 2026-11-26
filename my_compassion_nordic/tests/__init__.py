@@ -4,7 +4,10 @@ from . import (
     test_digital_fixit_nordic,
     test_digital_mode_hook,
     test_multicompany_nordic,
+    test_sponsor_child_url,
+    test_sponsorship_plan_nordic,
     test_ssn_details_field,
     test_stripe_billing_name,
     test_stripe_checkout_form,
+    test_thank_you_details_copy,
 )

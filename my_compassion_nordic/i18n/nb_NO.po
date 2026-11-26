@@ -357,6 +357,111 @@ msgid "If someone else will write the letters, enter their name instead."
 msgstr "Hvis noen andre skal skrive brevene, skriv inn navnet deres i stedet."
 
 #. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_thank_you_title_nordic
+msgid "Thank you for becoming the sponsor of"
+msgstr "Takk for at du har blitt fadder for"
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_details_form_nordic
+msgid "Please fill in your details so we can manage your new sponsorship."
+msgstr ""
+"Vennligst fyll inn opplysningene dine, så vi kan administrere ditt nye "
+"fadderskap."
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/new_sponsorship_wizard.py:0
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_wizard_sponsorship_plus_nordic
+msgid "Please choose one of the two sponsorship options before continuing."
+msgstr "Velg ett av de to fadderskapsalternativene før du fortsetter."
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/new_sponsorship_wizard.py:0
+#: model:ir.model.fields.selection,name:my_compassion_nordic.selection__new_sponsorship_wizard__sponsorship_plan__standard
+msgid "Sponsorship"
+msgstr "Fadder"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/new_sponsorship_wizard.py:0
+#: model:ir.model.fields.selection,name:my_compassion_nordic.selection__new_sponsorship_wizard__sponsorship_plan__plus
+msgid "Sponsorship Plus"
+msgstr "Fadder Pluss"
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_new_sponsorship_wizard__sponsorship_plan
+msgid "Sponsorship Plan"
+msgstr "Fadderskapsalternativ"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/new_sponsorship_wizard.py:0
+msgid "%(amount)s %(currency)s/month"
+msgstr "%(amount)s %(currency)s/måned"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/new_sponsorship_wizard.py:0
+msgid "%(amount)s kronor"
+msgstr "%(amount)s kroner"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/new_sponsorship_wizard.py:0
+msgid "%(amount)s kroner"
+msgstr "%(amount)s kroner"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/new_sponsorship_wizard.py:0
+msgid "What does %(plan)s mean?"
+msgstr "Hva innebærer %(plan)s?"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/new_sponsorship_wizard.py:0
+msgid ""
+"Besides helping your sponsored child to develop physically, economically, "
+"socially and spiritually, you give %(extra)s extra for needs the sponsorship"
+" does not cover."
+msgstr ""
+"I tillegg til å hjelpe fadderbarnet ditt til å utvikle seg både fysisk, "
+"økonomisk, sosialt og åndelig, bidrar du med %(extra)s ekstra til behov som "
+"ikke dekkes av fadderskapet."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_wizard_sponsorship_plus_nordic
+msgid ""
+"This money can be used for all of Compassion's programmes, wherever it is "
+"needed most."
+msgstr ""
+"Pengene kan brukes til alle Compassions programmer, der behovet er størst."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_wizard_sponsorship_plus_nordic
+msgid ""
+"It can be, for example, clean water, sanitation facilities, disaster relief,"
+" health programmes for mothers and babies, or registered children who have "
+"not yet found a sponsor."
+msgstr ""
+"Det kan for eksempel være rent vann, sanitæranlegg, katastrofehjelp, "
+"helseprogrammer for mødre og spedbarn eller registrerte barn som ennå ikke "
+"har fått en fadder."
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,help:my_compassion_nordic.field_res_config_settings__sponsor_child_url
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.res_config_settings_view_form_my2_sponsor_child_url
+msgid ""
+"Page of the public website where MyCompassion sends a sponsor who wants to "
+"sponsor another child. When empty, the sponsor stays in MyCompassion, on its"
+" list of children waiting for a sponsor."
+msgstr ""
+"Side på det offentlige nettstedet der MyCompassion sender en fadder som vil "
+"bli fadder for enda et barn. Er feltet tomt, blir fadderen i MyCompassion, på "
+"listen over barn som venter på en fadder."
+
+#. module: my_compassion_nordic
 #: model:ir.model,name:my_compassion_nordic.model_payment_provider
 msgid "Payment Provider"
 msgstr ""
@@ -375,6 +480,12 @@ msgstr "Personnummer (for gaverapportering til Skatteverket)"
 #: model:ir.model,name:my_compassion_nordic.model_recurring_contract
 msgid "Recurring contract"
 msgstr ""
+
+#. module: my_compassion_nordic
+#: model:ir.model.fields,field_description:my_compassion_nordic.field_res_config_settings__sponsor_child_url
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.res_config_settings_view_form_my2_sponsor_child_url
+msgid "Sponsor a child link"
+msgstr "Lenke for å bli fadder"
 
 #. module: my_compassion_nordic
 #. odoo-python
@@ -483,3 +594,14 @@ msgid ""
 msgstr ""
 "%(note)s Ingen ble tildelt en oppgave: angi brukeren under \"Letter "
 "translation check unsuccessful\" i Compassion-innstillingene."
+
+#. module: my_compassion_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_wizard_sponsorship_plus_nordic
+msgid "Choose your sponsorship"
+msgstr "Velg ditt fadderskap"
+
+#. module: my_compassion_nordic
+#. odoo-python
+#: code:addons/my_compassion_nordic/models/new_sponsorship_wizard.py:0
+msgid "Write&Pray sponsorships are not offered here."
+msgstr "Fadderskap av typen Write&Pray tilbys ikke her."

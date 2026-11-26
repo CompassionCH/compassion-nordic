@@ -54,6 +54,14 @@ def _ensure_digital_modes(env, providers=None):
     return modes
 
 
+def _seed_website_settings(env):
+    """Set the Nordic MyCompassion settings on each MyCompassion website (see
+    website._my2_seed_nordic_settings). A website flagged later gets them
+    when it is flagged."""
+    env["website"].search([("is_my_compassion", "=", True)])._my2_seed_nordic_settings()
+
+
 def post_init_hook(env):
     _ensure_digital_modes(env)
     env["res.company"]._my2_seed_collect_ssn()
+    _seed_website_settings(env)

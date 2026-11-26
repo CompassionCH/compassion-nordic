@@ -8,6 +8,9 @@ Nordic version of the post-payment sponsor details form.
     is the letter writer's, who may not be the payer (see
     recurring.contract._my2_apply_details).
 
+    It has no heading of its own: the page title above it thanks the
+    sponsor, and the form opens on a line saying what the details are for.
+
     Between the name and the phone number it asks the payer's national
     identity number, so the gift can be reported to their tax authority and
     they get their deduction:
@@ -29,18 +32,73 @@ Nordic version of the post-payment sponsor details form.
       the field renders at all and which country's number it takes.
 -->
 <odoo>
+  <!-- While the form shows, the title of the thank-you page says the
+       sponsorship has begun, and the form below asks for the details. -->
+  <template
+    id="my2_new_sponsorship_thank_you_title_nordic"
+    inherit_id="my_compassion.my2_new_sponsorship_thank_you_title"
+    name="New Sponsorship Thank You Title - Nordic"
+    priority="99"
+  >
+    <xpath expr="//h1" position="replace">
+      <h1
+        t-if="details_token and sponsorship._my2_details_mandatory()"
+        class="title-heading title-size-md text-dark-blue"
+      >
+        Thank you for becoming the sponsor of <span class="text-core-blue">
+          <t t-out="sponsorship.child_id.preferred_name" />
+        </span>
+      </h1>
+      <t t-else="">$0</t>
+    </xpath>
+  </template>
+  <!-- While the form shows, the card of the child above it gives no reason
+       for the form: the form's own intro says what the details are for.
+       The card keeps its title and photo. -->
+  <template
+    id="my2_new_sponsorship_thank_you_letter_card_nordic"
+    inherit_id="my_compassion.my2_new_sponsorship_thank_you_page"
+    name="New Sponsorship Thank You Letter Card - Nordic"
+    priority="99"
+  >
+    <xpath
+      expr="//t[@t-set='top_class'][@t-value=&quot;'ns-letter-card'&quot;]/../t[@t-set='subtext'][last()]"
+      position="after"
+    >
+      <t t-if="sponsorship._my2_details_mandatory()" t-set="subtext" t-value="False" />
+    </xpath>
+  </template>
   <template
     id="my2_new_sponsorship_details_form_nordic"
     inherit_id="my_compassion.my2_new_sponsorship_details_form"
     name="New Sponsorship Details - Nordic Form"
     priority="99"
   >
-    <xpath expr="//div[hasclass('h4')]/following-sibling::div[1]" position="after">
-      <div class="mb-3 text-center body-small text-low-black">
-        If someone else will write the letters, enter their name instead.
-      </div>
+    <!-- The page title above the form already thanks the sponsor (see
+         my2_new_sponsorship_thank_you_title_nordic), so the form opens on
+         what it is for: its own heading (div.h4) goes, and its intro (the
+         element after the heading) is replaced. The intro is replaced
+         first, while the heading still marks it.
+         All of it applies while the form is a required step
+         (recurring.contract._my2_details_mandatory), which this module
+         makes the case; otherwise the base form renders unchanged. -->
+    <xpath expr="//div[hasclass('h4')]/following-sibling::div[1]" position="replace">
+      <t t-if="not sponsorship._my2_details_mandatory()">$0</t>
+      <t t-else="">
+        <div class="mb-1 text-center text-lg-start tiny-text text-mid-grey">
+          Please fill in your details so we can manage your new sponsorship.
+        </div>
+        <div class="mb-3 text-center text-lg-start tiny-text text-mid-grey">
+          If someone else will write the letters, enter their name instead.
+        </div>
+      </t>
     </xpath>
-    <xpath expr="//details" position="replace" />
+    <xpath expr="//div[hasclass('h4')]" position="replace">
+      <t t-if="not sponsorship._my2_details_mandatory()">$0</t>
+    </xpath>
+    <xpath expr="//details" position="replace">
+      <t t-if="not sponsorship._my2_details_mandatory()">$0</t>
+    </xpath>
   </template>
   <template
     id="my2_new_sponsorship_details_ssn"
