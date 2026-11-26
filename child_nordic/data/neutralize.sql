@@ -40,6 +40,12 @@ update ir_cron set active = false;
 update base_automation SET active=false;
 
 -- Delete queue jobs
+-- Each deleted job sets parent_job_id to NULL on its children (ON DELETE SET
+-- NULL). Without an index on parent_job_id, Postgres scans the whole table for
+-- every deleted job, and the neutralization times out on a large table.
+-- Named as Odoo names an index=True index: a later index=True reuses it.
+CREATE INDEX IF NOT EXISTS queue_job_replacement__parent_job_id_index
+    ON queue_job_replacement (parent_job_id);
 DELETE FROM queue_job_replacement WHERE state NOT IN ('done', 'failed');
 
 -- Delete mailchimp account
