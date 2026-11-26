@@ -373,6 +373,7 @@ msgstr ""
 #. module: my_compassion_nordic
 #. odoo-python
 #: code:addons/my_compassion_nordic/models/new_sponsorship_wizard.py:0
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_wizard_sponsorship_plus_nordic
 msgid "Please choose one of the two sponsorship options before continuing."
 msgstr "Välj ett av de två fadderskapsalternativen innan du fortsätter."
 

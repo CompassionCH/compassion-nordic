@@ -115,6 +115,12 @@ class NewSponsorshipWizard(models.TransientModel):
             return fallback
         return name
 
+    def _my2_plus_plan_name(self, website):
+        """The name of the Plus plan in the visitor's language, as its radio
+        shows it. Needs no wizard: the page after the checkout names the
+        plan the same way."""
+        return self._my2_plan_name("fund_gen", website, self.env._("Sponsorship Plus"))
+
     def _my2_amount_words(self, amount, currency):
         """An amount with its currency as a sentence writes it ("60 kronor")."""
         if currency.name in KRONA_CURRENCIES:
@@ -144,9 +150,7 @@ class NewSponsorshipWizard(models.TransientModel):
         standard_name = self._my2_plan_name(
             "sponsorship", website, self.env._("Sponsorship")
         )
-        plus_name = self._my2_plan_name(
-            "fund_gen", website, self.env._("Sponsorship Plus")
-        )
+        plus_name = self._my2_plus_plan_name(website)
 
         def price(amount):
             return self.env._(

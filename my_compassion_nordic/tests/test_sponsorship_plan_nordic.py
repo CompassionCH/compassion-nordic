@@ -20,6 +20,10 @@ from .test_thank_you_details_copy import _text
 RADIO_RE = re.compile(r'<input[^>]*name="sponsorship_plus"[^>]*>')
 CSRF_RE = re.compile(r'name="csrf_token"\s+value="([^"]+)"')
 WIZARD_ID_RE = re.compile(r'name="wizard_id"\s+value="(\d+)"')
+TOTAL_RE = re.compile(r'id="ns-total-amount"[^>]*>([^<]*)<')
+SUMMARY_LABEL_RE = re.compile(
+    r'<span class="tiny-text text-mid-grey">\s*([^<]*?)\s*</span>'
+)
 
 # The product names of each site language, as the products carry them.
 PRODUCT_NAMES = {
@@ -37,6 +41,8 @@ SITES = {
         "standard": "Compassionfadder 361 kr/månad",
         "plus": "Compassionfadder Plus 422 kr/månad",
         "question": "Vad innebär Compassionfadder Plus?",
+        "plan_error": "Välj ett av de två fadderskapsalternativen innan du"
+        " fortsätter.",
         "explanation": (
             "Utöver att hjälpa ditt fadderbarn att utvecklas både fysiskt,"
             " ekonomiskt, socialt och andligt så bidrar du med 61 kronor extra"
@@ -54,6 +60,7 @@ SITES = {
         "standard": "Fadder 362 kr/måned",
         "plus": "Fadder Pluss 424 kr/måned",
         "question": "Hva innebærer Fadder Pluss?",
+        "plan_error": "Velg ett av de to fadderskapsalternativene før du fortsetter.",
         "explanation": (
             "bidrar du med 62 kroner ekstra til behov som ikke dekkes av"
             " fadderskapet.",
@@ -68,6 +75,7 @@ SITES = {
         "standard": "Fadder 261 kr/måned",
         "plus": "Fadder Plus 312 kr/måned",
         "question": "Hvad indebærer Fadder Plus?",
+        "plan_error": "Vælg en af de to fadderskabsmuligheder, før du fortsætter.",
         "explanation": (
             "bidrager du med 51 kroner ekstra til behov, som fadderskabet ikke"
             " dækker.",
@@ -211,6 +219,27 @@ class TestSponsorshipPlanNordic(PlanChoiceCase):
                 )
             )
 
+    def _render_all_set(self, sponsorship, code, lang=None):
+        """The summary of the thank-you page once the sponsor's name is in."""
+        lang = lang or SITES[code]["lang"]
+        website = self._site(code)
+        with MockRequest(self.env, website=website, context={"lang": lang}) as request:
+            return str(
+                request.env["ir.qweb"]._render(
+                    "my_compassion.my2_new_sponsorship_all_set",
+                    {
+                        "sponsorship": sponsorship.with_env(request.env),
+                        "sponsor_identity_visible": True,
+                        "first_letter_url": "/my2/letter",
+                    },
+                )
+            )
+
+    def _plus_sponsorship(self, code):
+        """A sponsorship of the country's company with the Plus line."""
+        wizard = self._checkout(f"plan-choice-plus-{code}@example.org", "1", code)
+        return wizard.finish_sponsorship()
+
     def _checkout(self, email, plan=None, code=None):
         """A public fast checkout, answered as the page posts it."""
         wizard = self._wizard(code)
@@ -280,6 +309,43 @@ class TestSponsorshipPlanNordic(PlanChoiceCase):
                     wizard = self._wizard(code)
                     wizard.update({"sponsorship_plus": value})
                     self.assertRadios(self._render(wizard, code), checked=value)
+
+    def test_missing_plan_message_under_the_radios(self):
+        for code, site in SITES.items():
+            with self.subTest(site=code):
+                html = self._render(self._wizard(code), code)
+                error = re.search(r'<div\s+id="ns-plan-error"[^>]*>([^<]*)<', html)
+                self.assertTrue(error, "the message is rendered, hidden")
+                self.assertIn("d-none", error.group(0))
+                self.assertIn('role="alert"', error.group(0))
+                self.assertEqual(error.group(1).strip(), site["plan_error"])
+
+    def test_total_waits_for_a_plan(self):
+        for code, site in SITES.items():
+            amount, extra = site["prices"]
+            with self.subTest(site=code):
+                wizard = self._wizard(code)
+                total = TOTAL_RE.search(self._render(wizard, code)).group(1)
+                self.assertEqual(total, "–")
+                for value, expected in (("0", amount), ("1", amount + extra)):
+                    wizard.update({"sponsorship_plus": value})
+                    total = TOTAL_RE.search(self._render(wizard, code)).group(1)
+                    self.assertIn(f"{expected}.-", total)
+
+    def test_summary_names_the_plus_plan_as_its_radio(self):
+        for code, site in SITES.items():
+            with self.subTest(site=code):
+                self._site(code)
+                html = self._render_all_set(self._plus_sponsorship(code), code)
+                plus_name = PRODUCT_NAMES[site["lang"]][1]
+                self.assertIn(plus_name, SUMMARY_LABEL_RE.findall(html))
+
+    def test_english_summary_never_shows_the_back_office_name(self):
+        self._site("SE")
+        html = self._render_all_set(self._plus_sponsorship("SE"), "SE", "en_US")
+        labels = SUMMARY_LABEL_RE.findall(html)
+        self.assertIn("Sponsorship Plus", labels)
+        self.assertNotIn(self.plus_product.with_context(lang="en_US").name, labels)
 
     # === Reading the radios ===
 
@@ -399,6 +465,16 @@ class TestSponsorshipPlanNordic(PlanChoiceCase):
                 self.assertIn('id="sponsorship_plus"', html)
                 self.assertIn('id="sponsorship-plus-info-modal"', html)
                 self.assertNotIn(site["question"], _text(html))
+
+    def test_switched_off_the_total_and_summary_are_the_base_ones(self):
+        self._site("SE")
+        sponsorship = self._plus_sponsorship("SE")
+        self._plan_optional()
+        amount = SITES["SE"]["prices"][0]
+        total = TOTAL_RE.search(self._render(self._wizard("SE"), "SE")).group(1)
+        self.assertIn(f"{amount}.-", total)
+        labels = SUMMARY_LABEL_RE.findall(self._render_all_set(sponsorship, "SE"))
+        self.assertNotIn(PRODUCT_NAMES["sv_SE"][1], labels)
 
     def test_switched_off_a_sponsorship_finishes_without_a_plan(self):
         self._plan_optional()

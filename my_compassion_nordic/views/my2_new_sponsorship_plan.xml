@@ -15,6 +15,9 @@ Nordic plan choice of the new-sponsorship checkout.
     is on, which this module makes the case; otherwise the base checkbox and
     its explanation render unchanged.
 
+    The same switch makes the checkout's total wait for a plan and the
+    summary after the checkout name the Plus plan as its radio does.
+
     Injected data (from the base step rendering):
     - wizard ('new.sponsorship.wizard'): sponsorship_plan checks the radio
       already picked, and _my2_plan_choice supplies the copy.
@@ -58,6 +61,14 @@ Nordic plan choice of the new-sponsorship checkout.
             </span>
           </label>
         </t>
+        <!-- Shown by the wizard's form validation while no plan is checked
+             (sponsorship_plan_choice.esm.js), which points the radios'
+             aria-describedby at it while it shows. -->
+        <div
+          id="ns-plan-error"
+          class="ns-plan-error d-none mt-2 tiny-text text-mid-orange"
+          role="alert"
+        >Please choose one of the two sponsorship options before continuing.</div>
         <a
           href="#"
           class="d-inline-block mt-2 very-tiny-text bold text-core-blue"
@@ -83,6 +94,37 @@ Nordic plan choice of the new-sponsorship checkout.
           class="mb-0"
         >It can be, for example, clean water, sanitation facilities, disaster relief, health programmes for mothers and babies, or registered children who have not yet found a sponsor.</p>
       </div>
+    </xpath>
+  </template>
+  <!-- The total of the checkout shows no amount until a plan is chosen;
+       the script then keeps it in line with the radio. -->
+  <template
+    id="my2_new_sponsorship_wizard_fast_checkout_nordic"
+    inherit_id="my_compassion.my2_new_sponsorship_wizard_fast_checkout"
+    name="New Sponsorship Wizard Fast Checkout - Nordic Total"
+    priority="99"
+  >
+    <xpath expr="//span[@id='ns-total-amount']" position="attributes">
+      <attribute
+        name="t-out"
+      >'–' if wizard._my2_plan_required() and not wizard.sponsorship_plan else currency_name + '&#160;' + ns_total_formatted</attribute>
+    </xpath>
+  </template>
+  <!-- The summary after the checkout names the Plus plan as its radio did. -->
+  <template
+    id="my2_new_sponsorship_all_set_nordic"
+    inherit_id="my_compassion.my2_new_sponsorship_all_set"
+    name="New Sponsorship All Set - Nordic Plan Name"
+    priority="99"
+  >
+    <xpath expr="//div[@t-if='sponsorship_plus_line']/span[1]" position="replace">
+      <t t-set="plan_wizard" t-value="request.env['new.sponsorship.wizard']" />
+      <t t-if="not plan_wizard._my2_plan_required()">$0</t>
+      <span
+        t-else=""
+        class="tiny-text text-mid-grey"
+        t-out="plan_wizard._my2_plus_plan_name(website)"
+      />
     </xpath>
   </template>
 </odoo>
