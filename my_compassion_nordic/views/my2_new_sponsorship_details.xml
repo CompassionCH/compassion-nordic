@@ -35,17 +35,21 @@ Nordic version of the post-payment sponsor details form.
   <!-- While the form shows, the title of the thank-you page says the
        sponsorship has begun, and the form below asks for the details. -->
   <template
-    id="my2_new_sponsorship_thank_you_page_nordic"
-    inherit_id="my_compassion.my2_new_sponsorship_thank_you_page"
-    name="New Sponsorship Thank You Page - Nordic Title"
+    id="my2_new_sponsorship_thank_you_title_nordic"
+    inherit_id="my_compassion.my2_new_sponsorship_thank_you_title"
+    name="New Sponsorship Thank You Title - Nordic"
+    priority="99"
   >
-    <xpath
-      expr="//t[@t-if='details_token']/preceding-sibling::div[1]//t[@t-set='title_content']"
-      position="after"
-    >
-      <t t-if="details_token" t-set="title_content">Thank you for becoming the sponsor of&#160;<t
-          t-out="sponsorship.child_id.preferred_name"
-        /></t>
+    <xpath expr="//h1" position="replace">
+      <h1
+        t-if="details_token and sponsorship._my2_details_mandatory()"
+        class="title-heading title-size-md text-dark-blue"
+      >
+        Thank you for becoming the sponsor of <span class="text-core-blue">
+          <t t-out="sponsorship.child_id.preferred_name" />
+        </span>
+      </h1>
+      <t t-else="">$0</t>
     </xpath>
   </template>
   <template
@@ -55,20 +59,30 @@ Nordic version of the post-payment sponsor details form.
     priority="99"
   >
     <!-- The page title above the form already thanks the sponsor (see
-         my2_new_sponsorship_thank_you_page_nordic), so the form opens on
-         what it is for. Its own heading and intro are the first two
-         elements after the hidden inputs; the intro is replaced first,
-         while it is still the second. -->
-    <xpath expr="//input[@name='details_token']/following-sibling::*[2]" position="replace">
-      <div class="mb-1 text-center body-small text-low-black">
-        Please fill in your details so we can manage your new sponsorship.
-      </div>
-      <div class="mb-3 text-center body-small text-low-black">
-        If someone else will write the letters, enter their name instead.
-      </div>
+         my2_new_sponsorship_thank_you_title_nordic), so the form opens on
+         what it is for: its own heading (div.h4) goes, and its intro (the
+         element after the heading) is replaced. The intro is replaced
+         first, while the heading still marks it.
+         All of it applies while the form is a required step
+         (recurring.contract._my2_details_mandatory), which this module
+         makes the case; otherwise the base form renders unchanged. -->
+    <xpath expr="//div[hasclass('h4')]/following-sibling::div[1]" position="replace">
+      <t t-if="not sponsorship._my2_details_mandatory()">$0</t>
+      <t t-else="">
+        <div class="mb-1 text-center body-small text-low-black">
+          Please fill in your details so we can manage your new sponsorship.
+        </div>
+        <div class="mb-3 text-center body-small text-low-black">
+          If someone else will write the letters, enter their name instead.
+        </div>
+      </t>
     </xpath>
-    <xpath expr="//input[@name='details_token']/following-sibling::*[1]" position="replace" />
-    <xpath expr="//details" position="replace" />
+    <xpath expr="//div[hasclass('h4')]" position="replace">
+      <t t-if="not sponsorship._my2_details_mandatory()">$0</t>
+    </xpath>
+    <xpath expr="//details" position="replace">
+      <t t-if="not sponsorship._my2_details_mandatory()">$0</t>
+    </xpath>
   </template>
   <template
     id="my2_new_sponsorship_details_ssn"

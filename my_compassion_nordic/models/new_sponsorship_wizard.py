@@ -32,6 +32,10 @@ class NewSponsorshipWizard(models.TransientModel):
         [("standard", "Sponsorship"), ("plus", "Sponsorship Plus")]
     )
 
+    def _my2_plan_required(self):
+        """The Nordic countries sell two plans, one of which must be picked."""
+        return True
+
     def update(self, post):
         """Read the plan radios.
 
@@ -40,6 +44,8 @@ class NewSponsorshipWizard(models.TransientModel):
         of the standard plan for the Plus. Any value other than "0" or "1"
         leaves the choice as it was.
         """
+        if not self._my2_plan_required():
+            return super().update(post)
         post = dict(post)
         value = post.pop("sponsorship_plus", None)
         plan = PLAN_VALUES.get(value) if isinstance(value, str) else None
@@ -55,7 +61,7 @@ class NewSponsorshipWizard(models.TransientModel):
         but a posted form can omit them. Write&Pray offers no plan.
         """
         self.ensure_one()
-        if self.sponsorship_type != "write_and_pray":
+        if self._my2_plan_required() and self.sponsorship_type != "write_and_pray":
             if not self.sponsorship_plan:
                 raise ValidationError(
                     self.env._(
@@ -91,10 +97,11 @@ class NewSponsorshipWizard(models.TransientModel):
     def _my2_plan_name(self, default_code, website, fallback):
         """The product's name in the visitor's language.
 
-        The English name of these products is the back office's (e.g. "CDSP -
-        contract only"). A language without a name of its own shows that
-        one, so the visitor then gets the fallback label instead, which is
-        translated like the rest of the page.
+        The English (en_US) name of these products is assumed to be the back
+        office's (e.g. "CDSP - contract only"), not one for sponsors. A
+        language without a name of its own shows that one, so the visitor
+        then gets the fallback label instead, which is translated like the
+        rest of the page.
         """
         product = self._my2_plan_product(default_code, website)
         name = product.name

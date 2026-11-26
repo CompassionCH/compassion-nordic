@@ -357,7 +357,7 @@ msgid "If someone else will write the letters, enter their name instead."
 msgstr "Hvis noen andre skal skrive brevene, skriv inn navnet deres i stedet."
 
 #. module: my_compassion_nordic
-#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_thank_you_page_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_thank_you_title_nordic
 msgid "Thank you for becoming the sponsor of"
 msgstr "Takk for at du har blitt fadder for"
 

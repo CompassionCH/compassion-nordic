@@ -32,10 +32,10 @@ LETTER_WRITER = {
 }
 # What my_compassion's form and page say in its place.
 BASE_COPY = {
-    "en_US": ("Who shall we thank?", "Thank you for sponsoring"),
-    "sv_SE": ("Vem ska vi tacka?", "Tack för att du är fadder till"),
-    "nb_NO": ("Hvem skal vi takke?", "Takk for at du er fadder for"),
-    "da_DK": ("Who shall we thank?", "Tak, fordi du er fadder for"),
+    "en_US": ("Your contact information", "Thank you for sponsoring"),
+    "sv_SE": ("Dina kontaktuppgifter", "Tack för att du är fadder till"),
+    "nb_NO": ("Din kontaktinformasjon", "Takk for at du er fadder for"),
+    "da_DK": ("Dine kontaktoplysninger", "Tak, fordi du er fadder for"),
 }
 
 
@@ -150,3 +150,20 @@ class TestThankYouDetailsCopy(HttpCase, DigitalSeamCase):
         text = _text(page.text)
         self.assertIn(f"Thank you for sponsoring {self.child.preferred_name}", text)
         self.assertNotIn(TITLE["en_US"], text)
+
+    def test_optional_form_keeps_the_base_copy(self):
+        """Where the form is optional (base my_compassion's choice, which its
+        own tests pin), the page and the form read as the base ones."""
+        patcher = patch.object(
+            type(self.env["recurring.contract"]),
+            "_my2_details_mandatory",
+            return_value=False,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        text = _text(self._open_form("en_US"))
+        heading, title = BASE_COPY["en_US"]
+        self.assertIn(heading, text)
+        self.assertIn(f"{title} {self.child.preferred_name}", text)
+        self.assertNotIn(TITLE["en_US"], text)
+        self.assertNotIn(INTRO["en_US"], text)

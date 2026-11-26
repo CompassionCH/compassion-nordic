@@ -359,7 +359,7 @@ msgstr ""
 "Om brevskrivningen ska skötas av någon annan, fyll i det namnet i stället."
 
 #. module: my_compassion_nordic
-#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_thank_you_page_nordic
+#: model_terms:ir.ui.view,arch_db:my_compassion_nordic.my2_new_sponsorship_thank_you_title_nordic
 msgid "Thank you for becoming the sponsor of"
 msgstr "Tack för att du har blivit fadder till"
 

@@ -11,6 +11,10 @@ Nordic plan choice of the new-sponsorship checkout.
     Both radios post "sponsorship_plus": "0" for the sponsorship alone, "1"
     for the Plus (see new.sponsorship.wizard.update in this module).
 
+    Everything here applies while new.sponsorship.wizard._my2_plan_required
+    is on, which this module makes the case; otherwise the base checkbox and
+    its explanation render unchanged.
+
     Injected data (from the base step rendering):
     - wizard ('new.sponsorship.wizard'): sponsorship_plan checks the radio
       already picked, and _my2_plan_choice supplies the copy.
@@ -27,8 +31,12 @@ Nordic plan choice of the new-sponsorship checkout.
       expr="//div[@id='sponsorship-plus-info-modal']/preceding-sibling::div[1]"
       position="replace"
     >
-      <t t-set="plan_choice" t-value="wizard._my2_plan_choice(website)" />
-      <fieldset class="my-3">
+      <t
+        t-set="plan_choice"
+        t-value="wizard._my2_plan_required() and wizard._my2_plan_choice(website)"
+      />
+      <t t-if="not plan_choice">$0</t>
+      <fieldset t-else="" class="my-3">
         <t t-foreach="plan_choice['options']" t-as="plan">
           <label
             t-att-for="plan['input_id']"
@@ -59,13 +67,15 @@ Nordic plan choice of the new-sponsorship checkout.
       </fieldset>
     </xpath>
     <xpath expr="//div[@id='sponsorship-plus-info-modal-title']" position="attributes">
-      <attribute name="t-out">plan_choice['question']</attribute>
+      <!-- Without a plan choice, t-out falls back to the base title. -->
+      <attribute name="t-out">plan_choice and plan_choice['question']</attribute>
     </xpath>
     <xpath
       expr="//div[@id='sponsorship-plus-info-modal-title']/following-sibling::div[1]"
       position="replace"
     >
-      <div class="body-small">
+      <t t-if="not plan_choice">$0</t>
+      <div t-else="" class="body-small">
         <p t-out="plan_choice['contribution']" />
         <p>This money can be used for all of Compassion's programmes, wherever it is needed most.</p>
         <p

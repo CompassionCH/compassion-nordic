@@ -82,7 +82,12 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
     """The Nordic checkout asks the sponsor to choose between the
     sponsorship and the sponsorship Plus: two required radios, neither
     checked in advance, named after the products and priced by the
-    website's pricelist."""
+    website's pricelist.
+
+    Runs on the MyCompassion websites of SE, NO and DK that the database
+    has (stage, for one, has Sverige only): a test that needs a given site
+    skips without it, the others use the first site found.
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -95,8 +100,10 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
             code = website.company_id.country_id.code
             if code in SITES and code not in cls.websites:
                 cls.websites[code] = website
-        if set(cls.websites) != set(SITES):
-            raise unittest.SkipTest("needs the MyCompassion website of SE, NO and DK")
+        if not cls.websites:
+            raise unittest.SkipTest("needs a MyCompassion website of SE, NO or DK")
+        # the site of the tests that work on any of them
+        cls.code = next(code for code in SITES if code in cls.websites)
         for lang in ("en_US", *PRODUCT_NAMES):
             cls.env["res.lang"]._activate_lang(lang)
         product_model = cls.env["product.template"]
@@ -107,8 +114,8 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
         for lang, (standard, plus) in PRODUCT_NAMES.items():
             cls.sponsorship_product.with_context(lang=lang).name = standard
             cls.plus_product.with_context(lang=lang).name = plus
-        for code, site in SITES.items():
-            cls._set_prices(cls.websites[code], *site["prices"])
+        for code, website in cls.websites.items():
+            cls._set_prices(website, *SITES[code]["prices"])
         cls.child = cls.env["compassion.child"].search([], limit=1)
 
     @classmethod
@@ -146,7 +153,12 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-    def _wizard(self, code="SE", public=True, **values):
+    def _need(self, code):
+        if code not in self.websites:
+            self.skipTest(f"needs the MyCompassion website of {code}")
+
+    def _wizard(self, code=None, public=True, **values):
+        code = code or self.code
         user = self.env.ref("base.public_user") if public else self.env.user
         return self.env["new.sponsorship.wizard"].create(
             {
@@ -157,7 +169,8 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
             }
         )
 
-    def _render(self, wizard, code="SE", lang=None):
+    def _render(self, wizard, code=None, lang=None):
+        code = code or self.code
         lang = lang or SITES[code]["lang"]
         website = self.websites[code]
         with MockRequest(self.env, website=website, context={"lang": lang}) as request:
@@ -167,12 +180,12 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
                 )
             )
 
-    def _mode(self, code="SE"):
+    def _mode(self, code=None):
         """A published card payment mode of the site's company."""
         return self.env["account.payment.mode"].create(
             {
                 "name": "Plan Choice Card",
-                "company_id": self.websites[code].company_id.id,
+                "company_id": self.websites[code or self.code].company_id.id,
                 "bank_account_link": "variable",
                 "payment_method_id": self.pay_method.id,
                 "payment_order_ok": False,
@@ -180,7 +193,7 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
             }
         )
 
-    def _checkout(self, email, plan=None, code="SE"):
+    def _checkout(self, email, plan=None, code=None):
         """A public fast checkout, answered as the page posts it."""
         wizard = self._wizard(code)
         post = {
@@ -210,7 +223,8 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
     # === The page ===
 
     def test_plans_named_and_priced_per_site(self):
-        for code, site in SITES.items():
+        for code in self.websites:
+            site = SITES[code]
             with self.subTest(site=code):
                 html = self._render(self._wizard(code), code)
                 self.assertRadios(html)
@@ -223,6 +237,7 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
                     self.assertIn(paragraph, text)
 
     def test_english_page_never_shows_the_back_office_names(self):
+        self._need("SE")
         html = self._render(self._wizard("SE"), "SE", lang="en_US")
         text = _text(html)
         self.assertIn("Sponsorship 361 kr/month", text)
@@ -234,10 +249,10 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
             self.assertNotIn(product.with_context(lang="en_US").name, text)
 
     def test_logged_in_payment_step_offers_the_same_choice(self):
-        html = self._render(self._wizard("DK", public=False), "DK")
+        html = self._render(self._wizard(public=False))
         self.assertIn('id="payment_method"', html)
         self.assertRadios(html)
-        self.assertIn(SITES["DK"]["plus"], _text(html))
+        self.assertIn(SITES[self.code]["plus"], _text(html))
 
     def test_a_choice_survives_a_rerender(self):
         for value in ("0", "1"):
@@ -295,7 +310,7 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
         sponsor = new_test_user(
             self.env, login="plan-choice-sponsor", groups="base.group_portal"
         )
-        wizard = self._wizard("DK", public=False, user_id=sponsor.id)
+        wizard = self._wizard(public=False, user_id=sponsor.id)
         wizard.update({"action": "next"})
         self.assertTrue(wizard.is_done)
         with self.assertRaisesRegex(ValidationError, "two sponsorship options"):
@@ -318,3 +333,39 @@ class TestSponsorshipPlanNordic(DigitalSeamCase):
         sponsorship = wizard.finish_sponsorship()
         self.assertEqual(sponsorship.type, "SWP")
         self.assertEqual(sponsorship.total_amount, 15.0)
+
+    # === Without the plan choice ===
+
+    def _plan_optional(self):
+        """Switch the plan choice off, as the base checkout tests do."""
+        patcher = patch.object(
+            type(self.env["new.sponsorship.wizard"]),
+            "_my2_plan_required",
+            return_value=False,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_switched_off_the_page_keeps_the_base_checkbox(self):
+        self._plan_optional()
+        html = self._render(self._wizard())
+        self.assertNotIn('type="radio" id="sponsorship_plan', html)
+        self.assertIn('id="sponsorship_plus"', html)
+        self.assertIn('id="sponsorship-plus-info-modal"', html)
+        self.assertNotIn(SITES[self.code]["question"], _text(html))
+
+    def test_switched_off_a_sponsorship_finishes_without_a_plan(self):
+        self._plan_optional()
+        wizard = self._checkout("plan-choice-optional@example.org")
+        self.assertFalse(wizard.sponsorship_plan)
+        sponsorship = wizard.finish_sponsorship()
+        codes = sponsorship.contract_line_ids.product_id.mapped("default_code")
+        self.assertIn("sponsorship", codes)
+        self.assertNotIn("fund_gen", codes)
+
+    def test_switched_off_the_checkbox_is_read_as_before(self):
+        self._plan_optional()
+        wizard = self._wizard()
+        wizard.update({"sponsorship_plus": "on"})
+        self.assertTrue(wizard.sponsorship_plus)
+        self.assertFalse(wizard.sponsorship_plan)
