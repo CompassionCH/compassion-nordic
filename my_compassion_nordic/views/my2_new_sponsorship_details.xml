@@ -52,6 +52,22 @@ Nordic version of the post-payment sponsor details form.
       <t t-else="">$0</t>
     </xpath>
   </template>
+  <!-- While the form shows, the card of the child above it gives no reason
+       for the form: the form's own intro says what the details are for.
+       The card keeps its title and photo. -->
+  <template
+    id="my2_new_sponsorship_thank_you_letter_card_nordic"
+    inherit_id="my_compassion.my2_new_sponsorship_thank_you_page"
+    name="New Sponsorship Thank You Letter Card - Nordic"
+    priority="99"
+  >
+    <xpath
+      expr="//t[@t-set='top_class'][@t-value=&quot;'ns-letter-card'&quot;]/../t[@t-set='subtext'][last()]"
+      position="after"
+    >
+      <t t-if="sponsorship._my2_details_mandatory()" t-set="subtext" t-value="False" />
+    </xpath>
+  </template>
   <template
     id="my2_new_sponsorship_details_form_nordic"
     inherit_id="my_compassion.my2_new_sponsorship_details_form"
@@ -69,10 +85,10 @@ Nordic version of the post-payment sponsor details form.
     <xpath expr="//div[hasclass('h4')]/following-sibling::div[1]" position="replace">
       <t t-if="not sponsorship._my2_details_mandatory()">$0</t>
       <t t-else="">
-        <div class="mb-1 text-center body-small text-low-black">
+        <div class="mb-1 text-center text-lg-start tiny-text text-mid-grey">
           Please fill in your details so we can manage your new sponsorship.
         </div>
-        <div class="mb-3 text-center body-small text-low-black">
+        <div class="mb-3 text-center text-lg-start tiny-text text-mid-grey">
           If someone else will write the letters, enter their name instead.
         </div>
       </t>

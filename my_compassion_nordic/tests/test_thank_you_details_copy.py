@@ -30,6 +30,12 @@ LETTER_WRITER = {
     "da_DK": "Hvis en anden skal skrive brevene, så skriv vedkommendes navn i"
     " stedet.",
 }
+# The reason for the form the letter card above it gives on my_compassion's
+# page, per gender of the child.
+LETTER_CARD_REASON = {
+    "M": "He writes back by name, which is why we ask next.",
+    "F": "She writes back by name, which is why we ask next.",
+}
 # What my_compassion's form and page say in its place.
 BASE_COPY = {
     "en_US": ("Your contact information", "Thank you for sponsoring"),
@@ -130,6 +136,17 @@ class TestThankYouDetailsCopy(HttpCase, DigitalSeamCase):
         )
         self.assertNotIn("writes to you by name", after_token)
 
+    def test_letter_card_gives_no_reason_for_the_form(self):
+        """The card of the child keeps its title, and gives no reason of its
+        own: the form's intro says what the details are for."""
+        name = self.child.preferred_name
+        for gender in LETTER_CARD_REASON:
+            with self.subTest(gender=gender):
+                self.child.gender = gender
+                text = _text(self._open_form("en_US"))
+                self.assertIn(f"{name} is expecting your letter", text)
+                self.assertNotIn("writes back by name", text)
+
     def test_page_without_the_form_keeps_its_title(self):
         """Once the details are in, the page thanks the sponsor as before."""
         self.payer.write(
@@ -167,3 +184,16 @@ class TestThankYouDetailsCopy(HttpCase, DigitalSeamCase):
         self.assertIn(f"{title} {self.child.preferred_name}", text)
         self.assertNotIn(TITLE["en_US"], text)
         self.assertNotIn(INTRO["en_US"], text)
+
+    def test_optional_form_keeps_the_letter_card_reason(self):
+        patcher = patch.object(
+            type(self.env["recurring.contract"]),
+            "_my2_details_mandatory",
+            return_value=False,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        for gender, reason in LETTER_CARD_REASON.items():
+            with self.subTest(gender=gender):
+                self.child.gender = gender
+                self.assertIn(reason, _text(self._open_form("en_US")))
