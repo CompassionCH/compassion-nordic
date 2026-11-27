@@ -18,11 +18,7 @@ class AccountMove(models.Model):
             )
             return "Processing error: Move is not in draft state."
         donation_data = DonationPostModel(**json.loads(donation_data_str))
-        partner = self.env["res.partner"].match_create_partner(
-            email=donation_data.donor_email,
-            name=donation_data.donor_name,
-            phone=donation_data.donor_phone,
-        )
+        partner = self._giving_platform_partner(donation_data)
         self.partner_id = partner.id
         self.line_ids = [
             (
@@ -80,6 +76,29 @@ class AccountMove(models.Model):
             }
         ).action_create_payments()
         return "Successfully processed donation and created payment."
+
+    def _giving_platform_partner(self, donation_data):
+        """Find or create the donor of a Giving Platform donation."""
+        country = self.env["res.country"]
+        if donation_data.donor_country_code:
+            country = country.search(
+                [("code", "=ilike", donation_data.donor_country_code)], limit=1
+            )
+        return self.env["res.partner"].match_create_partner(
+            email=donation_data.donor_email,
+            name=donation_data.donor_name,
+            phone=donation_data.donor_phone,
+            firstname=donation_data.donor_first_name,
+            lastname=donation_data.donor_last_name,
+            address={
+                "street": donation_data.donor_street,
+                "street2": donation_data.donor_street2,
+                "zip": donation_data.donor_zip,
+                "city": donation_data.donor_city,
+                "country_id": country.id,
+            },
+            country=country or self.company_id.country_id,
+        )
 
     def _notify_managers_error(self, error_message):
         user = self.env["res.config.settings"].get_param("mandate_notif_id")
