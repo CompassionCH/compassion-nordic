@@ -36,6 +36,12 @@ class FundListModel(CamelCaseModel):
 
 
 class DonationPostModel(CamelCaseModel):
+    """A donation. Partner details are only used to create the partner, or to
+    give an address to a partner found (by phone, then email) that has none:
+    send them only when the donor agreed to share them."""
+
+    model_config = ConfigDict(**CamelCaseModel.model_config, str_strip_whitespace=True)
+
     donation_id: int = Field(description="Giving Platform donation ID")
     payment_request_id: str = Field(
         description="Unique identifier from the payment provider"
@@ -45,6 +51,25 @@ class DonationPostModel(CamelCaseModel):
     donor_email: str | None = None
     donor_name: str | None = None
     donor_phone: str | None = None
+    donor_first_name: str | None = Field(
+        default=None,
+        description="Donor first name. With donorLastName, used instead of "
+        "donorName for a new partner.",
+    )
+    donor_last_name: str | None = Field(default=None, description="Donor last name")
+    donor_street: str | None = Field(
+        default=None, description="Address line 1 (e.g. Stripe address.line1)"
+    )
+    donor_street2: str | None = Field(
+        default=None, description="Address line 2 (e.g. Stripe address.line2)"
+    )
+    donor_zip: str | None = Field(default=None, description="Postal code")
+    donor_city: str | None = Field(default=None, description="City")
+    donor_country_code: str | None = Field(
+        default=None,
+        description="Country, ISO 3166-1 alpha-2 code (e.g. SE). Also used to "
+        "read a national phone number. An unknown code is ignored.",
+    )
     payment_provider: ProviderEnum
     fund_id: int = Field(description="Odoo ID of the fund the donation is for")
 
