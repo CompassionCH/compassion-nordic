@@ -49,7 +49,9 @@ class ResPartner(models.Model):
             else:
                 vals["name"] = name or email or phone
             partner = self.create(vals)
-        elif address and not (partner.street or partner.zip or partner.city):
+        elif address and not (
+            partner.street or partner.street2 or partner.zip or partner.city
+        ):
             partner.write(address)
         return partner
 

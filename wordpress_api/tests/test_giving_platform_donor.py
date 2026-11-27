@@ -152,3 +152,20 @@ class TestGivingPlatformDonor(TransactionCase):
         self.assertFalse(donor.country_id)
         # the company's country reads the number
         self.assertEqual(donor.phone, NUMBER)
+
+    def test_known_donor_with_only_a_second_line_keeps_it(self):
+        """A second address line alone is an address: the new one is not
+        mixed with it."""
+        partner = self.Partner.create(
+            {"name": "Anna Svensson", "phone": NUMBER, "street2": "c/o Berg"}
+        )
+        self._donor(
+            donor_phone=NUMBER,
+            donor_street="Storgatan 1",
+            donor_zip="111 22",
+            donor_city="Stockholm",
+        )
+        self.assertEqual(
+            (partner.street, partner.street2, partner.zip, partner.city),
+            (False, "c/o Berg", False, False),
+        )
